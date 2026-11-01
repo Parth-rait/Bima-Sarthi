@@ -80,10 +80,14 @@ def new_session(c):
     return r.json()["session_id"]
 
 
-def upload_extract(c, sid):
+def upload_extract(c, sid, product_line="health"):
+    """Upload, and (by default) answer "Type of insurance" like a user would."""
     pdf = make_pdf(1, "rejection letter")
     r = c.post(f"/session/{sid}/extract", files={"files": ("a.pdf", pdf, "application/pdf")})
     assert r.status_code == 200, r.text
+    if product_line:
+        p = c.put(f"/session/{sid}/facts", json={"facts": {"product_line": {"value": product_line}}})
+        assert p.status_code == 200, p.text
     return r.json()
 
 
@@ -606,3 +610,109 @@ def test_session_kept_past_midnight_still_works(client, monkeypatch):
     assert _put(client, sid, complaint="01/09/2026", reply="10/09/2026").status_code == 200
     client.post(f"/session/{sid}/check")
     assert client.get(f"/session/{sid}/letter.pdf?lang=en").status_code == 200
+
+
+# ---------- type of insurance (product_line) ----------
+
+def test_check_without_product_line_is_409_asking_for_it(client):
+    sid = new_session(client)
+    upload_extract(client, sid, product_line=None)
+    confirm_all(client, sid)
+    r = client.post(f"/session/{sid}/check")
+    assert r.status_code == 409
+    d = r.json()["detail"]
+    assert d["needs_product_line"] is True and "type of insurance" in d["message"].lower()
+    assert d["needs_confirmation"] == []
+
+
+def test_missing_product_line_409_still_lists_pending_facts(client):
+    sid = new_session(client)
+    upload_extract(client, sid, product_line=None)
+    d = client.post(f"/session/{sid}/check").json()["detail"]
+    assert d["needs_product_line"] is True and "claim_date" in d["needs_confirmation"]
+
+
+@pytest.mark.parametrize("bad", ["unknown", "Health", "", "motorcycle", 5])
+def test_product_line_accepts_only_the_seven_choices(client, bad):
+    sid = new_session(client)
+    upload_extract(client, sid, product_line=None)
+    r = client.put(f"/session/{sid}/facts", json={"facts": {"product_line": {"value": bad}}})
+    assert r.status_code == 422 and "product_line" in json.dumps(r.json())
+
+
+@pytest.mark.parametrize("line", ["health", "life", "accident", "motor", "crop", "credit_life", "other"])
+def test_product_line_is_stored_as_a_user_confirmed_fact_with_labels(client, line):
+    sid = new_session(client)
+    upload_extract(client, sid, product_line=None)
+    f = client.put(f"/session/{sid}/facts", json={"facts": {"product_line": {"value": line}}}).json()
+    pl = f["facts"]["product_line"]
+    assert pl["value"] == line and pl["status"] == "user_confirmed" and pl["label"]["en"] == "type of insurance"
+    assert "product_line" not in f["needs_confirmation"]
+
+
+def test_product_line_can_be_cleared_and_survives_a_second_extraction(client):
+    sid = new_session(client)
+    upload_extract(client, sid, product_line="life")
+    again = upload_extract(client, sid, product_line=None)
+    assert again["facts"]["product_line"]["value"] == "life"
+    client.put(f"/session/{sid}/facts", json={"facts": {"product_line": {"clear": True}}})
+    assert client.post(f"/session/{sid}/check").status_code == 409
+
+
+def test_extract_returns_a_health_hint_only_when_clearly_health(client, monkeypatch):
+    sid = new_session(client)
+    assert upload_extract(client, sid, product_line=None)["product_line_hint"] is None
+    hosp = {"rejection_ground": fv("room_rent"), "admission_date": fv(date(2025, 1, 5))}
+    monkeypatch.setattr(main, "extract_user_facts", lambda s: hosp)
+    sid2 = new_session(client)
+    assert upload_extract(client, sid2, product_line=None)["product_line_hint"] == "health"
+    # the hint is never stored as the user's choice
+    assert client.post(f"/session/{sid2}/check").status_code == 409
+
+
+def test_health_check_is_unchanged_plus_supported_and_a_plan(client):
+    sid = new_session(client)
+    upload_extract(client, sid)
+    confirm_all(client, sid)
+    body = client.post(f"/session/{sid}/check").json()
+    assert body["supported"] is True and body["findings"][0]["verdict"] == "CHALLENGEABLE"
+    plan = body["plan"]
+    assert [s["id"] for s in plan["steps"]][:4] == ["findings", "ask", "letter", "ombudsman"]
+    assert plan["verified"] is True and "Your plan" in plan["text"]["en"]
+    assert client.post(f"/session/{sid}/explain").json()["plan"]["verified"] is True
+
+
+@pytest.mark.parametrize("line", ["life", "motor", "accident", "crop", "credit_life", "other"])
+def test_non_health_check_is_200_unsupported_with_no_findings_and_a_general_plan(client, line, tmp_path):
+    sid = new_session(client)
+    upload_extract(client, sid, product_line=line)
+    r = client.post(f"/session/{sid}/check")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["supported"] is False and body["findings"] == [] and body["product_line"] == line
+    assert body["plan"]["kind"] == "general" and body["plan"]["title"]["en"].startswith(
+        "We don't have a checked rules engine for this type of insurance yet.")
+    assert not (tmp_path / "sessions" / sid).exists()       # uploads are deleted as for health
+    assert client.post(f"/session/{sid}/explain").status_code == 409
+    assert client.get(f"/session/{sid}/letter.pdf").status_code == 409
+
+
+def test_non_health_check_works_without_confirming_facts_or_cards(client, monkeypatch):
+    monkeypatch.setattr(main, "load_cards", lambda: [])
+    sid = new_session(client)
+    upload_extract(client, sid, product_line="life")          # claim_date still needs confirmation
+    r = client.post(f"/session/{sid}/check")
+    assert r.status_code == 200 and r.json()["plan"]["supported"] is False
+
+
+def test_non_health_dates_come_only_from_the_users_complaint_date(client):
+    sid = new_session(client)
+    upload_extract(client, sid, product_line="life")
+    plan = client.post(f"/session/{sid}/check").json()["plan"]
+    assert not any(i["date"] for s in plan["steps"] for i in s["items"])
+    sid = new_session(client)
+    upload_extract(client, sid, product_line="life")
+    client.put(f"/session/{sid}/facts", json={"facts": {"complaint_sent_date": {"value": "01/09/2026"}}})
+    plan = client.post(f"/session/{sid}/check").json()["plan"]
+    got = {i["key"]: i["date"]["iso"] for s in plan["steps"] for i in s["items"] if i["date"]}
+    assert got["insurer_reply_by"] == "2026-09-15" and got["ombudsman_earliest"] == "2026-10-01"

@@ -9,6 +9,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from sarthi.core.hashing import sha256_file
+from sarthi.core.models import PRODUCT_LINES
 from sarthi.core.registry import load_registry
 from sarthi.core.store import Store
 from sarthi.data.parse_docs import parse_source
@@ -318,6 +319,72 @@ def cmd_cases_fetch(args) -> int:
     return 0
 
 
+def _env_price(var: str, default: float) -> tuple[float, bool]:
+    v = os.environ.get(var)
+    return (float(v), True) if v else (default, False)
+
+
+def cmd_cases_discover(args) -> int:
+    from sarthi.data import discovery
+    families = [f.strip() for f in args.families.split(",") if f.strip()]
+    sp, sp_set = _env_price("IK_COST_SEARCH_INR", discovery.DEFAULT_SEARCH_INR)
+    dp, dp_set = _env_price("IK_COST_DOC_INR", discovery.DEFAULT_DOC_INR)
+    try:
+        pl = discovery.plan(families, max_results=args.max_results_per_query, search_price=sp, doc_price=dp)
+    except ValueError as e:
+        raise CliError(str(e)) from e
+    cap = float(os.environ.get("IK_CAP_INR", cases.DEFAULT_CAP_INR))
+    spent = cases.total_spend_inr()
+    if args.dry_run:
+        print("DRY RUN: no calls are made, nothing is written")
+        print(f"families: {', '.join(pl['families'])}")
+        for q in pl["queries"]:
+            print(f"  [{q['family']} -> {q['line']}] {q['query']}")
+        print(f"{pl['n_queries']} query(ies) x up to {pl['pages_per_query_max']} page(s) "
+              f"@ {sp:.2f} INR{'' if sp_set else ' (assumed; IK_COST_SEARCH_INR unset)'}")
+        print(f"estimated search cost: at most {pl['est_search_inr_max']:.2f} INR "
+              f"(less when a query has fewer hits than --max-results-per-query)")
+        if args.fetch:
+            print(f"--fetch adds {dp:.2f} INR{'' if dp_set else ' (assumed)'} per health/unsure candidate, "
+                  f"bounded by --max-inr {args.max_inr:.2f}")
+        print(f"run cap --max-inr {args.max_inr:.2f}; IK spent so far {spent:.2f} of IK_CAP_INR {cap:.2f} "
+              f"(headroom {cap - spent:.2f} INR)")
+        return 0
+    dbp = data_dir() / "bima_sarthi.duckdb"
+    try:
+        stored = discovery.stored_case_tids(dbp)
+    except Exception as e:  # e.g. the DB is locked by a writer
+        if args.fetch:
+            raise CliError(f"cannot read stored cases ({e}); refusing to --fetch blind") from e
+        print(f"warning: cannot read stored cases ({e}); duplicates vs the DB will not be detected")
+        stored = set()
+    store = open_store() if args.fetch else None
+    out = _ik(lambda: discovery.run_discovery(families, max_results=args.max_results_per_query,
+                                              max_inr=args.max_inr, run_id=args.run_id, stored_tids=stored,
+                                              fetch=args.fetch, store=store))
+    r = out["run"]
+    print(f"run {r['run_id']}: {len(r['queries'])} query(ies), {r['pages_billed']} page(s) billed, "
+          f"{r['unique_new']} new candidate(s)")
+    for q in r["queries"]:
+        print(f"  {q['family']}: returned {q['returned']}/{q['total_found']} new {q['new']} "
+              f"dup(stored {q['stored_duplicates']}, previous {q['previous_duplicates']}, "
+              f"run {q['run_duplicates']}) [{q['stopped']}] {q['query'][:70]}")
+    d = r["duplicates"]
+    print(f"duplicates: stored {d['stored']}, previous runs {d['previous']}, within run {d['within_run']}")
+    pc = r["prescreen_counts"]
+    print(f"prescreen by label: {pc['by_label']}")
+    print(f"product_line_guess: {pc['by_line']}")
+    if args.fetch:
+        print(f"fetched {r['fetched']} document(s)" + (f"; errors: {r['fetch_errors']}" if r["fetch_errors"] else ""))
+    print(f"IK spend this run: {out['spent_this_run']:.2f} INR (run cap {args.max_inr:.2f}); "
+          f"IK_CAP_INR headroom: {out['headroom_inr']:.2f} INR of {r['ik_cap_inr']:.2f}")
+    if out["stopped"] == "run_cap":
+        print(f"STOPPED: --max-inr {args.max_inr:.2f} reached; remaining queries/fetches were not run")
+    elif out["stopped"] == "global_cap":
+        print("STOPPED: IK_CAP_INR reached; remaining queries/fetches were not run")
+    return 0
+
+
 def cmd_cases_add_local(args) -> int:
     path = Path(args.path)
     if not path.is_file():
@@ -381,6 +448,22 @@ def cmd_cases_set_outcome(args) -> int:
     return 0
 
 
+def cmd_cases_set_product_line(args) -> int:
+    store = open_store()
+    if store.con.execute('SELECT 1 FROM "case" WHERE case_id=?', [args.case_id]).fetchone() is None:
+        raise CliError(f"unknown case '{args.case_id}'")
+    store.con.execute('UPDATE "case" SET product_line=? WHERE case_id=?',
+                      [args.product_line, args.case_id])
+    print(f"OK   {args.case_id}: product_line={args.product_line}")
+    return 0
+
+
+def cmd_cases_backfill_product_line(args) -> int:
+    counts = case_issues.backfill_product_line(open_store())
+    print(" ".join(f"{k}={v}" for k, v in counts.items()))
+    return 0
+
+
 def cmd_cases_set_appellant(args) -> int:
     store = open_store()
     row = store.con.execute('SELECT outcome, policyholder_prevailed FROM "case" WHERE case_id=?',
@@ -395,6 +478,18 @@ def cmd_cases_set_appellant(args) -> int:
     print(f"OK   {args.case_id}: appellant={args.appellant}"
           + (f", policyholder_prevailed={derived} (from outcome {row[0]})"
              if row[1] is None and derived is not None else ""))
+    return 0
+
+
+def cmd_cases_exclude(args) -> int:
+    reason = " ".join(args.reason.split())
+    if not reason:
+        raise CliError("--reason must not be empty")
+    store = open_store()
+    if store.con.execute('SELECT 1 FROM "case" WHERE case_id=?', [args.case_id]).fetchone() is None:
+        raise CliError(f"unknown case '{args.case_id}'")
+    store.con.execute('UPDATE "case" SET excluded_reason=? WHERE case_id=?', [reason, args.case_id])
+    print(f"OK   {args.case_id}: excluded from evaluation ({reason})")
     return 0
 
 
@@ -459,6 +554,14 @@ def _add_cases(sub):
     a = cs.add_parser("fetch", help="fetch judgments by Indian Kanoon doc id (costs money)")
     a.add_argument("tids", nargs="+")
     a.set_defaults(func=cmd_cases_fetch)
+    a = cs.add_parser("discover", help="spend-capped candidate discovery across query families (costs money)")
+    a.add_argument("--families", required=True, help="comma-separated family names, 'all', or 'none' (no search; with --fetch, fetch from the log)")
+    a.add_argument("--max-results-per-query", type=int, default=60)
+    a.add_argument("--max-inr", type=float, default=120.0, help="hard stop for THIS run (search + fetch)")
+    a.add_argument("--dry-run", action="store_true", help="print the plan and estimated cost; no calls")
+    a.add_argument("--fetch", action="store_true", help="also fetch likely_health/unsure health candidates")
+    a.add_argument("--run-id")
+    a.set_defaults(func=cmd_cases_discover)
     a = cs.add_parser("add-local", help="register a hand-saved judgment as a case")
     a.add_argument("path")
     a.add_argument("--case-id", required=True)
@@ -480,10 +583,21 @@ def _add_cases(sub):
     a.add_argument("--all-unextracted", action="store_true")
     a.add_argument("--force", action="store_true", help="overwrite fields a human already reviewed")
     a.set_defaults(func=cmd_cases_extract)
+    a = cs.add_parser("set-product-line", help="set the product line of a case (health, life, motor, ...)")
+    a.add_argument("case_id")
+    a.add_argument("product_line", choices=PRODUCT_LINES)
+    a.set_defaults(func=cmd_cases_set_product_line)
+    a = cs.add_parser("backfill-product-line",
+                      help="mark cases with a human-reviewed rule issue as health (evidence only)")
+    a.set_defaults(func=cmd_cases_backfill_product_line)
     a = cs.add_parser("set-appellant", help="set who appealed (derives policyholder_prevailed if unset)")
     a.add_argument("case_id")
     a.add_argument("appellant", choices=("insurer", "policyholder"))
     a.set_defaults(func=cmd_cases_set_appellant)
+    a = cs.add_parser("exclude", help="exclude a case from evaluation (out of scope or duplicate)")
+    a.add_argument("case_id")
+    a.add_argument("--reason", required=True, help="why the case is excluded")
+    a.set_defaults(func=cmd_cases_exclude)
     a = cs.add_parser("backfill-appellant", help="infer appellant / policyholder_prevailed from titles")
     a.set_defaults(func=cmd_cases_backfill_appellant)
     ip = cs.add_parser("issues", help="per-issue holdings: draft with a model, review, sheet")
@@ -545,13 +659,14 @@ def cmd_eval(args) -> int:
     run_id = args.run_id or datetime.now().strftime("eval-%Y%m%d-%H%M%S")
     summary = evaluate.run_eval(run_id, args.methods, args.repeats, open_store())
     evaluate.write_report(summary, args.out)
-    print(f"run {run_id}: {summary.n_cases} case(s), "
-          f"{summary.n_skipped_no_outcome} skipped (no outcome); report at {args.out}")
+    print(f"run {run_id}: {summary.n_cases} case(s), {summary.n_primary} primary, "
+          f"{summary.n_abstention_set} abstention-set, {summary.n_case_level_excluded} excluded "
+          f"from case level (winner unknown); report at {args.out}")
     return 0
 
 
 def _add_eval(sub):
-    p = sub.add_parser("eval", help="rules vs model-only baselines against court outcomes")
+    p = sub.add_parser("eval", help="rules vs model-only baselines against reviewed holdings (finding level) and who prevailed")
     p.add_argument("--methods", nargs="+", choices=["rules", "glimmer_only", "spark_only"],
                    default=["rules", "glimmer_only", "spark_only"])
     p.add_argument("--repeats", type=int, default=3)

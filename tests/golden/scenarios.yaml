@@ -1,0 +1,438 @@
+# GOLDEN ENGINE SCENARIOS - code-test fixtures, NOT data.
+# Hand-written, synthetic facts that pin the behaviour of the rule engine (sarthi/core/engine.py)
+# against the seed cards in rules/seed/*.yaml. They are not court cases, not user documents, and
+# they never feed evaluation metrics. Expected verdicts are worked out by hand from each card's
+# condition, thresholds and in-force dates (comments say how), not copied from engine output.
+#
+# Scenario shape:
+#   id, description
+#   base:    optional name of a fact set under `bases` (the scenario's `facts` override it)
+#   facts:   field -> value, or {value: ..., status: needs_confirmation}. `null` removes the field.
+#   cards:   optional list of seed file stems to build (default: every seed card, status approved)
+#   expect:  rule_id -> VERDICT, or {verdict, reason, version}; the set of rule_ids must match
+#            exactly ({} = the engine returns no findings at all)
+#
+# Cover months = whole months from inception_date to the claim date. The card version in force is
+# decided by the later of inception_date / policy_renewal_date (applies_by: policy_start_or_renewal)
+# for MORATORIUM_60M and PED_WAIT_36M, and by the claim date for the time-limit cards.
+# MORATORIUM_60M: v0 (96 months) in force 2020-10-01 .. before 2024-05-29, v1 (60 months) from 2024-05-29.
+# PED_WAIT_36M:   v0 (48 months) in force 2020-10-01 .. before 2024-04-01, v1 (36 months) from 2024-04-01.
+# CASHLESS_1H (> 60 min) from 2024-07-31; DISCHARGE_3H (> 180 min) and REJECTION_PROCESS from 2024-05-29.
+
+bases:
+  nd_v1:   # non_disclosure, policy renewed on 2024-06-01 so the 2024 card applies; 67 months of cover
+    rejection_ground: non_disclosure
+    fraud_alleged: false
+    inception_date: 2019-06-15
+    policy_renewal_date: 2024-06-01
+    claim_date: 2025-02-01
+  nd_v0:   # non_disclosure, policy renewed on 2023-06-01 so the pre-2024 card applies; 76 months
+    rejection_ground: non_disclosure
+    fraud_alleged: false
+    inception_date: 2018-01-10
+    policy_renewal_date: 2023-06-01
+    claim_date: 2024-05-15
+  ped_v1:  # pre_existing_disease, renewed 2024-06-01 (36-month card), 72 months of cover, condition disclosed
+    rejection_ground: pre_existing_disease
+    disclosed_conditions: ["Diabetes Mellitus"]
+    alleged_undisclosed_condition: diabetes
+    inception_date: 2019-01-10
+    policy_renewal_date: 2024-06-01
+    claim_date: 2025-02-01
+  ped_v0:  # pre_existing_disease, renewed 2023-03-01 (48-month card)
+    rejection_ground: pre_existing_disease
+    disclosed_conditions: ["Diabetes Mellitus"]
+    alleged_undisclosed_condition: diabetes
+    inception_date: 2019-03-10
+    policy_renewal_date: 2023-03-01
+    claim_date: 2023-03-10
+  cashless:
+    rejection_ground: cashless_delay
+    claim_date: 2024-08-01
+    cashless_request_at: 2024-08-01 10:00:00
+    decision_at: 2024-08-01 11:00:00
+  discharge:
+    rejection_ground: discharge_delay
+    claim_date: 2024-08-01
+    discharge_request_at: 2024-08-01 10:00:00
+    final_auth_at: 2024-08-01 13:00:00
+  process:
+    rejection_ground: process_defect
+    claim_date: 2024-08-01
+
+scenarios:
+  # ---------------- MORATORIUM_60M v1 (60 months) ----------------
+  - id: mor_v1_exactly_60_months
+    description: "60 whole months (2019-06-15 to 2024-06-15), no fraud: >= 60 so CHALLENGEABLE"
+    base: nd_v1
+    facts: {claim_date: 2024-06-15}
+    expect: {MORATORIUM_60M: {verdict: CHALLENGEABLE, reason: condition_met, version: 1}}
+  - id: mor_v1_59_months
+    description: "one day short of 60 months (2024-06-14): 59 < 60 so CONSISTENT"
+    base: nd_v1
+    facts: {claim_date: 2024-06-14}
+    expect: {MORATORIUM_60M: {verdict: CONSISTENT, reason: condition_not_met, version: 1}}
+  - id: mor_v1_well_above_threshold
+    description: "67 months, no fraud: CHALLENGEABLE"
+    base: nd_v1
+    expect: {MORATORIUM_60M: {verdict: CHALLENGEABLE, reason: condition_met}}
+  - id: mor_v1_fraud_alleged
+    description: "67 months but the insurer alleges fraud: the moratorium does not bar a fraud case, CONSISTENT"
+    base: nd_v1
+    facts: {fraud_alleged: true}
+    expect: {MORATORIUM_60M: {verdict: CONSISTENT, reason: condition_not_met}}
+  - id: mor_v1_fraud_unknown
+    description: "fraud_alleged absent: an input is unknown so NEED_INFO, never a guess"
+    base: nd_v1
+    facts: {fraud_alleged: null}
+    expect: {MORATORIUM_60M: {verdict: NEED_INFO, reason: "missing_inputs: fraud_alleged"}}
+  - id: mor_v1_months_unknown_no_inception
+    description: "no inception_date: cover months cannot be known"
+    base: nd_v1
+    facts: {inception_date: null}
+    expect: {MORATORIUM_60M: {verdict: NEED_INFO, reason: missing_inception_date}}
+  - id: mor_v1_port_without_continuity_confirmed
+    description: "ported from another insurer, continuity not confirmed: a port never silently counts as continuous"
+    base: nd_v1
+    facts: {ported_from_date: 2015-01-01}
+    expect: {MORATORIUM_60M: {verdict: NEED_INFO, reason: "missing_inputs: continuous_cover_months"}}
+  - id: mor_v1_gap_without_continuity_confirmed
+    description: "a 30-day renewal gap, continuity not confirmed: possible break so NEED_INFO"
+    base: nd_v1
+    facts: {renewal_gap_days: 30}
+    expect: {MORATORIUM_60M: {verdict: NEED_INFO, reason: "missing_inputs: continuous_cover_months"}}
+  - id: mor_v1_gap_zero_is_not_a_break
+    description: "renewal_gap_days = 0 (renewed on time): no break, 67 months, CHALLENGEABLE"
+    base: nd_v1
+    facts: {renewal_gap_days: 0}
+    expect: {MORATORIUM_60M: {verdict: CHALLENGEABLE}}
+  - id: mor_v1_gap_zero_unconfirmed
+    description: "renewal_gap_days = 0 but awaiting confirmation: treated as a possible break"
+    base: nd_v1
+    facts: {renewal_gap_days: {value: 0, status: needs_confirmation}}
+    expect: {MORATORIUM_60M: {verdict: NEED_INFO, reason: "missing_inputs: continuous_cover_months"}}
+  - id: mor_v1_port_with_continuity_confirmed
+    description: "port plus the user confirming continuity: cover counts, 67 months, CHALLENGEABLE"
+    base: nd_v1
+    facts: {ported_from_date: 2015-01-01, continuity_confirmed: true}
+    expect: {MORATORIUM_60M: {verdict: CHALLENGEABLE}}
+  - id: mor_v1_gap_with_continuity_confirmed
+    description: "a 45-day gap that the user confirms did not break cover: CHALLENGEABLE"
+    base: nd_v1
+    facts: {renewal_gap_days: 45, continuity_confirmed: true}
+    expect: {MORATORIUM_60M: {verdict: CHALLENGEABLE}}
+  - id: mor_v1_continuity_denied
+    description: "continuity_confirmed = false: cover was not continuous, months unknown, NEED_INFO"
+    base: nd_v1
+    facts: {continuity_confirmed: false}
+    expect: {MORATORIUM_60M: {verdict: NEED_INFO, reason: "missing_inputs: continuous_cover_months"}}
+
+  # ---------------- MORATORIUM_60M v0 (96 months) ----------------
+  - id: mor_v0_exactly_96_months
+    description: "96 whole months (2016-05-10 to 2024-05-10), renewed 2023-06-01 (v0 era): CHALLENGEABLE"
+    base: nd_v0
+    facts: {inception_date: 2016-05-10, claim_date: 2024-05-10}
+    expect: {MORATORIUM_60M: {verdict: CHALLENGEABLE, version: 0}}
+  - id: mor_v0_95_months
+    description: "one day short of 96 months: CONSISTENT"
+    base: nd_v0
+    facts: {inception_date: 2016-05-10, claim_date: 2024-05-09}
+    expect: {MORATORIUM_60M: {verdict: CONSISTENT, version: 0}}
+  - id: mor_v0_76_months_is_below_96
+    description: "76 months passes the new 60-month rule but not the 96-month rule in force at the renewal: CONSISTENT"
+    base: nd_v0
+    expect: {MORATORIUM_60M: {verdict: CONSISTENT, version: 0}}
+  - id: mor_v0_fraud_alleged
+    description: "136 months but fraud alleged: CONSISTENT"
+    base: nd_v0
+    facts: {inception_date: 2013-01-10, fraud_alleged: true}
+    expect: {MORATORIUM_60M: {verdict: CONSISTENT, version: 0}}
+  - id: mor_v0_port_without_continuity_confirmed
+    description: "v0 era, 136 months but a port with continuity unconfirmed: NEED_INFO"
+    base: nd_v0
+    facts: {inception_date: 2013-01-10, ported_from_date: 2010-01-01}
+    expect: {MORATORIUM_60M: {verdict: NEED_INFO, reason: "missing_inputs: continuous_cover_months", version: 0}}
+  - id: mor_v0_continuity_denied
+    description: "v0 era, continuity_confirmed = false: NEED_INFO"
+    base: nd_v0
+    facts: {inception_date: 2013-01-10, continuity_confirmed: false}
+    expect: {MORATORIUM_60M: {verdict: NEED_INFO, reason: "missing_inputs: continuous_cover_months", version: 0}}
+
+  # ---------------- v0 / v1 cut-over days ----------------
+  - id: mor_cutover_renewed_2024_05_28_uses_v0
+    description: "policy restarted the day before the 2024-05-29 cut-over: v0 (96), 77 months so CONSISTENT"
+    base: nd_v0
+    facts: {policy_renewal_date: 2024-05-28, claim_date: 2024-06-20}
+    expect: {MORATORIUM_60M: {verdict: CONSISTENT, version: 0}}
+  - id: mor_cutover_renewed_2024_05_29_uses_v1
+    description: "policy restarted on the 2024-05-29 cut-over day: v1 (60), the same 77 months so CHALLENGEABLE"
+    base: nd_v0
+    facts: {policy_renewal_date: 2024-05-29, claim_date: 2024-06-20}
+    expect: {MORATORIUM_60M: {verdict: CHALLENGEABLE, version: 1}}
+  - id: mor_v0_first_day_2020_10_01
+    description: "policy started on the first day v0 is in force (2020-10-01), 0 months of cover: CONSISTENT, not out of force"
+    facts: {rejection_ground: non_disclosure, fraud_alleged: false, inception_date: 2020-10-01, claim_date: 2020-10-01}
+    expect: {MORATORIUM_60M: {verdict: CONSISTENT, version: 0}}
+  - id: mor_before_2020_10_01_not_in_force
+    description: "policy started and claim made before 2020-10-01: no moratorium card in force"
+    facts: {rejection_ground: non_disclosure, fraud_alleged: false, inception_date: 2018-01-10, claim_date: 2020-09-30}
+    expect: {MORATORIUM_60M: {verdict: NEED_INFO, reason: rule_not_in_force}}
+  - id: mor_old_policy_never_renewed_after_2020_not_in_force
+    description: "inception 2018 and no later renewal date on file: the policy start predates every card, rule_not_in_force"
+    facts: {rejection_ground: non_disclosure, fraud_alleged: false, inception_date: 2018-01-10, claim_date: 2025-01-10}
+    expect: {MORATORIUM_60M: {verdict: NEED_INFO, reason: rule_not_in_force}}
+  - id: mor_policy_not_yet_started_at_claim
+    description: "claim date before the inception date: policy not yet started, NEED_INFO on inception_date"
+    facts: {rejection_ground: non_disclosure, fraud_alleged: false, inception_date: 2025-03-01, claim_date: 2025-02-01}
+    expect: {MORATORIUM_60M: {verdict: NEED_INFO, reason: missing_inception_date}}
+
+  # ---------------- PED_WAIT_36M v1 (36 months) and v0 (48 months) ----------------
+  - id: ped_v1_disclosed
+    description: "alleged condition matches a disclosed one, 72 months >= 36: CHALLENGEABLE"
+    base: ped_v1
+    expect: {PED_WAIT_36M: {verdict: CHALLENGEABLE, reason: condition_met, version: 1}}
+  - id: ped_v1_not_disclosed
+    description: "the alleged condition was not among the disclosed ones: the insurer's ground stands, CONSISTENT"
+    base: ped_v1
+    facts: {disclosed_conditions: ["Asthma"]}
+    expect: {PED_WAIT_36M: {verdict: CONSISTENT, reason: condition_not_met, version: 1}}
+  - id: ped_v1_disclosure_unknown_no_alleged_condition
+    description: "no alleged condition on file: disclosure unknown, NEED_INFO"
+    base: ped_v1
+    facts: {alleged_undisclosed_condition: null}
+    expect: {PED_WAIT_36M: {verdict: NEED_INFO, reason: "missing_inputs: ped_disclosed"}}
+  - id: ped_v1_disclosure_unknown_no_disclosed_list
+    description: "no disclosed-conditions list on file: NEED_INFO"
+    base: ped_v1
+    facts: {disclosed_conditions: null}
+    expect: {PED_WAIT_36M: {verdict: NEED_INFO, reason: "missing_inputs: ped_disclosed"}}
+  - id: ped_v1_exactly_36_months
+    description: "36 whole months (2022-06-15 to 2025-06-15), disclosed: CHALLENGEABLE"
+    base: ped_v1
+    facts: {inception_date: 2022-06-15, claim_date: 2025-06-15}
+    expect: {PED_WAIT_36M: {verdict: CHALLENGEABLE, version: 1}}
+  - id: ped_v1_35_months
+    description: "35 months, disclosed: below the 36-month wait so CONSISTENT"
+    base: ped_v1
+    facts: {inception_date: 2022-06-15, claim_date: 2025-06-14}
+    expect: {PED_WAIT_36M: {verdict: CONSISTENT, version: 1}}
+  - id: ped_v0_exactly_48_months
+    description: "48 whole months (2019-03-10 to 2023-03-10), disclosed: CHALLENGEABLE under the 48-month card"
+    base: ped_v0
+    expect: {PED_WAIT_36M: {verdict: CHALLENGEABLE, version: 0}}
+  - id: ped_v0_47_months
+    description: "47 months, disclosed: CONSISTENT under v0"
+    base: ped_v0
+    facts: {claim_date: 2023-03-09}
+    expect: {PED_WAIT_36M: {verdict: CONSISTENT, version: 0}}
+  - id: ped_v0_40_months_between_36_and_48
+    description: "40 months would pass 36 but this policy is under the 48-month card: CONSISTENT"
+    base: ped_v0
+    facts: {inception_date: 2020-01-10, claim_date: 2023-05-10}
+    expect: {PED_WAIT_36M: {verdict: CONSISTENT, version: 0}}
+  - id: ped_v0_not_disclosed
+    description: "v0 era, 74 months but the condition was not disclosed: CONSISTENT"
+    base: ped_v0
+    facts: {inception_date: 2017-01-10, disclosed_conditions: ["Asthma"]}
+    expect: {PED_WAIT_36M: {verdict: CONSISTENT, version: 0}}
+  - id: ped_cutover_renewed_2024_03_31_uses_v0
+    description: "renewed the day before 2024-04-01: 48-month card, 40 months so CONSISTENT"
+    base: ped_v0
+    facts: {inception_date: 2021-01-10, policy_renewal_date: 2024-03-31, claim_date: 2024-05-10}
+    expect: {PED_WAIT_36M: {verdict: CONSISTENT, version: 0}}
+  - id: ped_cutover_renewed_2024_04_01_uses_v1
+    description: "renewed on the 2024-04-01 cut-over day: 36-month card, the same 40 months so CHALLENGEABLE"
+    base: ped_v0
+    facts: {inception_date: 2021-01-10, policy_renewal_date: 2024-04-01, claim_date: 2024-05-10}
+    expect: {PED_WAIT_36M: {verdict: CHALLENGEABLE, version: 1}}
+
+  # ---------------- CASHLESS_1H (> 60 minutes) ----------------
+  - id: cashless_exactly_60_minutes
+    description: "decision exactly 60 minutes after the request: not more than one hour, CONSISTENT"
+    base: cashless
+    expect: {CASHLESS_1H: {verdict: CONSISTENT, reason: condition_not_met}}
+  - id: cashless_61_minutes
+    description: "61 minutes: over the one-hour limit, CHALLENGEABLE"
+    base: cashless
+    facts: {decision_at: 2024-08-01 11:01:00}
+    expect: {CASHLESS_1H: {verdict: CHALLENGEABLE, reason: condition_met}}
+  - id: cashless_30_minutes
+    description: "30 minutes: within the limit, CONSISTENT"
+    base: cashless
+    facts: {decision_at: 2024-08-01 10:30:00}
+    expect: {CASHLESS_1H: {verdict: CONSISTENT}}
+  - id: cashless_decision_time_missing
+    description: "no decision time: minutes unknown, NEED_INFO"
+    base: cashless
+    facts: {decision_at: null}
+    expect: {CASHLESS_1H: {verdict: NEED_INFO, reason: "missing_inputs: cashless_minutes"}}
+  - id: cashless_request_time_missing
+    description: "no request time: NEED_INFO"
+    base: cashless
+    facts: {cashless_request_at: null}
+    expect: {CASHLESS_1H: {verdict: NEED_INFO, reason: "missing_inputs: cashless_minutes"}}
+  - id: cashless_decision_before_request
+    description: "decision stamped before the request: the data is inconsistent, minutes unknown, NEED_INFO"
+    base: cashless
+    facts: {decision_at: 2024-08-01 09:00:00}
+    expect: {CASHLESS_1H: {verdict: NEED_INFO, reason: "missing_inputs: cashless_minutes"}}
+  - id: cashless_in_force_on_2024_07_31
+    description: "claim on the first day the card is in force (2024-07-31), 90 minutes: CHALLENGEABLE"
+    base: cashless
+    facts: {claim_date: 2024-07-31, cashless_request_at: 2024-07-31 10:00:00, decision_at: 2024-07-31 11:30:00}
+    expect: {CASHLESS_1H: {verdict: CHALLENGEABLE}}
+  - id: cashless_not_in_force_on_2024_07_30
+    description: "claim one day before the card is in force: rule_not_in_force even though 90 minutes"
+    base: cashless
+    facts: {claim_date: 2024-07-30, cashless_request_at: 2024-07-30 10:00:00, decision_at: 2024-07-30 11:30:00}
+    expect: {CASHLESS_1H: {verdict: NEED_INFO, reason: rule_not_in_force}}
+
+  # ---------------- DISCHARGE_3H (> 180 minutes) ----------------
+  - id: discharge_exactly_180_minutes
+    description: "final authorisation exactly 3 hours after the discharge request: CONSISTENT"
+    base: discharge
+    facts: {final_auth_at: 2024-08-01 13:00:00}
+    expect: {DISCHARGE_3H: {verdict: CONSISTENT, reason: condition_not_met}}
+  - id: discharge_181_minutes
+    description: "181 minutes: over three hours, CHALLENGEABLE"
+    base: discharge
+    facts: {final_auth_at: 2024-08-01 13:01:00}
+    expect: {DISCHARGE_3H: {verdict: CHALLENGEABLE, reason: condition_met}}
+  - id: discharge_120_minutes
+    description: "two hours: CONSISTENT"
+    base: discharge
+    facts: {final_auth_at: 2024-08-01 12:00:00}
+    expect: {DISCHARGE_3H: {verdict: CONSISTENT}}
+  - id: discharge_final_auth_missing
+    description: "no final authorisation time: NEED_INFO"
+    base: discharge
+    facts: {final_auth_at: null}
+    expect: {DISCHARGE_3H: {verdict: NEED_INFO, reason: "missing_inputs: discharge_minutes"}}
+  - id: discharge_in_force_on_2024_05_29
+    description: "claim on the first in-force day (2024-05-29), 4 hours: CHALLENGEABLE"
+    base: discharge
+    facts: {claim_date: 2024-05-29, discharge_request_at: 2024-05-29 08:00:00, final_auth_at: 2024-05-29 12:00:00}
+    expect: {DISCHARGE_3H: {verdict: CHALLENGEABLE}}
+  - id: discharge_not_in_force_on_2024_05_28
+    description: "claim the day before: rule_not_in_force"
+    base: discharge
+    facts: {claim_date: 2024-05-28, discharge_request_at: 2024-05-28 08:00:00, final_auth_at: 2024-05-28 12:00:00}
+    expect: {DISCHARGE_3H: {verdict: NEED_INFO, reason: rule_not_in_force}}
+
+  # ---------------- REJECTION_PROCESS ----------------
+  - id: process_silence
+    description: "nothing shown about CRC approval or reasons: NEED_INFO, never CONSISTENT"
+    base: process
+    expect: {REJECTION_PROCESS: {verdict: NEED_INFO, reason: "missing_inputs: crc_approval_mentioned, reasons_cite_terms"}}
+  - id: process_both_shown
+    description: "CRC approval mentioned and reasons cite the policy terms: the process was followed, CONSISTENT"
+    base: process
+    facts: {crc_approval_mentioned: true, reasons_cite_terms: true}
+    expect: {REJECTION_PROCESS: {verdict: CONSISTENT, reason: condition_met}}
+  - id: process_reasons_do_not_cite_terms
+    description: "CRC approval shown but reasons do not cite terms: not shown to be compliant, NEED_INFO (never CHALLENGEABLE)"
+    base: process
+    facts: {crc_approval_mentioned: true, reasons_cite_terms: false}
+    expect: {REJECTION_PROCESS: {verdict: NEED_INFO, reason: condition_not_met}}
+  - id: process_only_crc_known
+    description: "reasons_cite_terms unknown: NEED_INFO"
+    base: process
+    facts: {crc_approval_mentioned: true}
+    expect: {REJECTION_PROCESS: {verdict: NEED_INFO, reason: "missing_inputs: reasons_cite_terms"}}
+  - id: process_neither_shown_false
+    description: "both recorded as absent: NEED_INFO"
+    base: process
+    facts: {crc_approval_mentioned: false, reasons_cite_terms: false}
+    expect: {REJECTION_PROCESS: {verdict: NEED_INFO, reason: condition_not_met}}
+
+  # ---------------- claim-date boundaries and fallbacks ----------------
+  - id: date_2022_claim_cashless_not_in_force
+    description: "a 2022 claim against a card in force only from 2024-07-31"
+    base: cashless
+    facts: {claim_date: 2022-03-01, cashless_request_at: 2022-03-01 10:00:00, decision_at: 2022-03-01 14:00:00}
+    expect: {CASHLESS_1H: {verdict: NEED_INFO, reason: rule_not_in_force}}
+  - id: date_2022_claim_discharge_not_in_force
+    description: "a 2022 claim against DISCHARGE_3H (in force from 2024-05-29)"
+    base: discharge
+    facts: {claim_date: 2022-03-01, discharge_request_at: 2022-03-01 08:00:00, final_auth_at: 2022-03-01 18:00:00}
+    expect: {DISCHARGE_3H: {verdict: NEED_INFO, reason: rule_not_in_force}}
+  - id: date_2022_claim_process_not_in_force
+    description: "a 2022 claim against REJECTION_PROCESS (in force from 2024-05-29)"
+    base: process
+    facts: {claim_date: 2022-03-01, crc_approval_mentioned: true, reasons_cite_terms: true}
+    expect: {REJECTION_PROCESS: {verdict: NEED_INFO, reason: rule_not_in_force}}
+  - id: date_admission_date_stands_in_for_missing_claim_date
+    description: "no claim_date at all: admission_date (2024-08-01) is used, 90 minutes so CHALLENGEABLE"
+    base: cashless
+    facts: {claim_date: null, admission_date: 2024-08-01, decision_at: 2024-08-01 11:30:00}
+    expect: {CASHLESS_1H: {verdict: CHALLENGEABLE}}
+  - id: date_admission_date_2022_not_in_force
+    description: "no claim_date, admission_date in 2022: rule_not_in_force"
+    base: cashless
+    facts: {claim_date: null, admission_date: 2022-03-01}
+    expect: {CASHLESS_1H: {verdict: NEED_INFO, reason: rule_not_in_force}}
+  - id: date_unconfirmed_claim_date_is_not_replaced_by_admission_date
+    description: "claim_date awaiting confirmation: NEED_INFO, even though an admission_date is present"
+    base: cashless
+    facts: {claim_date: {value: 2024-08-01, status: needs_confirmation}, admission_date: 2024-08-01, decision_at: 2024-08-01 11:30:00}
+    expect: {CASHLESS_1H: {verdict: NEED_INFO, reason: missing_claim_date}}
+  - id: date_no_claim_or_admission_date
+    description: "neither date on file: NEED_INFO"
+    base: cashless
+    facts: {claim_date: null}
+    expect: {CASHLESS_1H: {verdict: NEED_INFO, reason: missing_claim_date}}
+
+  # ---------------- grounds that yield no finding ----------------
+  - id: ground_unknown_vocabulary
+    description: "a rejection_ground outside the vocabulary triggers no card: no findings"
+    facts: {rejection_ground: alien_ground, claim_date: 2024-08-01}
+    expect: {}
+  - id: ground_missing
+    description: "no rejection_ground at all: the engine does not run, no findings"
+    facts: {claim_date: 2024-08-01, fraud_alleged: false}
+    expect: {}
+  - id: ground_unconfirmed
+    description: "rejection_ground awaiting confirmation: treated as missing, no findings"
+    facts: {rejection_ground: {value: non_disclosure, status: needs_confirmation}, claim_date: 2024-08-01}
+    expect: {}
+  - id: ground_triggers_no_approved_card
+    description: "cashless_delay while only the moratorium cards are approved: no findings"
+    base: cashless
+    cards: [MORATORIUM_60M, MORATORIUM_60M.v0]
+    expect: {}
+  - id: ground_other_has_no_automated_condition
+    description: "ground 'other' reaches GRIEVANCE_ROUTE, which carries no automated condition: NEED_INFO"
+    facts: {rejection_ground: other, claim_date: 2024-08-01}
+    expect: {GRIEVANCE_ROUTE: {verdict: NEED_INFO, reason: condition_not_automated}}
+
+# Evaluation level: how an engine finding is compared with the forum's holding.
+evaluation_scenarios:
+  - id: appeal_inversion_insurer_appeal_dismissed
+    description: >-
+      The insurer appealed and the appeal was dismissed, so the stored outcome is 'dismissed' but the
+      POLICYHOLDER prevailed. The engine says CHALLENGEABLE (67 months of cover) and the forum held
+      for the policyholder on the moratorium: an agreement, not false hope.
+    facts: nd_v1
+    case: {appellant: insurer, outcome: dismissed}
+    issues: {MORATORIUM_60M: for_policyholder}
+    expect: {policyholder_prevailed: true, finding_agreeing: 1, finding_false_hope_runs: 0,
+             case_false_hope_runs: 0, case_agreeing_runs: 1}
+  - id: appeal_insurer_won
+    description: >-
+      The insurer appealed and the appeal was allowed: the insurer prevailed. An engine CHALLENGEABLE
+      against a holding for the insurer IS false hope and must be counted as such.
+    facts: nd_v1
+    case: {appellant: insurer, outcome: allowed}
+    issues: {MORATORIUM_60M: for_insurer}
+    expect: {policyholder_prevailed: false, finding_agreeing: 0, finding_false_hope_runs: 1,
+             case_false_hope_runs: 1, case_agreeing_runs: 0}
+  - id: complaint_dismissed_policyholder_appellant
+    description: >-
+      The policyholder appealed and it was dismissed: the insurer prevailed, the engine CONSISTENT
+      (fraud alleged) agrees.
+    facts: nd_v1
+    facts_override: {fraud_alleged: true}
+    case: {appellant: policyholder, outcome: dismissed}
+    issues: {MORATORIUM_60M: for_insurer}
+    expect: {policyholder_prevailed: false, finding_agreeing: 1, finding_false_hope_runs: 0,
+             case_false_hope_runs: 0, case_agreeing_runs: 1}

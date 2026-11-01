@@ -295,3 +295,60 @@ def test_cases_review_cli(tmp_path, capsys):
     st = dict(s2.con.execute("SELECT field, status FROM case_fact").fetchall())
     assert st == {"cited_clause": "reviewed", "rejection_ground": "corrected"}
     assert cli.main(["cases", "review", "missing"]) != 0
+
+
+def test_cases_exclude_sets_reason_and_validates(tmp_path, capsys):
+    s = Store(tmp_path / "bima_sarthi.duckdb")
+    s.init()
+    s.con.execute('INSERT INTO "case" (case_id, outcome) VALUES (?, ?)', ["cx", "allowed"])
+    assert cli.main(["cases", "exclude", "cx", "--reason", "motor insurance"]) == 0
+    s2 = Store(tmp_path / "bima_sarthi.duckdb")
+    assert s2.con.execute('SELECT excluded_reason FROM "case" WHERE case_id=?',
+                          ["cx"]).fetchone() == ("motor insurance",)
+    assert cli.main(["cases", "exclude", "nope", "--reason", "x"]) != 0
+    assert cli.main(["cases", "exclude", "cx", "--reason", "   "]) != 0
+    with pytest.raises(SystemExit):
+        cli.main(["cases", "exclude", "cx"])  # --reason is required
+
+
+# ---------- EXPANSION_QUERIES (R105) ----------
+
+def test_expansion_queries_one_per_family_and_existing_queries_untouched():
+    assert set(cases.EXPANSION_QUERIES) == {"moratorium", "ped_waiting", "cashless", "discharge", "committee"}
+    assert len(QUERIES) == 12 and cases.QUERIES is QUERIES
+
+
+def test_expansion_queries_use_valid_ik_syntax():
+    import re
+    for fam, q in cases.EXPANSION_QUERIES.items():
+        bare = re.sub(r'"[^"]*"', '""', q)
+        assert not re.search(r"\b(OR|AND|NOT)\b", bare), fam
+        for m in re.finditer(r"\w*(?:ANDD|ORR|NOTT)\w*", bare):
+            assert m.group(0) in ("ANDD", "ORR", "NOTT"), (fam, m.group(0))
+            assert bare[m.start() - 1] == " " and bare[m.end()] == " ", (fam, m.group(0))
+        assert q.count('"') % 2 == 0 and q.count("(") == q.count(")"), fam
+        assert q.count("doctypes:") == 1 and q.count("fromdate:") == 1, fam
+
+
+def test_expansion_queries_filter_decisions_from_2023_and_exclude_life():
+    assert cases.EXPANSION_FILTERS == "doctypes: consumer,supremecourt,highcourts fromdate: 1-1-2023"
+    for fam, q in cases.EXPANSION_QUERIES.items():
+        assert q.endswith(" " + cases.EXPANSION_FILTERS), fam
+        assert q.startswith('("health insurance" ORR mediclaim) '), fam
+        assert ' NOTT "life insurance" ' in q, fam
+
+
+def test_expansion_queries_family_terms():
+    q = cases.EXPANSION_QUERIES
+    assert '"non-disclosure" (moratorium ORR "eight years" ORR "60 months" ORR "sixty months")' in q["moratorium"]
+    assert '"pre-existing" "waiting period" (36 ORR 48 ORR "thirty-six" ORR "forty-eight")' in q["ped_waiting"]
+    assert 'cashless ("one hour" ORR "within an hour" ORR authorisation) delay' in q["cashless"]
+    assert 'discharge ("three hours" ORR "final authorisation")' in q["discharge"]
+    assert '"claims review committee" ORR "claim review committee"' in q["committee"]
+
+
+def test_expansion_queries_never_use_explicit_andd():
+    # Live probe (2026-11-01): an explicit ANDD makes Indian Kanoon drop the whole boolean clause and
+    # return every 2023+ decision (10M hits). Conjunction must be the implicit space.
+    for fam, q in cases.EXPANSION_QUERIES.items():
+        assert "ANDD" not in q, fam

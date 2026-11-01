@@ -315,6 +315,27 @@ def test_sheet_in_scope_first_and_contents(store, monkeypatch, tmp_path):
     assert "the moratorium of 60 months bars repudiation" in t and "p.1" in t
 
 
+def test_sheet_lists_only_cases_not_excluded_and_not_reviewed(store, monkeypatch, tmp_path):
+    def add(cid, status, excluded=None):
+        store.upsert("case", [dict(case_id=cid, source_sha256=None, forum="X", outcome=None,
+                                   excluded_reason=excluded)], key=["case_id"])
+        store.upsert("case_issue", [dict(case_id=cid, issue="exclusion", holding="not_decided",
+                                         holding_quote=None, page_no=None, status=status,
+                                         reviewer_note=None)], key=["case_id", "issue"])
+    add("pend", "drafted")
+    add("flag", "needs_review")
+    add("done", "reviewed")
+    add("fixed", "corrected")
+    add("rej", "rejected")
+    add("excl", "drafted", excluded="motor insurance")
+    out = tmp_path / "sheet.md"
+    assert write_review_sheet(store, out) == 2
+    t = out.read_text()
+    assert "## pend" in t and "## flag" in t
+    for gone in ("## done", "## fixed", "## rej", "## excl"):
+        assert gone not in t
+
+
 # ---------- CLI ----------
 
 def test_cli_registered():

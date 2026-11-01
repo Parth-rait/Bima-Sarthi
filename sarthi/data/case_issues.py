@@ -96,6 +96,19 @@ def backfill_appellant(store: Store) -> dict[str, int]:
     return counts
 
 
+def backfill_product_line(store: Store) -> dict[str, int]:
+    """Evidence-only backfill: a non-excluded case with product_line unset and at least one
+    human-reviewed (reviewed/corrected) real rule issue is health, because a human reviewed a
+    health-rule issue on it. Nothing else is guessed. Idempotent."""
+    ids = [r[0] for r in store.con.execute(
+        'SELECT c.case_id FROM "case" c WHERE c.product_line IS NULL AND c.excluded_reason IS NULL '
+        "AND EXISTS (SELECT 1 FROM case_issue i WHERE i.case_id = c.case_id "
+        "AND i.status IN ('reviewed','corrected') AND i.issue <> ?) ORDER BY 1", [OVERALL]).fetchall()]
+    for cid in ids:
+        store.con.execute('UPDATE "case" SET product_line=\'health\' WHERE case_id=?', [cid])
+    return {"health": len(ids)}
+
+
 # ---------- drafting ----------
 
 class OutIssue(BaseModel):
@@ -339,9 +352,13 @@ def in_scope_case_ids(store: Store, case_ids: list[str]) -> set[str]:
 
 
 def write_review_sheet(store: Store, path: Path) -> int:
-    """Markdown sheet, in-scope cases first. Returns the number of cases listed."""
+    """Markdown sheet, in-scope cases first. Returns the number of cases listed. Lists only cases
+    still awaiting review: not excluded, and with no issue a human has already decided."""
+    marks = ", ".join("?" for _ in PROTECTED)
     ids = [r[0] for r in store.con.execute(
-        "SELECT DISTINCT case_id FROM case_issue ORDER BY 1").fetchall()]
+        "SELECT DISTINCT i.case_id FROM case_issue i LEFT JOIN \"case\" c USING (case_id) "
+        "WHERE c.excluded_reason IS NULL AND i.case_id NOT IN "
+        f"(SELECT case_id FROM case_issue WHERE status IN ({marks})) ORDER BY 1", list(PROTECTED)).fetchall()]
     scope = in_scope_case_ids(store, ids)
     ordered = [c for c in ids if c in scope] + [c for c in ids if c not in scope]
     L = ["# Case issue review sheet", "",
@@ -352,13 +369,13 @@ def write_review_sheet(store: Store, path: Path) -> int:
          f"{len(scope)} in-scope case(s) listed first (claim/admission date inside an approved "
          f"card's in-force window); {len(ids) - len(scope)} other(s).", ""]
     for cid in ordered:
-        forum, appellant, prevailed, outcome = store.con.execute(
-            'SELECT forum, appellant, policyholder_prevailed, outcome FROM "case" WHERE case_id=?',
-            [cid]).fetchone() or (None, None, None, None)
+        forum, appellant, prevailed, outcome, line = store.con.execute(
+            'SELECT forum, appellant, policyholder_prevailed, outcome, product_line FROM "case" '
+            "WHERE case_id=?", [cid]).fetchone() or (None, None, None, None, None)
         L += [f"## {cid}{' [in scope]' if cid in scope else ''}: {_title(cid, store) or '(no title)'}",
               f"- Forum: {forum}; claim/admission date: {_claim_date(cid, store) or 'missing'}; "
               f"court outcome field: {outcome}",
-              f"- Appealed by: {appellant or 'unknown'}"]
+              f"- Appealed by: {appellant or 'unknown'}; Product line: {line or 'unknown'}"]
         issues = store.con.execute(
             "SELECT issue, holding, holding_quote, page_no, status, reviewer_note FROM case_issue "
             "WHERE case_id=? ORDER BY issue <> ?, issue", [cid, OVERALL]).fetchall()

@@ -50,6 +50,25 @@ QUERIES: dict[str, str] = {k: build_query(v) for k, v in {
     "process_defect": '"insurance company" repudiated ("delay in intimation" ORR condonation ORR "documents not submitted" ORR "claim review committee")',
 }.items()}
 
+# R105 expansion: judgments about the five CHALLENGEABLE-capable cards. Indian Kanoon's fromdate
+# filters the DECISION date, so use decisions from 1-1-2023 (claims likely on/after 2020-10-01).
+EXPANSION_FILTERS = "doctypes: consumer,supremecourt,highcourts fromdate: 1-1-2023"
+
+
+# NB: conjunction is the implicit space. A live probe showed an explicit ANDD makes Indian Kanoon
+# drop the whole boolean clause (10M hits, no relevance); ORR / NOTT work.
+def build_expansion_query(terms: str) -> str:
+    return f'("health insurance" ORR mediclaim) {terms} NOTT "life insurance" {EXPANSION_FILTERS}'
+
+
+EXPANSION_QUERIES: dict[str, str] = {k: build_expansion_query(v) for k, v in {
+    "moratorium": '"non-disclosure" (moratorium ORR "eight years" ORR "60 months" ORR "sixty months")',
+    "ped_waiting": '"pre-existing" "waiting period" (36 ORR 48 ORR "thirty-six" ORR "forty-eight")',
+    "cashless": 'cashless ("one hour" ORR "within an hour" ORR authorisation) delay',
+    "discharge": 'discharge ("three hours" ORR "final authorisation")',
+    "committee": '("claims review committee" ORR "claim review committee")',
+}.items()}
+
 INSURER_ALIASES: dict[str, list[str]] = {
     "Star Health": ["Star Health"],
     "New India Assurance": ["New India Assurance"],
@@ -219,8 +238,10 @@ def _upsert_case(case_id: str, sha: str, text: str, forum: str | None, decided_o
                  outcome: str | None = None) -> tuple[Case, dict]:
     case = Case(case_id=case_id, source_sha256=sha, forum=forum, decided_on=decided_on,
                 insurer=match_insurer(text), outcome=outcome or detect_outcome(text))
-    # appellant / policyholder_prevailed are curated later; a re-fetch must not wipe them
-    return case, case.model_dump(exclude={"appellant", "policyholder_prevailed"})
+    # appellant / policyholder_prevailed / excluded_reason / product_line are curated later;
+    # a re-fetch must not wipe them
+    return case, case.model_dump(exclude={"appellant", "policyholder_prevailed", "excluded_reason",
+                                          "product_line"})
 
 
 def fetch_case(doc_id: str, store: Store, *, sleep: Callable[[float], None] = time.sleep) -> Case:

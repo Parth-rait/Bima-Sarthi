@@ -21,6 +21,8 @@ from sarthi.app import gallery as gallery_mod
 from sarthi.app.explain import explain
 from sarthi.app.extract import extract_user_facts, ready_for_rules
 from sarthi.app.labels import label, labels_json
+from sarthi.app.plan import (PRODUCT_LINE_KEYS, finalize, general_plan, health_plan, product_label,
+                             product_line_hint)
 from sarthi.app.letter import LETTER_FACT_KEYS, build_letter, deadline_sources, deadlines, to_pdf
 from sarthi.app import session as session_mod
 from sarthi.app.session import Session, UnsupportedUpload, UploadTooLarge, sweep
@@ -40,7 +42,9 @@ NOTICE = "This is a rules check, not legal or medical advice."
 INDEPENDENT = "Bima Sarthi is an independent project, not affiliated with IRDAI, LIC or any insurer."
 GRIEVANCE_MSG = "Deadlines need the grievance-route rule card to be approved"
 STATIC = Path(__file__).parent / "static"
-ALLOWED_KEYS = set(FACT_KEYS) | set(LETTER_FACT_KEYS)
+PRODUCT_LINE = "product_line"  # session-level, chosen by the user on the confirm screen
+ALLOWED_KEYS = set(FACT_KEYS) | set(LETTER_FACT_KEYS) | {PRODUCT_LINE}
+NEEDS_PRODUCT_LINE = "Please choose the type of insurance before the check runs."
 STATUS_ORDER = {"needs_confirmation": 0, "verified": 1, "user_confirmed": 2}
 
 _SESSIONS: dict[str, dict] = {}
@@ -232,6 +236,11 @@ def parse_input(key: str, raw):
         if not ok:
             raise ValueError("Enter a real date and time, for example 05/03/2024 14:30.")
         return datetime.fromisoformat(v)
+    if key == PRODUCT_LINE:
+        if not isinstance(raw, str) or raw.strip() not in PRODUCT_LINE_KEYS:
+            raise ValueError("Choose the type of insurance from the list: "
+                             + ", ".join(product_label(k) for k in PRODUCT_LINE_KEYS))
+        return raw.strip()
     if key == "rejection_ground":
         if not isinstance(raw, str) or raw.strip() not in REJECTION_GROUNDS:
             raise ValueError("Choose the rejection reason from the list: " + ", ".join(REJECTION_GROUNDS))
@@ -385,14 +394,15 @@ def extract(sid: str, files: list[UploadFile] = File(...)) -> dict:
         raise HTTPException(502, "We could not read these documents right now. Please try again.")
     # New extraction goes UNDER what the user has already confirmed or entered: never overwrite it.
     kept = {k: v for k, v in st["facts"].items()
-            if v.status == "user_confirmed" or k in LETTER_FACT_KEYS or k == "continuity_confirmed"}
+            if v.status == "user_confirmed" or k in LETTER_FACT_KEYS or k in ("continuity_confirmed", PRODUCT_LINE)}
     st["facts"] = {**extracted, **kept}
     backends = {b for b in (st["reader_backend"], getattr(extracted, "backend", None)) if b}
     st["reader_backend"] = ", ".join(sorted(backends)) or None
     st["findings"] = None
     log.info("extracted session=%s pages=%d fields=%d", sid, len(session.pages()), len(extracted))
     return {"facts": facts_json(st["facts"]), "needs_confirmation": pending(st["facts"]),
-            "pages": len(session.pages()), "reader_backend": st["reader_backend"]}
+            "pages": len(session.pages()), "reader_backend": st["reader_backend"],
+            "product_line_hint": product_line_hint(st["facts"])}
 
 
 # ---------- check / explain / letter ----------
@@ -450,13 +460,57 @@ def deadlines_json(st: dict, cards: list[RuleCard]) -> dict:
                      if sent else "Counted from today's date; see the rule quote for the source.")}
 
 
+def _product_line(facts: dict[str, FactValue]) -> str | None:
+    f = facts.get(PRODUCT_LINE)
+    return f.value if f is not None and f.value in PRODUCT_LINE_KEYS else None
+
+
+def _claim_amount(st: dict):
+    f = st["facts"].get("claim_amount_inr")
+    return f.value if f is not None and isinstance(f.value, (int, float)) else None
+
+
+def health_plan_json(st: dict, cards: list[RuleCard]) -> dict | None:
+    """"Your plan" for a health check: fixed templates over the findings, the approved
+    grievance card and the user's own dates. None if its text fails the verify() self-check."""
+    card = grievance_card(cards)
+    plan, extras = health_plan(st["findings"], params=card.params if card else None,
+                               complaint_date=_complaint_date(st), reply_date=st["insurer_reply_date"],
+                               claim_amount=_claim_amount(st))
+    return finalize(plan, extras, st["findings"])
+
+
+def _general_check(st: dict, line: str) -> dict:
+    """Types of insurance without a checked rules engine: no findings, no verdict, a general plan."""
+    try:
+        cards = load_cards()
+    except HTTPException:  # the plan needs no rule card; dates are simply omitted
+        cards = []
+    card = grievance_card(cards)
+    plan, extras = general_plan(line, params=card.params if card else None,
+                                complaint_date=_complaint_date(st), reply_date=st["insurer_reply_date"])
+    st["findings"] = None
+    st["session"].delete()  # page images are no longer needed; results live in memory only
+    st["purged"] = True
+    return {"supported": False, "product_line": line, "findings": [],
+            "plan": finalize(plan, extras, []), "labels": labels_json(),
+            "deadlines": {"available": False, "note": "Dates, where the sources apply, are shown in your plan."},
+            "reader_backend": st["reader_backend"]}
+
+
 @app.post("/session/{sid}/check")
 def check(sid: str) -> dict:
     st = _state(sid)
+    facts = st["facts"]
+    line = _product_line(facts)
+    if line is None:
+        raise HTTPException(409, {"message": NEEDS_PRODUCT_LINE, "needs_product_line": True,
+                                  "needs_confirmation": pending(facts)})
+    if line != "health":
+        return _general_check(st, line)
     cards = load_cards()
     if not cards:
         raise HTTPException(503, "The rules are not available right now. Please try again later.")
-    facts = st["facts"]
     if not ready_for_rules(facts, cards):
         need = pending(facts)
         gr = facts.get("rejection_ground")
@@ -467,9 +521,10 @@ def check(sid: str) -> dict:
     st["findings"] = run_rules(facts, cards)
     st["session"].delete()  # page images are no longer needed; results live in memory only
     st["purged"] = True
-    return {"findings": [f.model_dump(mode="json") for f in st["findings"]],
-            "deadlines": deadlines_json(st, cards), "labels": labels_json(),
-            "reader_backend": st["reader_backend"]}
+    return {"supported": True, "product_line": "health",
+            "findings": [f.model_dump(mode="json") for f in st["findings"]],
+            "deadlines": deadlines_json(st, cards), "plan": health_plan_json(st, cards),
+            "labels": labels_json(), "reader_backend": st["reader_backend"]}
 
 
 @app.post("/session/{sid}/explain")
@@ -479,10 +534,11 @@ def explain_route(sid: str, lang: str = Query("en", pattern="^(en|hi)$"),
     if st["findings"] is None:
         raise HTTPException(409, "Run the check first.")
     out = explain(st["findings"], lang, bool(helper))
+    cards = load_cards()
     return {"text": out.text, "used_model": out.used_model,
             "findings": [f.model_dump(mode="json") for f in st["findings"]],
-            "deadlines": deadlines_json(st, load_cards()), "labels": labels_json(),
-            "reader_backend": st["reader_backend"]}
+            "deadlines": deadlines_json(st, cards), "plan": health_plan_json(st, cards),
+            "labels": labels_json(), "reader_backend": st["reader_backend"]}
 
 
 @app.get("/session/{sid}/letter.pdf")

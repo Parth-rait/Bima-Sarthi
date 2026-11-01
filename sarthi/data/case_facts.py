@@ -421,3 +421,22 @@ def load_reviewed_facts(case_id: str, store: Store) -> dict[str, FactValue]:
         out[field] = FactValue(value=v, quote=quote, page_no=page_no,
                                confidence="high", status="verified")
     return out
+
+
+def load_unresolved_facts(case_id: str, store: Store) -> dict[str, FactValue]:
+    """Facts that exist for the case but no human has decided yet (status extracted /
+    needs_review), as `needs_confirmation` FactValues: the same state the app uses for an
+    unconfirmed fact, so the app's readiness check (`ready_for_rules`) applies to them unchanged.
+    An undecodable stored value is still unresolved (value None). Rejected facts are resolved."""
+    rows = store.con.execute(
+        "SELECT field, value, quote, page_no FROM case_fact WHERE case_id=? "
+        "AND status IN ('extracted','needs_review')", [case_id]).fetchall()
+    out = {}
+    for field, value, quote, page_no in rows:
+        try:
+            v = _decode(field, json.loads(value)) if value is not None else None
+        except (ValueError, TypeError):
+            v = None
+        out[field] = FactValue(value=v, quote=quote, page_no=page_no, confidence="low",
+                               status="needs_confirmation")
+    return out

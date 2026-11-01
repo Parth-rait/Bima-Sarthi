@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field, field_validator
 
 Verdict = Literal["CONSISTENT", "CHALLENGEABLE", "NEED_INFO"]
 DocType = Literal["regulation", "circular", "wording", "judgment", "report"]
+PRODUCT_LINES = ("health", "life", "credit_life", "crop", "accident", "motor", "other", "unknown")
+ProductLine = Literal["health", "life", "credit_life", "crop", "accident", "motor", "other", "unknown"]
 
 
 class Source(BaseModel):
@@ -112,6 +114,8 @@ class Case(BaseModel):
     relief_amount: float | None = None
     appellant: Literal["insurer", "policyholder", "unknown"] | None = None
     policyholder_prevailed: bool | None = None
+    excluded_reason: str | None = None  # set by a reviewer: out of scope or duplicate
+    product_line: ProductLine | None = None  # set by a human; None = not yet known
 
 
 class CaseIssue(BaseModel):

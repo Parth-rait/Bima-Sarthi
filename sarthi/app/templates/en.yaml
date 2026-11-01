@@ -16,6 +16,7 @@ labels:
   units: {months: "months", days: "days", minutes: "minutes", years: "years", hours: "hours", weeks: "weeks", fortnights: "fortnights"}
   nonpayable: "non-payable"
   no_rule: "We don't have a checked rule for this reason yet. This does not mean the decision is correct."
+  general_title: "We don't have a checked rules engine for this type of insurance yet. This does not mean the decision is correct. Here is a general way to take your case forward."
   missing_prefix: "missing "
 CHALLENGEABLE:
   self: "On the facts in your documents, this decision may be challengeable under {rule_id}."

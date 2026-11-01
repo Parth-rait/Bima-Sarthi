@@ -26,6 +26,8 @@ LABELS: dict[str, tuple[str, str]] = {
     "continuity_confirmed": ("cover was continuous", "कवर लगातार था"),
     "policy_renewal_date": ("policy renewal date", "पॉलिसी नवीनीकरण की तारीख़"),
     "cited_clause_found": ("cited clause found in the policy", "बताई गई धारा पॉलिसी में मिली"),
+    # session-level choice on the confirm screen
+    "product_line": ("type of insurance", "बीमा का प्रकार"),
     # letter details
     "policyholder_name": ("name on the policy", "पॉलिसी पर नाम"),
     "policy_number": ("policy number", "पॉलिसी संख्या"),

@@ -161,6 +161,18 @@ def _block(f, lang: str) -> str:
     return "\n".join(lines) + "\n"
 
 
+def cap_note_text(amt, params: dict, lang: str) -> str:
+    """The Ombudsman limit note for a claim amount ("" when none applies)."""
+    limit, award = _claim_limit(params), _award_cap(params)
+    if amt in (None, ""):
+        return ""
+    if limit is not None and float(amt) > float(limit):
+        return _L[lang]["cap"].format(amt=_inr(amt), cap=_lakh(limit))
+    if award is not None and float(amt) > float(award):
+        return _L[lang]["award"].format(cap=_lakh(award))
+    return ""
+
+
 def build_letter(facts: dict, findings: list, lang: str, *, params: dict,
                  letter_date: date, insurer_reply_date: date | None = None) -> str:
     """`params`, `letter_date` (and optional `insurer_reply_date`) are keyword extras
@@ -171,14 +183,7 @@ def build_letter(facts: dict, findings: list, lang: str, *, params: dict,
     if not ch:
         raise ValueError("no CHALLENGEABLE finding: nothing to write a grievance about")
     dl = deadlines(letter_date, insurer_reply_date, params=params)
-    cap_note = ""
-    amt = getattr(facts.get("claim_amount_inr"), "value", None)
-    limit, award = _claim_limit(params), _award_cap(params)
-    if amt not in (None, ""):
-        if limit is not None and float(amt) > float(limit):
-            cap_note = _L[lang]["cap"].format(amt=_inr(amt), cap=_lakh(limit))
-        elif award is not None and float(amt) > float(award):
-            cap_note = _L[lang]["award"].format(cap=_lakh(award))
+    cap_note = cap_note_text(getattr(facts.get("claim_amount_inr"), "value", None), params, lang)
     raw = (TEMPLATES / f"letter_{lang}.txt").read_text(encoding="utf-8")
     # Lines starting with "#" are template-only comments (e.g. the Q-007 draft marker).
     raw = "\n".join(l for l in raw.split("\n") if not l.startswith("#"))

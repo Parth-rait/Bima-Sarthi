@@ -318,15 +318,28 @@ class _Allowed:
 
 @lru_cache(maxsize=1)
 def _no_rule_sentences() -> tuple[str, ...]:
-    """The fixed "no checked rule yet" sentences (en, hi). They deny that the decision is
+    """The fixed "no checked rule yet" sentences (en, hi; also the general-plan title). They deny that the decision is
     correct, which the blocked-phrase scan would otherwise flag; exempt only these exact texts."""
     d = Path(__file__).parent / "templates"
-    return tuple(yaml.safe_load((d / f"{l}.yaml").read_text(encoding="utf-8"))["labels"]["no_rule"]
-                 for l in ("en", "hi"))
+    labels = [yaml.safe_load((d / f"{l}.yaml").read_text(encoding="utf-8"))["labels"] for l in ("en", "hi")]
+    return tuple(lb[k] for lb in labels for k in ("no_rule", "general_title"))
 
 
-def verify(text: str, findings: list[Finding]) -> VerifyResult:
+def verify(text: str, findings: list[Finding], *, extra_quotes=(), extra_dates=(),
+           extra_values=()) -> VerifyResult:
+    """`extra_*` are optional, additive allowances for fixed-template text that carries
+    more than the findings do (the plan): official quotes shown verbatim, dates computed
+    from user input and verified params, and (kind, number) values from verified params
+    or the user ("int" for plain integers such as page numbers). Default: none."""
     al = _Allowed(findings)
+    for q in filter(None, extra_quotes):
+        al._text(q)
+        al.quotes.append(q)
+    for d in extra_dates:
+        al._add_date(d)
+    for kind, v in extra_values:
+        v = Decimal(str(v)).normalize()
+        (al.plain if kind == "int" else al.typed).add(v if kind == "int" else (kind, v))
     problems: list[str] = []
 
     def strip(t: str, parts) -> str:

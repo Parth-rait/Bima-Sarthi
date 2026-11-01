@@ -1,0 +1,62 @@
+# Fallback rungs, referenced by name from <ROLE>_FALLBACKS. Ladder order (best first):
+#   READER_FALLBACKS=hpc48,hpc24,kaggle,baseten,nemotron_ultra,deepseek_v4_flash,kimi_k3,ollama_dev
+# Fields: base_url_env (env var holding the URL), default_base_url (optional literal used when the
+# env var is unset), model, key_env, vision (can the rung read images).
+# Optional: json_schema (default true; false = do not send response_format json_schema to this rung),
+# min_max_tokens (floor for max_tokens on this rung, for reasoning models that can return empty
+# content with finish_reason "length").
+#
+# Which env var points each rung where (see deploy/README.md and docs/runbooks/19*.md):
+#   hpc48   HPC48_BASE_URL   = SSH tunnel to the Q8 job,  e.g. http://localhost:18080/v1  (key: HPC48_KEY)
+#   hpc24   HPC24_BASE_URL   = SSH tunnel to the Q4 job,  e.g. http://localhost:18081/v1  (key: HPC24_KEY)
+#   kaggle  KAGGLE_BASE_URL  = the public tunnel URL printed by the Kaggle notebook + /v1  (key: KAGGLE_KEY)
+#   baseten BASETEN_BASE_URL = defaults to the Baseten URL below                           (key: BASETEN_API_KEY)
+#   ollama_dev OLLAMA_BASE_URL = defaults to local Ollama on the Mac (dev only, text only)  (key: OLLAMA_KEY)
+# The key values are the contents of ~/.glimmer_key on the cluster (or the Kaggle notebook key); never commit them.
+hpc48:           # Glimmer 30B Q8_K_XL + mmproj on rtx, gpu:2g.48gb:1 (deploy/glimmer.sbatch)
+  base_url_env: HPC48_BASE_URL
+  model: glimmer
+  key_env: HPC48_KEY
+  vision: true   # mmproj-Muse-Glimmer-30B-BF16.gguf loaded in llama-server
+hpc24:           # Glimmer Q4_K_XL on rtx, gpu:1g.24gb:1 (deploy/glimmer_q4.sbatch)
+  base_url_env: HPC24_BASE_URL
+  model: glimmer-q4
+  key_env: HPC24_KEY
+  vision: true   # mmproj loaded
+kaggle:          # Glimmer Q4_K_XL on 2x T4 (deploy/kaggle_glimmer.ipynb)
+  base_url_env: KAGGLE_BASE_URL
+  model: glimmer-q4
+  key_env: KAGGLE_KEY
+  vision: true
+baseten:
+  base_url_env: BASETEN_BASE_URL
+  default_base_url: https://inference.baseten.co/v1
+  model: meta-models/muse-spark-open
+  key_env: BASETEN_API_KEY
+  vision: true   # assumption: Spark Open accepts image_url parts; verify in Task 19
+nemotron_ultra:  # Baseten, text only
+  base_url_env: BASETEN_BASE_URL
+  default_base_url: https://inference.baseten.co/v1
+  model: nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B
+  key_env: NEMOTRON_ULTRA
+  vision: false
+deepseek_v4_flash:  # Baseten, reasoning model, text only
+  base_url_env: BASETEN_BASE_URL
+  default_base_url: https://inference.baseten.co/v1
+  model: deepseek-ai/DeepSeek-V4-Flash-0731
+  key_env: DEEPSEEK_V4_FL
+  vision: false
+  min_max_tokens: 4000
+kimi_k3:         # Baseten, reasoning model, text only
+  base_url_env: BASETEN_BASE_URL
+  default_base_url: https://inference.baseten.co/v1
+  model: moonshotai/Kimi-K3
+  key_env: KIMI_K3_KEY
+  vision: false
+  min_max_tokens: 4000
+ollama_dev:      # dev only, Mac, text only
+  base_url_env: OLLAMA_BASE_URL
+  default_base_url: http://localhost:11434/v1
+  model: llama3.2:3b
+  key_env: OLLAMA_KEY
+  vision: false

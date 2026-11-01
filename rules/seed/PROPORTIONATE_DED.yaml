@@ -1,0 +1,20 @@
+rule_id: PROPORTIONATE_DED
+version: 1
+group: part_payment
+title_en: "Proportionate deduction rules"
+title_hi: null
+source_id: irdai_health_master_2024
+quote: null
+page_no: null
+in_force_from: 2024-04-01  # draft — confirm in Task 6 Step 5
+applies_by: claim_date  # draft — confirm in Task 6 Step 5
+triggers: [deduction]
+inputs: [deduction_items]
+params: {}
+condition: null
+if_true: null
+if_false: null
+question_en: "What proportionate deduction did the insurer apply, and on what basis?"
+question_hi: null
+action_en: "Check the deduction method against the policy terms."
+action_hi: null

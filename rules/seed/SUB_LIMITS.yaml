@@ -1,0 +1,21 @@
+rule_id: SUB_LIMITS
+version: 1
+group: part_payment
+title_en: "Sub-limits on treatments"
+title_hi: null
+source_id: irdai_ppi_master_2024
+quote: "The sub-limits, Proportionate Deductions and the existence of Package rates if any, with cross reference to the concerned policy section,"
+page_no: 190
+in_force_from: 2024-09-05  # Master Circular on Protection of Policyholders Interests, Date: 5th September 2024 (p1)
+in_force_to: null  # no end date stated
+applies_by: claim_date  # disclosure is checked against the policy as it stood at the claim  [draft — confirm]
+triggers: [sub_limit]
+inputs: [deduction_items]
+params: {}
+condition: null
+if_true: null
+if_false: null
+question_en: "Which sub-limit did the insurer apply, and where is it in the policy?"
+question_hi: null
+action_en: "Confirm the sub-limit exists in the policy and was disclosed."
+action_hi: null

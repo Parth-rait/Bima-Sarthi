@@ -1,0 +1,21 @@
+rule_id: MORATORIUM_60M
+version: 1
+group: rejection
+title_en: "Moratorium: no rejection on non-disclosure after continuous cover"
+title_hi: null
+source_id: irdai_health_master_2024
+quote: "No policy and claim of health insurance shall be contestable on any grounds of non-disclosure and/or misrepresentation except for established fraud, after the completion of the Moratorium Period, i.e. 60 months of continuous coverage"
+page_no: 8
+in_force_from: 2024-05-29  # Master Circular on Health Insurance Business, Version 1 dated 29052024 (p1); p4 effective date: immediate effect. Same rule at IRDAI (Insurance Products) Regulations 2024 Sch III cl. 8 (p37), in force 2024-04-01
+in_force_to: null  # no end date stated
+applies_by: policy_start_or_renewal  # p4 para (2)-(3): existing products are modified by 30.09.2024 and accrued moratorium credit is carried forward; whether it binds pre-existing policies only from renewal is open (Q-005)  [draft — confirm]
+triggers: [non_disclosure]
+inputs: [continuous_cover_months, fraud_alleged]
+params: {moratorium_months: 60}
+condition: "continuous_cover_months >= 60 and not fraud_alleged"
+if_true: CHALLENGEABLE
+if_false: CONSISTENT
+question_en: "For how many continuous months has this policyholder been covered, and does the insurer allege fraud?"
+question_hi: null
+action_en: "Ask the insurer to withdraw the rejection and cite the moratorium; escalate to the grievance route if refused."
+action_hi: null

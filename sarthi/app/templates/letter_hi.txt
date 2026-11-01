@@ -1,0 +1,23 @@
+# draft — pending human review (Q-007)
+दिनांक: $letter_date
+
+सेवा में,
+शिकायत निवारण अधिकारी
+$insurer_name
+
+विषय: पॉलिसी संख्या $policy_number के अंतर्गत दावा संख्या $claim_number के निर्णय की समीक्षा का अनुरोध
+
+महोदय/महोदया,
+
+मैं, $policyholder_name, $insurer_name की पॉलिसी संख्या $policy_number का धारक हूँ। मेरा दावा संख्या $claim_number ($claim_amount) मेरे प्रतिकूल तय हुआ है। मैंने इस निर्णय को नीचे दिए गए नियमों से मिलाकर देखा है और आपसे समीक्षा का अनुरोध करता हूँ।
+
+$findings_block
+मैं ऊपर दिए गए नियमों के अंतर्गत निर्णय पर पुनर्विचार का अनुरोध करता हूँ, और इस पत्र से $insurer_reply_days दिनों के भीतर, अर्थात $insurer_reply_by तक, लिखित उत्तर चाहता हूँ।
+
+यदि उस तारीख तक उत्तर नहीं मिलता, या उत्तर से मैं संतुष्ट नहीं हूँ, तो मैं बीमा लोकपाल के पास जा सकता हूँ। इसके लिए सबसे जल्दी की तारीख $ombudsman_earliest है, और शिकायत लोकपाल तक $ombudsman_latest से पहले पहुँच जानी चाहिए।
+$cap_note
+भवदीय,
+$policyholder_name
+पॉलिसी संख्या $policy_number | दावा संख्या $claim_number
+
+Prepared with Bima Sarthi, an independent project, not affiliated with IRDAI, LIC or any insurer.

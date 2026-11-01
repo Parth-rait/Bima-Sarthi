@@ -1,0 +1,41 @@
+# English explanation templates (source of truth). Placeholders are filled by explain.templated().
+# Wording rules: never promise an outcome; never say the insurer's decision is right or wrong;
+# never comment on treatment or diagnosis.
+labels:
+  quote_intro: "What the rule says"
+  facts_intro: "What your documents show"
+  fact_quote: "source text"
+  page: "page"
+  question_label: "Question to settle"
+  action_label: "What you can do"
+  rule_label: "Rule"
+  "yes": "yes"
+  "no": "no"
+  english_marker: ""
+  footer: "This is a rules check, not legal or medical advice. It does not promise any result."
+  units: {months: "months", days: "days", minutes: "minutes", years: "years", hours: "hours", weeks: "weeks", fortnights: "fortnights"}
+  nonpayable: "non-payable"
+  no_rule: "We don't have a checked rule for this reason yet. This does not mean the decision is correct."
+  missing_prefix: "missing "
+CHALLENGEABLE:
+  self: "On the facts in your documents, this decision may be challengeable under {rule_id}."
+  helper: "On the facts in their documents, the decision on their claim may be challengeable under {rule_id}."
+CONSISTENT:
+  self: "Under {rule_id}, the rule gives no ground to challenge the decision on this point. This check covers only this rule."
+  helper: "Under {rule_id}, the rule gives no ground to challenge the decision on this point in their claim. This check covers only this rule."
+NEED_INFO:
+  rule_not_in_force:
+    self: "We could not apply {rule_id} to your claim because the rule was not in force on the relevant date."
+    helper: "We could not apply {rule_id} to their claim because the rule was not in force on the relevant date."
+  missing_inputs:
+    self: "We need a little more information from you before we can check {rule_id}: {missing}."
+    helper: "We need a little more information about their claim before we can check {rule_id}: {missing}."
+  condition_not_automated:
+    self: "{rule_id} cannot be checked automatically. Please read the rule below against your documents, or ask a grievance officer or an advisor."
+    helper: "{rule_id} cannot be checked automatically. Please read the rule below against their documents, or ask a grievance officer or an advisor."
+  missing_date:
+    self: "We cannot check {rule_id} yet because a date is missing: {missing}."
+    helper: "We cannot check {rule_id} for their claim yet because a date is missing: {missing}."
+  default:
+    self: "We cannot say yet whether {rule_id} applies to your claim."
+    helper: "We cannot say yet whether {rule_id} applies to their claim."

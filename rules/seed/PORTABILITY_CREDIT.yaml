@@ -1,0 +1,21 @@
+rule_id: PORTABILITY_CREDIT
+version: 1
+group: rejection
+title_en: "Credit for waiting periods served on portability"
+title_hi: null
+source_id: irdai_health_master_2024
+quote: "The policyholder is entitled to transfer the credits gained to the extent of the Sum Insured, No Claim Bonus, specific waiting periods, waiting period for pre-existing disease , Moratorium period etc from the Existing Insurer to the Acquiring Insurer in the previous policy."
+page_no: 8
+in_force_from: 2024-05-29  # Master Circular on Health Insurance Business, Version 1 dated 29052024 (p1); p4 effective date: immediate effect
+in_force_to: null  # no end date stated
+applies_by: policy_start_or_renewal  # credit is given when the policy is ported at start/renewal  [draft — confirm]
+triggers: [portability]
+inputs: [continuous_cover_months]
+params: {}
+condition: null
+if_true: null
+if_false: null
+question_en: "Was this policy ported from another insurer, and what cover did the earlier policy give?"
+question_hi: null
+action_en: "Ask the insurer to credit waiting periods already served under the earlier policy."
+action_hi: null

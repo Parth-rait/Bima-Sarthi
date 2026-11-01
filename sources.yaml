@@ -1,0 +1,40 @@
+# Source registry. Landing pages only; Task 3 resolves the PDFs.
+# Entries marked "url unverified" were not confirmed beyond the publisher domain.
+sources:
+  - id: irdai_health_master_2024
+    url: https://irdai.gov.in/master-circulars  # url unverified
+    doc_type: circular
+    publisher: IRDAI
+    title: Master Circular on Health Insurance Business (29 May 2024)
+  - id: irdai_products_regs_2024
+    url: https://irdai.gov.in/regulations  # url unverified
+    doc_type: regulation
+    publisher: IRDAI
+    title: IRDAI (Insurance Products) Regulations, 2024
+  - id: ombudsman_rules_2017
+    url: https://financialservices.gov.in/insurance-divisions/Acts-and-Rules  # url unverified
+    doc_type: regulation
+    publisher: Department of Financial Services, Ministry of Finance
+    title: Insurance Ombudsman Rules, 2017
+  - id: cio_annual_2023_24
+    url: https://www.cioins.co.in/Annual-Reports  # url unverified
+    doc_type: report
+    publisher: Council for Insurance Ombudsmen
+    title: CIO Annual Report 2023-24
+  - id: irdai_annual_2023_24
+    url: https://irdai.gov.in/annual-reports  # url unverified
+    doc_type: report
+    publisher: IRDAI
+    title: IRDAI Annual Report 2023-24
+  - id: irdai_protection_policyholders_2017
+    # url unverified; currently duplicates the regulations index of irdai_products_regs_2024
+    # until the specific landing page is confirmed.
+    url: https://irdai.gov.in/regulations
+    doc_type: regulation
+    publisher: IRDAI
+    title: IRDAI (Protection of Policyholders' Interests) Regulations
+  - id: policyholder_portal
+    url: https://policyholder.gov.in/  # url unverified
+    doc_type: report
+    publisher: IRDAI
+    title: Policyholder portal

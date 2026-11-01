@@ -1,0 +1,22 @@
+Date: $letter_date
+
+To,
+The Grievance Redressal Officer
+$insurer_name
+
+Subject: Request to review the decision on Claim No. $claim_number under Policy No. $policy_number
+
+Dear Sir/Madam,
+
+I, $policyholder_name, hold Policy No. $policy_number with $insurer_name. My claim No. $claim_number for $claim_amount has been decided adversely. I have compared the decision with the rules below and request your review.
+
+$findings_block
+I request reconsideration of the decision under the rule(s) cited above, and a written reply within $insurer_reply_days days of this letter, that is by $insurer_reply_by.
+
+If I do not receive a reply by that date, or if I am not satisfied with the reply, I may approach the Insurance Ombudsman. The earliest date for that is $ombudsman_earliest, and the complaint should reach the Ombudsman no later than $ombudsman_latest.
+$cap_note
+Yours faithfully,
+$policyholder_name
+Policy No. $policy_number | Claim No. $claim_number
+
+Prepared with Bima Sarthi, an independent project, not affiliated with IRDAI, LIC or any insurer.

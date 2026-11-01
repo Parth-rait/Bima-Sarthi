@@ -1,0 +1,21 @@
+rule_id: CASHLESS_1H
+version: 1
+group: cashless_process
+title_en: "Cashless authorisation within 1 hour"
+title_hi: null
+source_id: irdai_health_master_2024
+quote: "Insurer shall decide on the request for cashless authorization immediately but not more than one hour of receipt of request."
+page_no: 9
+in_force_from: 2024-07-31  # Master Circular on Health Insurance Business, dated 29052024 (p1); p9 para 15(b) requires systems in place not later than 31 July 2024, so the one-hour rule is treated as binding from that date
+in_force_to: null  # no end date stated
+applies_by: claim_date  # time limit runs on the date the cashless request was made  [draft — confirm]
+triggers: [cashless_delay]
+inputs: [cashless_minutes]
+params: {limit_minutes: 60}
+condition: "cashless_minutes > 60"
+if_true: CHALLENGEABLE
+if_false: CONSISTENT
+question_en: "How many minutes did the insurer take to respond to the cashless request?"
+question_hi: null
+action_en: "Record the request and response times and complain about the delay."
+action_hi: null

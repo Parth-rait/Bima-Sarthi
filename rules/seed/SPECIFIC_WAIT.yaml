@@ -1,0 +1,21 @@
+rule_id: SPECIFIC_WAIT
+version: 1
+group: rejection
+title_en: "Specific disease waiting period"
+title_hi: null
+source_id: irdai_products_regs_2024
+quote: "\"Specific waiting period\" means a period up to 36 months from the commencement of a health insurance policy during which period specified diseases/treatments (except due to an accident) are not covered."
+page_no: 36
+in_force_from: 2024-04-01  # IRDAI (Insurance Products) Regulations 2024 reg 1(2): in force on later of gazette publication or 1st April 2024 (p21)
+in_force_to: null  # no end date stated
+applies_by: policy_start_or_renewal  # waiting period runs from commencement of the policy; reg 9(3) (p25) saves earlier contracts  [draft — confirm]
+triggers: [specific_waiting_period]
+inputs: [continuous_cover_months]
+params: {}
+condition: null
+if_true: null
+if_false: null
+question_en: "Which specific waiting period does the policy apply, and how many months of cover were completed?"
+question_hi: null
+action_en: "Compare the insurer's cited period with the policy wording and the regulatory cap."
+action_hi: null

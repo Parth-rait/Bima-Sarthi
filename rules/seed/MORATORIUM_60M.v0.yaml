@@ -1,0 +1,21 @@
+rule_id: MORATORIUM_60M
+version: 0
+group: rejection
+title_en: "Moratorium: no rejection on non-disclosure after continuous cover (rules before 2024)"
+title_hi: null
+source_id: irdai_std_master_2020
+quote: "This period of eight years is called as moratorium period. The moratorium would be applicable for the sums insured of the first policy and subsequently completion of 8 continuous years would be applicable from date of enhancement of sums insured only on the enhanced limits. After the expiry of Moratorium Period no health insurance policy shall be contestable except for proven fraud and permanent exclusions specified in the policy contract."
+page_no: 107
+in_force_from: 2020-10-01  # IRDAI Master Circular on Standardization of Health Insurance Products, 22 July 2020 (p1): Exclusions guidelines (p94 para 1) apply to products filed on or after 01 October 2019, and non-compliant existing products "shall not be offered and promoted from 01st October, 2020"; later date chosen (conservative) - human to confirm
+in_force_to: 2024-05-29  # = in_force_from of the v1 card (2024 rules), so versions do not overlap
+applies_by: policy_start_or_renewal  # same as v1: waiting/moratorium status is fixed by the policy from commencement/renewal; unconfirmed for pre-2020 policies  [draft — confirm]
+triggers: [non_disclosure]
+inputs: [continuous_cover_months, fraud_alleged]
+params: {moratorium_months: 96}
+condition: "continuous_cover_months >= 96 and not fraud_alleged"
+if_true: CHALLENGEABLE
+if_false: CONSISTENT
+question_en: "For how many continuous months has this policyholder been covered, and does the insurer allege fraud?"
+question_hi: null
+action_en: "Ask the insurer to withdraw the rejection and cite the moratorium; escalate to the grievance route if refused."
+action_hi: null

@@ -1,0 +1,11 @@
+.git
+.env
+.env.*
+data/
+!data/bima_sarthi.duckdb
+**/__pycache__
+.venv
+tests/
+docs/
+.superpowers/
+*.log

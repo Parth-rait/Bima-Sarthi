@@ -1,0 +1,21 @@
+rule_id: PED_WAIT_36M
+version: 0
+group: rejection
+title_en: "Pre-existing disease waiting period capped at 48 months (rules before 2024)"
+title_hi: null
+source_id: irdai_std_master_2020
+quote: "(Explanation: Subject to product design the number of months, not exceeding 48 months, shall be specified or a reference may be given to the policy schedule)"
+page_no: 96
+in_force_from: 2020-10-01  # IRDAI Master Circular on Standardization of Health Insurance Products, 22 July 2020 (p1): Exclusions guidelines (p94 para 1) apply to products filed on or after 01 October 2019, and non-compliant existing products "shall not be offered and promoted from 01st October, 2020"; later date chosen (conservative) - human to confirm
+in_force_to: 2024-04-01  # = in_force_from of the v1 card (2024 rules), so versions do not overlap
+applies_by: policy_start_or_renewal  # same as v1: waiting/moratorium status is fixed by the policy from commencement/renewal; unconfirmed for pre-2020 policies  [draft — confirm]
+triggers: [pre_existing_disease]
+inputs: [continuous_cover_months]
+params: {max_wait_months: 48}
+condition: "continuous_cover_months >= 48 and ped_disclosed"  # final review 1 Nov: the quoted rule protects only DISCLOSED PEDs; undisclosed → moratorium route
+if_true: CHALLENGEABLE
+if_false: CONSISTENT
+question_en: "For how many continuous months has this policyholder been covered?"
+question_hi: null
+action_en: "Point out that the waiting period cannot exceed the cap; ask the insurer to reconsider."
+action_hi: null

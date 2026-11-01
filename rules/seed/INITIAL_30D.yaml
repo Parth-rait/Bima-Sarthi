@@ -1,0 +1,20 @@
+rule_id: INITIAL_30D
+version: 1
+group: rejection
+title_en: "Initial 30-day waiting period"
+title_hi: null
+source_id: irdai_health_master_2024
+quote: null
+page_no: null
+in_force_from: 2024-04-01  # draft — confirm in Task 6 Step 5
+applies_by: policy_start_or_renewal  # draft — confirm in Task 6 Step 5
+triggers: [initial_waiting_period]
+inputs: [claim_date]
+params: {}
+condition: null
+if_true: null
+if_false: null
+question_en: "When did the policy start, and was the claim for an accident?"
+question_hi: null
+action_en: "Check the claim date against the initial waiting period and its exceptions."
+action_hi: null

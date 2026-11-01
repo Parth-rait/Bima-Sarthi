@@ -1,0 +1,16 @@
+/data/
+.env
+.claude/
+.superpowers/
+__pycache__/
+.venv/
+*.pyc
+.pytest_cache/
+.airflow/
+.impeccable/hook.cache.json
+
+# kept out of the repo (Parth, 1 Nov 2026): planning docs, operator runbooks, AI working notes
+docs/superpowers/
+docs/runbooks/
+CLAUDE.md
+PRODUCT.md

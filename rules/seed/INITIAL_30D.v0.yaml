@@ -1,0 +1,20 @@
+rule_id: INITIAL_30D
+version: 0
+group: rejection
+title_en: "Initial 30-day waiting period (rules before 2024)"
+title_hi: null
+source_id: irdai_std_master_2020
+quote: "a) Expenses related to the treatment of any illness within 30 days from the first policy commencement date shall be excluded except claims arising due to an accident, provided the same are covered. b) This exclusion shall not, however, apply if the Insured Person has Continuous Coverage for more than twelve months."
+page_no: 97
+in_force_from: 2020-10-01  # IRDAI Master Circular on Standardization of Health Insurance Products, 22 July 2020 (p1): Exclusions guidelines (p94 para 1) apply to products filed on or after 01 October 2019, and non-compliant existing products "shall not be offered and promoted from 01st October, 2020"; later date chosen (conservative) - human to confirm
+applies_by: policy_start_or_renewal  # same as v1: waiting/moratorium status is fixed by the policy from commencement/renewal; unconfirmed for pre-2020 policies  [draft — confirm]
+triggers: [initial_waiting_period]
+inputs: [claim_date]
+params: {}
+condition: null
+if_true: null
+if_false: null
+question_en: "When did the policy start, and was the claim for an accident?"
+question_hi: null
+action_en: "Check the claim date against the initial waiting period and its exceptions."
+action_hi: null

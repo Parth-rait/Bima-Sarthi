@@ -1,0 +1,21 @@
+rule_id: DISCHARGE_3H
+version: 1
+group: cashless_process
+title_en: "Final discharge authorisation within 3 hours"
+title_hi: null
+source_id: irdai_health_master_2024
+quote: "Insurer shall grant final authorization within three hours of the receipt of discharge authorization request from the hospital."
+page_no: 9
+in_force_from: 2024-05-29  # Master Circular on Health Insurance Business, Version 1 dated 29052024 (p1); p4 effective date: immediate effect
+in_force_to: null  # no end date stated
+applies_by: claim_date  # time limit runs on the date of the discharge request  [draft — confirm]
+triggers: [discharge_delay]
+inputs: [discharge_minutes]
+params: {limit_minutes: 180}
+condition: "discharge_minutes > 180"
+if_true: CHALLENGEABLE
+if_false: CONSISTENT
+question_en: "How many minutes did the insurer take to authorise final discharge?"
+question_hi: null
+action_en: "Record the times and complain about the delay."
+action_hi: null

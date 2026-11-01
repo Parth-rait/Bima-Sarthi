@@ -1,0 +1,21 @@
+rule_id: REJECTION_PROCESS
+version: 1
+group: rejection
+title_en: "Rejection process: committee approval and reasons citing policy terms"
+title_hi: null
+source_id: irdai_health_master_2024
+quote: "No claim shall be repudiated without the approval of PMC or a three- member sub-group of PMC called the Claims Review Committee (CRC). b) In case, the claim is repudiated or disallowed partially, details shall be conveyed to the claimant along with full details giving reference to the specific terms and conditions of the policy document."
+page_no: 9
+in_force_from: 2024-05-29  # Master Circular on Health Insurance Business, Version 1 dated 29052024 (p1); p4 effective date: immediate effect
+in_force_to: null  # no end date stated
+applies_by: claim_date  # applies to the decision taken on the claim  [draft — confirm]
+triggers: [process_defect]
+inputs: [crc_approval_mentioned, reasons_cite_terms]
+params: {}
+condition: "crc_approval_mentioned and reasons_cite_terms"
+if_true: CONSISTENT
+if_false: NEED_INFO  # Parth 1 Nov: CRC approval is required, a silent letter is not proof of breach — ask for proof
+question_en: "Does the rejection letter mention claims review committee approval and cite policy terms as reasons?"
+question_hi: null
+action_en: "Ask the insurer for the committee approval and written reasons."
+action_hi: null

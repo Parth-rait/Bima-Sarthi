@@ -1,0 +1,21 @@
+rule_id: PED_WAIT_36M
+version: 1
+group: rejection
+title_en: "Pre-existing disease waiting period capped at 36 months"
+title_hi: null
+source_id: irdai_products_regs_2024
+quote: "Waiting period for pre-existing diseases disclosed by the persons to be insured, shall be maximum up to 36 months of continuous coverage under the Health Insurance policy."
+page_no: 37
+in_force_from: 2024-04-01  # IRDAI (Insurance Products) Regulations 2024 reg 1(2): in force on later of gazette publication or 1st April 2024 (p21)
+in_force_to: null  # no end date stated
+applies_by: policy_start_or_renewal  # waiting period is fixed by the policy terms from commencement; reg 9(3) (p25) saves contracts entered into before commencement  [draft — confirm]
+triggers: [pre_existing_disease]
+inputs: [continuous_cover_months]
+params: {max_wait_months: 36}
+condition: "continuous_cover_months >= 36 and ped_disclosed"  # final review 1 Nov: the quoted rule protects only DISCLOSED PEDs; undisclosed → moratorium route
+if_true: CHALLENGEABLE
+if_false: CONSISTENT
+question_en: "For how many continuous months has this policyholder been covered?"
+question_hi: null
+action_en: "Point out that the waiting period cannot exceed the cap; ask the insurer to reconsider."
+action_hi: null

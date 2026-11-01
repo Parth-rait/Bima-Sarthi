@@ -1,0 +1,20 @@
+rule_id: NONPAYABLE_LIST
+version: 1
+group: part_payment
+title_en: "Deductions limited to the listed non-payable items"
+title_hi: null
+source_id: irdai_health_master_2024
+quote: null
+page_no: null
+in_force_from: 2024-04-01  # draft — confirm in Task 6 Step 5
+applies_by: claim_date  # draft — confirm in Task 6 Step 5
+triggers: [deduction]
+inputs: [deduction_items, nonpayable_overcharge_inr]
+params: {}
+condition: "nonpayable_overcharge_inr > 0"
+if_true: CHALLENGEABLE
+if_false: CONSISTENT
+question_en: "How much was deducted for items not on the standard non-payable list?"
+question_hi: null
+action_en: "Request an itemised deduction statement and contest items outside the list."
+action_hi: null

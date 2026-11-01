@@ -1,0 +1,46 @@
+# draft — pending human review (Q-007)
+# Hindi explanation templates. Rule quotes stay in their original language (English).
+# Same wording rules as en.yaml: no outcome promises, no verdict on the insurer's decision,
+# no comment on treatment or diagnosis.
+labels:
+  # draft — pending human review (Q-007)
+  quote_intro: "नियम में क्या लिखा है"
+  facts_intro: "आपके कागज़ों में क्या दिखता है"
+  fact_quote: "कागज़ का मूल पाठ"
+  page: "पृष्ठ"
+  question_label: "तय करने वाला सवाल"
+  action_label: "आप क्या कर सकते हैं"
+  rule_label: "नियम"
+  "yes": "हाँ"
+  "no": "नहीं"
+  english_marker: "(English)"
+  footer: "यह नियमों की जाँच है, कानूनी या चिकित्सा सलाह नहीं। यह किसी नतीजे का वादा नहीं करती।"
+  units: {months: "महीने", days: "दिन", minutes: "मिनट", years: "साल", hours: "घंटे", weeks: "सप्ताह", fortnights: "पखवाड़े"}
+  nonpayable: "गैर-भुगतान योग्य"
+  no_rule: "इस कारण के लिए हमारे पास अभी कोई जाँचा हुआ नियम नहीं है। इसका मतलब यह नहीं कि फ़ैसला सही है।"
+  missing_prefix: "कमी: "
+CHALLENGEABLE:
+  # draft — pending human review (Q-007)
+  self: "आपके कागज़ों में दिए तथ्यों के आधार पर, यह फ़ैसला {rule_id} के तहत चुनौती देने लायक हो सकता है।"
+  helper: "उनके कागज़ों में दिए तथ्यों के आधार पर, यह फ़ैसला {rule_id} के तहत चुनौती देने लायक हो सकता है। उनका दावा आगे इस तरह उठाया जा सकता है।"
+CONSISTENT:
+  # draft — pending human review (Q-007)
+  self: "{rule_id} के अनुसार, इस मुद्दे पर फ़ैसले को चुनौती देने का कोई आधार इस नियम से नहीं मिलता। यह जाँच सिर्फ़ इसी नियम तक सीमित है।"
+  helper: "{rule_id} के अनुसार, उनका दावा देखने पर इस मुद्दे पर फ़ैसले को चुनौती देने का कोई आधार इस नियम से नहीं मिलता। यह जाँच सिर्फ़ इसी नियम तक सीमित है।"
+NEED_INFO:
+  # draft — pending human review (Q-007)
+  rule_not_in_force:
+    self: "हम {rule_id} को आपके दावे पर लागू नहीं कर सके, क्योंकि उस तारीख़ को यह नियम लागू नहीं था।"
+    helper: "हम {rule_id} को उनके दावे पर लागू नहीं कर सके, क्योंकि उस तारीख़ को यह नियम लागू नहीं था।"
+  missing_inputs:
+    self: "{rule_id} जाँचने से पहले हमें आपसे थोड़ी और जानकारी चाहिए: {missing}।"
+    helper: "{rule_id} जाँचने से पहले हमें उनके दावे की थोड़ी और जानकारी चाहिए: {missing}।"
+  condition_not_automated:
+    self: "{rule_id} अपने-आप नहीं जाँचा जा सकता। कृपया नीचे लिखा नियम अपने कागज़ों से मिलाकर पढ़ें, या शिकायत अधिकारी या किसी सलाहकार से पूछें।"
+    helper: "{rule_id} अपने-आप नहीं जाँचा जा सकता। कृपया नीचे लिखा नियम उनके कागज़ों से मिलाकर पढ़ें, या शिकायत अधिकारी या किसी सलाहकार से पूछें।"
+  missing_date:
+    self: "हम अभी {rule_id} नहीं जाँच सकते, क्योंकि कोई तारीख़ नहीं मिली: {missing}।"
+    helper: "हम उनके दावे पर अभी {rule_id} नहीं जाँच सकते, क्योंकि कोई तारीख़ नहीं मिली: {missing}।"
+  default:
+    self: "अभी हम नहीं कह सकते कि {rule_id} आपके दावे पर लागू होता है या नहीं।"
+    helper: "अभी हम नहीं कह सकते कि {rule_id} उनके दावे पर लागू होता है या नहीं।"

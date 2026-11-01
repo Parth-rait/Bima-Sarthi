@@ -1,0 +1,21 @@
+rule_id: EXCLUSION_LISTED
+version: 1
+group: rejection
+title_en: "Rejection must rest on an exclusion listed in the policy"
+title_hi: null
+source_id: irdai_ppi_master_2024
+quote: "Insurers shall mandatorily include in the policy document all the applicable exclusions for a particular product. No further deductions shall be made from the claim amount in the name of any other exclusions."
+page_no: 144
+in_force_from: 2024-09-05  # Master Circular on Protection of Policyholders Interests, Date: 5th September 2024 (p1)
+in_force_to: null  # no end date stated
+applies_by: claim_date  # applies to the claim decision at the time of rejection  [draft — confirm]
+triggers: [exclusion]
+inputs: [cited_clause_found]
+params: {}
+condition: "cited_clause_found"
+if_true: CONSISTENT
+if_false: CHALLENGEABLE
+question_en: "Does the clause the insurer cites exist in the policy wording?"
+question_hi: null
+action_en: "Ask the insurer to point to the exact clause; challenge if none exists."
+action_hi: null

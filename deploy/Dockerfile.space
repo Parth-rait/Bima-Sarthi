@@ -2,6 +2,14 @@
 #   docker build -f deploy/Dockerfile.space .   (the Space build copies this file to ./Dockerfile; see 19d)
 # ASSUMPTION: the ASGI app is sarthi.app.main:app (check once Task 15 lands). The snapshot data/bima_sarthi.duckdb must hold only rule cards, index, stats and gallery: no user data,
 # and no judgment text if the licence forbids it (facts and citations only). Secrets arrive as Space secrets.
+# Stage 1: build the React frontend (served by FastAPI at /; the old page stays at /legacy).
+FROM node:22-slim AS web
+WORKDIR /web
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend ./
+RUN npm run build
+
 FROM python:3.12-slim
 COPY --from=ghcr.io/astral-sh/uv:0.13.6 /uv /usr/local/bin/uv
 RUN useradd -m -u 1000 user
@@ -12,16 +20,19 @@ COPY sarthi ./sarthi
 COPY rules ./rules
 COPY gallery ./gallery
 COPY models.yaml ./models.yaml
+COPY --from=web /web/dist ./frontend/dist
 COPY data/bima_sarthi.duckdb ./data/bima_sarthi.duckdb
 RUN uv sync --frozen --no-dev && chown -R user:user /home/user && chmod a-w data/bima_sarthi.duckdb
 USER user
 ENV PATH="/home/user/app/.venv/bin:$PATH" \
     SARTHI_DATA_DIR=/home/user/app/data \
-    READER_BASE_URL=https://inference.baseten.co/v1 \
-    READER_MODEL=meta-models/muse-spark-open \
-    WRITER_BASE_URL=https://inference.baseten.co/v1 \
-    WRITER_MODEL=meta-models/muse-spark-open \
-    BASETEN_BASE_URL=https://inference.baseten.co/v1
-# Space secrets (names only, set in Settings): READER_KEY, WRITER_KEY, BASETEN_API_KEY
+    READER_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai \
+    READER_MODEL=gemini-3.1-flash-lite \
+    WRITER_BASE_URL=https://api.groq.com/openai/v1 \
+    WRITER_MODEL=openai/gpt-oss-120b \
+    READER_FALLBACKS=groq_qwen_vl \
+    WRITER_FALLBACKS=gemini_flash
+# Free-tier models: tell visitors to upload only sample or redacted documents (free tiers may use inputs).
+# Space secrets (names only, set in Settings): READER_KEY (Gemini key), WRITER_KEY (Groq key), GROQ_API_KEY, GEMINI_API_KEY
 EXPOSE 7860
 CMD ["uvicorn", "sarthi.app.main:app", "--host", "0.0.0.0", "--port", "7860"]

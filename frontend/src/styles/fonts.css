@@ -1,0 +1,18 @@
+/* Self-hosted via @fontsource (SIL OFL 1.1). No CDN, no Google Fonts at runtime.
+   Only the subsets and weights the design uses are imported.
+   Display: Fraunces (latin) + Noto Serif Devanagari. Quote slips: Newsreader (latin).
+   UI/body: Source Sans 3 (latin) + Noto Sans Devanagari. Metadata: IBM Plex Mono 400. */
+@import "@fontsource/fraunces/latin-500.css";
+@import "@fontsource/fraunces/latin-600.css";
+@import "@fontsource/fraunces/latin-500-italic.css";
+@import "@fontsource/newsreader/latin-400.css";
+@import "@fontsource/newsreader/latin-400-italic.css";
+@import "@fontsource/newsreader/latin-600.css";
+@import "@fontsource/source-sans-3/latin-400.css";
+@import "@fontsource/source-sans-3/latin-600.css";
+@import "@fontsource/source-sans-3/latin-700.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/noto-sans-devanagari/devanagari-400.css";
+@import "@fontsource/noto-sans-devanagari/devanagari-600.css";
+@import "@fontsource/noto-serif-devanagari/devanagari-400.css";
+@import "@fontsource/noto-serif-devanagari/devanagari-600.css";

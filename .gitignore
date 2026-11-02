@@ -14,3 +14,7 @@ docs/superpowers/
 docs/runbooks/
 CLAUDE.md
 PRODUCT.md
+
+# frontend build artefacts
+frontend/node_modules/
+frontend/dist/

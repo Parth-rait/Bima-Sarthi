@@ -1,0 +1,15 @@
+/*
+ * Stylesheet entry. Layer order matters:
+ *   theme < base (preflight + our base) < components (layout primitives) < utilities
+ * so every Tailwind utility on a component beats the layout/base rules. (The phase-1 "legacy" layer and workflow.css were
+ * deleted in 3b: every screen is now built from Tailwind utilities and the ds components.)
+ */
+@layer theme, base, components, utilities;
+@import "./fonts.css";
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "./tokens.css";
+@import "./base.css" layer(base);
+@import "./layout.css" layer(components);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "./print.css";

@@ -1,0 +1,156 @@
+/*
+ * Design tokens: "late-afternoon sky with sunlight through soft clouds" (phase 3a).
+ *
+ * Ivory and pale peach carry ~90% of every page. Ink carries all text. One primary action colour (ink fill, ivory
+ * text; apricot only on hover/press and as a key highlight). Sky blue and lavender live only in atmospheric
+ * backgrounds (never controls). Dusty rose marks emphasis. Champagne gold is a hairline or underline, nothing larger.
+ * Every text/background pair is measured (npm run contrast, src/test/contrast.test.ts); the table is in DESIGN.md.
+ *
+ * Blocks:
+ *   @theme static  = tokens Tailwind turns into utilities (bg-ivory, text-ink, font-display, shadow-sheet ...).
+ *   :root          = layout tokens (gutters, wraps, rhythm).
+ * The phase-3a alias block (night, wine, cream, brass ...) and the workflow screens' legacy variables were deleted in 3b.
+ */
+/* The app has no dark theme. Make Tailwind's dark: variant opt-in by class (nothing ever sets .dark), so an operating-system
+   dark mode can never turn a registry component near-black (that was the phase-3a draggable-card bug). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme static {
+  /* ---- surfaces ---- */
+  --color-ivory: #fbf6ee; /* ground: the page */
+  --color-peach: #f7e6d6; /* surface-2: alternate band, quiet panel */
+  --color-peach-deep: #f0d8c2; /* hover on peach, pressed secondary */
+  --color-paper: #fffcf7; /* a sheet lifted off the ground (inputs, the few cards) */
+
+  /* ---- atmosphere: backgrounds only, never controls or text ---- */
+  --color-sky-blue: #bfd3e6;
+  --color-sky-pale: #dce6f0;
+  --color-lavender: #d9d2e6;
+  --color-dusty-rose: #d9a9a6; /* emphasis marks, timeline markers, art; never body-sized text */
+  --color-apricot: #e9a87f; /* primary action hover/press and key highlights ONLY */
+  --color-apricot-soft: #f2c6a0; /* selection, soft glow */
+  --color-gold: #d9be8a; /* champagne: hairlines and underlines ONLY */
+
+  /* ---- text ---- */
+  --color-ink: #2a2630; /* all text; the primary action fill; the ink band */
+  --color-ink-soft: #5b5560; /* secondary text */
+  --color-on-ink: #fbf6ee; /* text on the ink band and on primary buttons */
+  --color-on-ink-soft: #d8cfc6; /* secondary text on the ink band */
+  --color-ink-raised: #3a3541; /* a surface raised from the ink band, primary hover alternative */
+
+  /* ---- lines and focus ---- */
+  --color-line: #e2d8cc; /* hairlines that separate groups (decorative) */
+  --color-line-strong: #857a6d; /* control borders and meaningful non-text (>= 3:1) */
+  --color-focus-ring: #2a2630; /* 3px ring, offset 2px */
+  --color-focus-ring-on-ink: #fbf6ee;
+
+  /* ---- states and verdicts: muted, always with shape + word + sentence ---- */
+  --color-terracotta: #b5553f; /* error, CHALLENGEABLE: borders, icons (non-text) */
+  --color-terracotta-ink: #8b3f2c; /* error text, CHALLENGEABLE stamp text */
+  --color-terracotta-wash: #f6dfd6;
+  --color-amber-ink: #6e4a0c; /* warning text, NEED_INFO stamp text */
+  --color-amber-wash: #f6e4bd;
+  --color-sage: #6f8f76; /* success mark (non-text) */
+  --color-sage-ink: #35553f; /* success text, CONSISTENT stamp text */
+  --color-sage-wash: #dde9de;
+
+  /* ---- type ---- */
+  --font-display: "Fraunces", "Noto Serif Devanagari", Georgia, "Times New Roman", serif;
+  --font-ui: "Source Sans 3", "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Source Sans 3", "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-quote: "Newsreader", "Noto Serif Devanagari", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* headings are not oversized: clamp scale, body 16-18px */
+  --text-display: clamp(2.25rem, 1.25rem + 3.4vw, 4.25rem);
+  --text-display--line-height: 1.06;
+  --text-display--letter-spacing: -0.02em;
+  --text-h1: clamp(2rem, 1.25rem + 2.3vw, 3.25rem);
+  --text-h1--line-height: 1.1;
+  --text-h1--letter-spacing: -0.015em;
+  --text-h2: clamp(1.625rem, 1.2rem + 1.35vw, 2.375rem);
+  --text-h2--line-height: 1.16;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h3: clamp(1.1875rem, 1.1rem + 0.35vw, 1.4375rem);
+  --text-h3--line-height: 1.25;
+  --text-lead: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+  --text-lead--line-height: 1.55;
+  --text-body: clamp(1rem, 0.96rem + 0.18vw, 1.125rem);
+  --text-body--line-height: 1.6;
+  --text-meta: 0.875rem;
+  --text-meta--line-height: 1.45;
+
+  /* ---- shape ---- */
+  --radius-ctl: 0.625rem; /* buttons, inputs */
+  --radius-card: 1rem; /* the few cards, images */
+
+  /* ---- depth: soft, warm, low. No halos. ---- */
+  --shadow-sheet: 0 1px 2px rgba(42, 38, 48, 0.06), 0 14px 32px -18px rgba(42, 38, 48, 0.22);
+  --shadow-under: 0 6px 14px -8px rgba(42, 38, 48, 0.28);
+  --shadow-lift: 0 2px 4px rgba(42, 38, 48, 0.06), 0 24px 44px -24px rgba(42, 38, 48, 0.32);
+  --shadow-stage: 0 30px 60px -30px rgba(42, 38, 48, 0.45), 0 10px 20px -14px rgba(42, 38, 48, 0.25);
+  --shadow-button: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+
+  /* ---- motion ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-rise: rise 0.5s var(--ease-out) both;
+
+  @keyframes progress-slide {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0.001;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+:root {
+  color-scheme: light;
+
+  /* =====================================================================================================
+   * LAYOUT TOKENS (data-layout system, documented in DESIGN.md)
+   * ===================================================================================================== */
+  /* responsive gutters: 16 / 24 / 40 / 64 px */
+  --gutter: 1rem;
+  --gutter-sm: 1.5rem;
+  --gutter-lg: 2.5rem;
+  --gutter-2xl: 4rem;
+  /* content wells (max widths; the actual width is min(well, 100% - 2 * gutter)) */
+  --wrap-wide: 90rem; /* 1440px: navbar, heroes, editorial bands */
+  --wrap-default: 80rem; /* 1280px: most content */
+  --wrap-narrow: 60rem; /* 960px: forms and prose pages */
+  --measure-prose: 68ch; /* running text */
+  /* vertical rhythm */
+  --section-y: clamp(4rem, 8vw, 8rem);
+  --section-y-tight: clamp(2.5rem, 5vw, 5rem);
+  --grid-gap: clamp(1rem, 2.5vw, 2.5rem);
+  --nav-h: 4.25rem;
+}
+
+@media (min-width: 40rem) {
+  :root {
+    --gutter: var(--gutter-sm);
+  }
+}
+@media (min-width: 64rem) {
+  :root {
+    --gutter: var(--gutter-lg);
+  }
+}
+@media (min-width: 96rem) {
+  :root {
+    --gutter: var(--gutter-2xl);
+  }
+}

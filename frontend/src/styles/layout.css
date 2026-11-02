@@ -1,0 +1,71 @@
+/*
+ * Layout system (layer components, so Tailwind utilities can still override).
+ * Every page is a stack of BANDS (full-bleed backgrounds), each holding one WRAP (the content well).
+ * React primitives live in components/ds/Section.tsx and emit data-layout / data-wrap attributes;
+ * DESIGN.md documents the vocabulary. Widths are min(well, 100% - 2 * gutter): the well never touches the screen edge.
+ */
+.wrap {
+  width: min(var(--wrap-default), 100% - 2 * var(--gutter));
+  margin-inline: auto;
+}
+.wrap[data-wrap="wide"] {
+  width: min(var(--wrap-wide), 100% - 2 * var(--gutter));
+}
+.wrap[data-wrap="default"] {
+  width: min(var(--wrap-default), 100% - 2 * var(--gutter));
+}
+.wrap[data-wrap="narrow"] {
+  width: min(var(--wrap-narrow), 100% - 2 * var(--gutter));
+}
+
+.prose-measure {
+  max-width: var(--measure-prose);
+}
+
+/* a band: full-bleed background + vertical rhythm */
+.band {
+  position: relative;
+  isolation: isolate;
+  padding-block: var(--section-y);
+}
+.band[data-pad="tight"] {
+  padding-block: var(--section-y-tight);
+}
+.band[data-pad="none"] {
+  padding-block: 0;
+}
+.band[data-tone="ivory"] {
+  background-color: var(--color-ivory);
+  color: var(--color-ink);
+}
+.band[data-tone="peach"] {
+  background-color: var(--color-peach);
+  color: var(--color-ink);
+}
+/* sky: an atmospheric wash from pale blue into ivory with a lavender breath; text on it is ink only */
+.band[data-tone="sky"] {
+  background-color: var(--color-sky-pale);
+  background-image:
+    radial-gradient(60rem 28rem at 12% 0%, color-mix(in srgb, var(--color-lavender) 70%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--color-sky-pale) 0%, var(--color-ivory) 100%);
+  color: var(--color-ink);
+}
+.band[data-tone="ink"] {
+  background-color: var(--color-ink);
+  color: var(--color-on-ink);
+}
+.band[data-tone="ink"] :focus-visible,
+.on-ink :focus-visible {
+  outline-color: var(--color-focus-ring-on-ink);
+}
+
+/* 12-column grid; children place themselves with Tailwind's col-span-* / lg:col-span-* / col-start-* */
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gap);
+  row-gap: var(--grid-gap);
+}
+.grid-12 > * {
+  grid-column: span 12 / span 12;
+}

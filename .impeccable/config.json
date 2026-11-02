@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "sarthi/app/static/index.html"
+        ],
+        "createdAt": "2026-11-02T06:03:19.638Z",
+        "reason": "Frozen legacy fallback page served at /legacy; the new React frontend follows DESIGN.md"
+      }
+    ]
+  }
+}

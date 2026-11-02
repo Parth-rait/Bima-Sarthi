@@ -1,0 +1,4 @@
+Pristine output of `npx shadcn@latest add @aceternity/<name>` run on 2 Nov 2026 (registry https://ui.aceternity.com/registry/<name>.json, MIT, author Manu Arora).
+Stored as .txt so they are not compiled. The working copies are in src/components/ui/; every change is listed in docs/FRONTEND_PHASE2_PLAN.md section 12.
+liquid-glass, chromatic-image, carousel (from carousel-demo), draggable-card (from draggable-card-demo-2). The two demo files use Unsplash URLs and are kept only as evidence.
+Phase 3a (2 Nov 2026, same registry, same command): parallax-hero-images, file-upload, lamp, timeline, cloud-shader, each as the component file (`<name>.tsx.txt`) plus the registry demo it shipped with (`<name>-demo.tsx.txt`; demos are not compiled and were removed from src). Every change to the working copies is listed in DESIGN.md, section "Aceternity components".

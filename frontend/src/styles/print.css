@@ -1,0 +1,65 @@
+/* Printable summary and the /results report: plain, legible on paper, no controls. */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12pt;
+  }
+  .no-print,
+  .skip,
+  .wf .actions,
+  .wf button,
+  .wf form,
+  .wf .picker,
+  .wf #policy-box,
+  .sr-only {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .wf .sheet,
+  .print-sheet {
+    box-shadow: none !important;
+    border: 0 !important;
+    background: #fff !important;
+    background-image: none !important;
+    padding: 0 !important;
+  }
+  .wf .sheet::before,
+  .wf .sheet::after {
+    display: none;
+  }
+  .wf .quote,
+  .print-quote {
+    background: #fff !important;
+    border-color: #000 !important;
+    break-inside: avoid;
+  }
+  .wf .finding,
+  .wf .block,
+  .print-keep {
+    break-inside: avoid;
+  }
+  .wf .stamp {
+    background: #fff !important;
+    color: #000 !important;
+    animation: none;
+  }
+  .wf .screen {
+    animation: none;
+  }
+  a {
+    color: #000 !important;
+  }
+}
+@media screen {
+  .print-only {
+    display: none;
+  }
+}

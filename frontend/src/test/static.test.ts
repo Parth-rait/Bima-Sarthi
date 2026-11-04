@@ -116,6 +116,14 @@ describe("design-system guardrails", () => {
       expect(t, rel(f)).not.toMatch(/\bborder-[lr]-(?:[2-9]|\[)/);
     }
   });
+  it("a glass plate never hangs off a static element, or it blurs the whole page", () => {
+    for (const f of css) {
+      const t = read(f);
+      if (!/backdrop-filter/.test(t)) continue;
+      // an absolutely positioned ::before inside a static element resolves against a far larger containing block
+      expect(t, rel(f)).not.toMatch(/position:\s*static/);
+    }
+  });
   it("every page component has exactly one place that renders its page heading", () => {
     const pages = files.filter((f) => rel(f).startsWith(`pages${path.sep}`) && f.endsWith(".tsx"));
     expect(pages.length).toBe(11);

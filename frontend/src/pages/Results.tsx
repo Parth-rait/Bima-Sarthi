@@ -64,7 +64,7 @@ export default function Results() {
           {!result.findings.length && result.supported ? <p>{t("no_find")}</p> : null}
           <div className="findings">
             {sortFindings(result.findings).map((f, i) => (
-              <VerdictCard key={`${f.rule_id}-${i}`} f={f} />
+              <VerdictCard key={`${f.rule_id}-${i}`} f={f} i={i} />
             ))}
           </div>
           {result.text ? (

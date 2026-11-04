@@ -1,5 +1,5 @@
 /* Global base (layer base): page ground, focus, selection, scrollbars, reduced motion.
-   Element rules for the old workflow screens live in workflow.css under .wf. */
+   Element rules for the claim flow live in operate.css under .wf. */
 *,
 *::before,
 *::after {

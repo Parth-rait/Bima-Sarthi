@@ -93,7 +93,7 @@ export function ResultScreen() {
       {result.findings.length ? (
         <div className="findings">
           {sortFindings(result.findings).map((f, i) => (
-            <VerdictCard key={`${f.rule_id}-${i}`} f={f} />
+            <VerdictCard key={`${f.rule_id}-${i}`} f={f} i={i} />
           ))}
         </div>
       ) : null}

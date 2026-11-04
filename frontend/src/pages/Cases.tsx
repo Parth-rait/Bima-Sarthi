@@ -81,7 +81,7 @@ function CaseDetail({ c, onClose }: { c: GalleryCase; onClose: () => void }) {
       <div className="wf mt-4">
         <div className="findings">
           {sortFindings(c.findings).map((f, i) => (
-            <VerdictCard key={`${f.rule_id}-${i}`} f={f} />
+            <VerdictCard key={`${f.rule_id}-${i}`} f={f} i={i} />
           ))}
         </div>
       </div>

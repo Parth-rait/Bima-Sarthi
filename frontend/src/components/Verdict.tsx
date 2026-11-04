@@ -1,5 +1,6 @@
 import type { Finding } from "../api";
 import { showVal, labelOf } from "../lib/facts";
+import { rowOrder } from "../lib/motion";
 import { useSession } from "../state/store";
 import { Quote, RuleChip, Stamp } from "./evidence";
 import type { Key } from "../i18n";
@@ -12,7 +13,7 @@ export const sortFindings = (fs: Finding[]): Finding[] => [...fs].sort((a, b) =>
  * and the plain sentence. Colour only reinforces. The rule id appears only as a small "Rule reference" chip:
  * the API provides no plain-language rule title, and we do not invent one.
  */
-export function VerdictCard({ f }: { f: Finding }) {
+export function VerdictCard({ f, i = 0 }: { f: Finding; i?: number }) {
   const { state, t } = useSession();
   const { lang } = state;
   const q = lang === "hi" ? f.question_hi || f.question_en : f.question_en;
@@ -22,7 +23,7 @@ export function VerdictCard({ f }: { f: Finding }) {
   const used = Object.entries(f.facts_used || {}).filter(([, v]) => v && v.quote);
   const page = f.page_no != null ? ` (${t("page")} ${f.page_no})` : "";
   return (
-    <article className={`finding finding-${f.verdict}`} data-verdict={f.verdict} data-rule={f.rule_id}>
+    <article className={`finding finding-${f.verdict}`} data-verdict={f.verdict} data-rule={f.rule_id} style={rowOrder(i)}>
       <header className="finding-head">
         <Stamp verdict={f.verdict} />
         <RuleChip id={f.rule_id} />

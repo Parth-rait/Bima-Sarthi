@@ -113,7 +113,7 @@ export function PolicyBox() {
       <p className="hint">{t("pol_up_p")}</p>
       <FilePicker files={files} onChange={setFiles} label={t("pol_l")} inputId="policy-files" disabled={busy} />
       <div className="actions">
-        <button type="button" onClick={read} disabled={busy || files.length === 0 || !state.sid}>
+        <button type="button" className="secondary" onClick={read} disabled={busy || files.length === 0 || !state.sid}>
           {t("pol_b")}
         </button>
       </div>

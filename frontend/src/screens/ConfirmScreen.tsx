@@ -19,6 +19,7 @@ import {
 } from "../lib/confirm";
 import { describeError, type ViewError } from "../lib/errors";
 import { isDeductionList, labelOf, valText } from "../lib/facts";
+import { rowOrder } from "../lib/motion";
 import { effectiveProduct } from "../state/session";
 import { useSession } from "../state/store";
 
@@ -103,9 +104,10 @@ export function ConfirmScreen() {
       </div>
 
       <ul className="facts">
-        {rows.map(([k, f]) => (
+        {rows.map(([k, f], i) => (
           <FactRow
             key={k}
+            i={i}
             k={k}
             f={f}
             form={form}
@@ -229,6 +231,7 @@ function SourceLine({ f }: { f: Fact }) {
 
 function FactRow({
   k,
+  i,
   f,
   form,
   upd,
@@ -236,6 +239,7 @@ function FactRow({
   error,
 }: {
   k: string;
+  i: number;
   f: Fact;
   form: ConfirmForm;
   upd: (p: Partial<ConfirmForm>) => void;
@@ -327,7 +331,7 @@ function FactRow({
   }
 
   return (
-    <li id={`fact-${k}`} data-key={k} className={`fact${pend ? " pending" : ""}${error ? " has-error" : ""}`}>
+    <li id={`fact-${k}`} data-key={k} style={rowOrder(i)} className={`fact${pend ? " pending" : ""}${error ? " has-error" : ""}`}>
       <div className="fact-src">
         <h3>
           {label} <span className={`tag ${pend ? "tag-need" : "tag-ok"}`}>{tagText}</span>

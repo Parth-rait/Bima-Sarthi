@@ -2,6 +2,7 @@ import { IconCamera, IconFile, IconUpload } from "@/components/icons";
 import { useEffect, useId, useRef, useState, type DragEvent } from "react";
 import { useSession } from "@/state/store";
 import { cn } from "@/lib/utils";
+import { rowOrder } from "@/lib/motion";
 import { buttonStyles } from "./Button";
 import { ProgressIndicator } from "./ProgressIndicator";
 
@@ -111,7 +112,8 @@ export function FileUploader({
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
-        className={cn("rounded-ctl border-2 bg-paper p-4 md:p-5", dragging ? "border-ink bg-peach" : "border-line-strong")}
+        data-drop={dragging ? "drag" : "idle"}
+        className="dropzone rounded-ctl border-2 p-4 md:p-5"
       >
         <div className="flex flex-wrap items-center gap-3">
           <input
@@ -175,13 +177,13 @@ export function FileUploader({
           <p className="hint m-0 text-ink-soft">{t("no_files")}</p>
         ) : (
           <>
-            <ul className="m-0 list-none divide-y divide-line border-y border-line p-0">
+            <ul className="picked-list m-0 list-none p-0">
               {files.map((f, i) => (
-                <li key={`${f.name}-${f.size}-${i}`} className="flex flex-wrap items-center gap-3 py-3">
+                <li key={`${f.name}-${f.size}-${i}`} style={rowOrder(i)} className="picked-file flex flex-wrap items-center gap-3 py-3">
                   <Preview file={f} />
                   <span className="min-w-0 flex-1">
                     <span className="fname block break-all font-semibold text-ink">{f.name}</span>
-                    <span className="block text-[0.875rem] text-ink-soft">{formatSize(f.size)}</span>
+                    <span className="block text-meta text-ink-soft">{formatSize(f.size)}</span>
                   </span>
                   <button
                     type="button"

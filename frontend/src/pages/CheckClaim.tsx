@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { motion } from "motion/react";
 import { useService } from "@/app/ServiceStatus";
 import { Button } from "@/components/ds/Button";
 import { ErrorState } from "@/components/ds/ErrorState";
@@ -6,6 +7,7 @@ import { Stepper } from "@/components/ds/Stepper";
 import { Band, Wrap } from "@/components/ds/Section";
 import { RoleToggle } from "@/components/layout/Seg";
 import { ErrorBox } from "@/components/ErrorBox";
+import { useArrive } from "@/lib/motion";
 import { useSession } from "@/state/store";
 import { ConfirmScreen } from "@/screens/ConfirmScreen";
 import { DeletedScreen } from "@/screens/DeletedScreen";
@@ -25,6 +27,7 @@ export default function CheckClaim() {
   const svc = useService();
   const body = useRef<HTMLDivElement>(null);
   const first = useRef(true);
+  const arrive = useArrive();
 
   // On a step change inside the page, move focus to the new screen's heading (the route change itself focuses the h1).
   useEffect(() => {
@@ -82,10 +85,13 @@ export default function CheckClaim() {
                       </p>
                     </ErrorBox>
                   ) : null}
-                  {state.view === "upload" ? <UploadScreen /> : null}
-                  {state.view === "confirm" ? <ConfirmScreen /> : null}
-                  {state.view === "result" ? <ResultScreen /> : null}
-                  {state.view === "deleted" ? <DeletedScreen /> : null}
+                  {/* one step replaces another: the new screen arrives, the old one is simply gone (no crossfade, no overlap) */}
+                  <motion.div key={state.view} className="screen-slot" {...arrive}>
+                    {state.view === "upload" ? <UploadScreen /> : null}
+                    {state.view === "confirm" ? <ConfirmScreen /> : null}
+                    {state.view === "result" ? <ResultScreen /> : null}
+                    {state.view === "deleted" ? <DeletedScreen /> : null}
+                  </motion.div>
                 </div>
               </div>
             </div>

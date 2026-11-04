@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Deadlines, DeadlineSource, Plan, PlanItem, RequestChecklist as Checklist } from "../api";
 import { pick } from "../i18n";
+import { rowOrder } from "../lib/motion";
 import { useSession } from "../state/store";
 import { ErrorBox } from "./ErrorBox";
 import { IconDownload } from "./icons";
@@ -96,7 +97,7 @@ export function ChecklistSection({ checklist }: { checklist: Checklist }) {
       <p>{pick(checklist.intro, state.lang)}</p>
       <ul className="checklist">
         {checklist.items.map((i, n) => (
-          <li key={n}>{pick(i, state.lang)}</li>
+          <li key={n} style={rowOrder(n)}>{pick(i, state.lang)}</li>
         ))}
       </ul>
     </section>
@@ -121,12 +122,12 @@ export function DeadlinesBox({ d, complaintEntered }: { d: Deadlines; complaintE
       <h3 id="dl-h">{t("dl")}</h3>
       {showDates ? (
         <ul className="deadlines">
-          {keys.map((k) => {
+          {keys.map((k, n) => {
             const date = d[k];
             if (!date) return null;
             const s = src(k);
             return (
-              <li key={k}>
+              <li key={k} style={rowOrder(n)}>
                 <span className="dl-label">{t(DL_LABEL[k])}: </span>
                 <time dateTime={date.iso}>{date.display}</time>
                 {s?.label ? (

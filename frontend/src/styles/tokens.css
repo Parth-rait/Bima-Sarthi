@@ -183,6 +183,7 @@
   --grid-gap: clamp(1rem, 2.5vw, 2.5rem);
   --nav-h: 4.25rem;
   /* stacking: one ladder, so a new overlay cannot guess its way above the modal */
+  --z-step: 40; /* the sticky claim-flow stepper: under the navbar, above the sheet */
   --z-nav: 50;
   --z-toast: 60;
   --z-menu: 65;

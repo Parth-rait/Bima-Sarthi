@@ -29,6 +29,81 @@
   display: grid;
   min-width: 0;
 }
+
+/* ---- the stepper: folder tabs that stick under the navbar and condense once they are stuck ---- */
+.wf .stepper {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: var(--z-step);
+  isolation: isolate;
+}
+/* the glass plate. It is behind the tabs and holds no text: every label sits on a tab's own solid fill. */
+.wf .stepper::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--spacing) * -3) calc(var(--spacing) * -4) -1px;
+  z-index: -1;
+  border-radius: var(--radius-card);
+  background-color: color-mix(in srgb, var(--color-ivory) 74%, transparent);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  backdrop-filter: blur(12px) saturate(1.15);
+  box-shadow: var(--shadow-float);
+  opacity: 0;
+  transition:
+    opacity var(--dur-2) var(--ease-out),
+    inset var(--dur-2) var(--ease-out);
+}
+.wf .stepper[data-stuck]::before {
+  opacity: 1;
+}
+/* the compact progress line: how far through the flow, without repeating the tabs */
+.wf .stepper::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: -1px;
+  height: 2px;
+  border-radius: var(--radius-tab);
+  background: linear-gradient(90deg, var(--color-ink) var(--step-progress, 0%), transparent var(--step-progress, 0%));
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.wf .stepper[data-stuck]::after {
+  opacity: 1;
+}
+.wf .stepper ol {
+  display: flex;
+  gap: calc(var(--spacing) * 1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wf .step {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--spacing) * 1.5);
+  min-width: 0;
+  padding: calc(var(--spacing) * 2);
+  border: 1px solid var(--color-line);
+  border-block-end: 0;
+  border-start-start-radius: var(--radius-tab);
+  border-start-end-radius: var(--radius-tab);
+  font-size: var(--text-control);
+  line-height: var(--text-control--line-height);
+  font-weight: 600;
+  text-align: center;
+  overflow-wrap: anywhere;
+  min-block-size: 2.75rem;
+}
+/* stuck = the tabs have been read; keep them, cost less height for them */
+.wf .stepper[data-stuck] .step {
+  min-block-size: 2.25rem;
+  padding-block: calc(var(--spacing) * 1);
+  font-size: var(--text-meta);
+}
 .wf .sheet {
   display: grid;
   gap: calc(var(--spacing) * 6);
@@ -42,6 +117,11 @@
 }
 
 /* ---- a screen: one step of the flow ---- */
+/* the keyed wrapper React swaps when the step changes; it must not add a box of its own */
+.wf .screen-slot {
+  display: grid;
+  min-width: 0;
+}
 .wf .screen {
   display: grid;
   gap: calc(var(--spacing) * 5);
@@ -122,7 +202,77 @@
   font-size: var(--text-body);
   line-height: var(--text-body--line-height);
 }
+/* where a line came from, said quietly, in the same breath as the line itself */
+.wf .src {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+  color: var(--color-ink-soft);
+  overflow-wrap: anywhere;
+}
+.wf .muted {
+  color: var(--color-ink-soft);
+}
+.wf .need-date {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
+  background-color: var(--color-amber-wash);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-ctl);
+  color: var(--color-amber-ink);
+}
 
+/* ---- the policy box: the key terms read off the document, each one editable ---- */
+.wf .policy-terms {
+  display: grid;
+  gap: calc(var(--spacing) * 4);
+  min-width: 0;
+}
+.wf .terms {
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+.wf .terms > li {
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+  padding: calc(var(--spacing) * 4);
+  background-color: var(--color-ivory);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-ctl);
+}
+.wf .terms > li.pending {
+  background-color: var(--color-amber-wash);
+  border-color: var(--color-line-strong);
+}
+.wf .terms > li h4 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.wf .term-value {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  font-weight: 600;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
 /* ---- actions ---- */
 .wf .actions {
   display: flex;
@@ -130,6 +280,138 @@
   align-items: center;
   gap: calc(var(--spacing) * 3);
   min-width: 0;
+}
+
+/* ---- the controls ----
+ * The flow's screens address their buttons with plain semantic classes because the behaviour tests pin that
+ * markup, and the class-less button is the step's ONE primary action. The recipe mirrors ds/Button exactly, so
+ * a screen-authored control and a design-system control are indistinguishable. Utilities beat this layer, so
+ * anything already built with <Button> is untouched. */
+.wf .btn,
+.wf button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--spacing) * 2);
+  min-width: 0;
+  min-block-size: 2.75rem;
+  padding: calc(var(--spacing) * 2) calc(var(--spacing) * 5);
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-ctl);
+  background-color: var(--color-ink);
+  color: var(--color-on-ink);
+  font-family: inherit;
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.wf .btn:hover,
+.wf button:hover {
+  border-color: var(--color-apricot);
+  background-color: var(--color-apricot);
+  color: var(--color-ink);
+}
+.wf .btn:active,
+.wf button:active {
+  background-color: var(--color-apricot-soft);
+}
+.wf button.secondary,
+.wf .btn.secondary {
+  border-color: var(--color-ink);
+  background-color: transparent;
+  color: var(--color-ink);
+}
+.wf button.secondary:hover,
+.wf .btn.secondary:hover {
+  background-color: var(--color-peach-deep);
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+.wf button.secondary:active,
+.wf .btn.secondary:active {
+  background-color: var(--color-peach);
+}
+.wf button.danger,
+.wf .btn.danger {
+  border-color: var(--color-terracotta);
+  background-color: transparent;
+  color: var(--color-terracotta-ink);
+}
+.wf button.danger:hover,
+.wf .btn.danger:hover {
+  background-color: var(--color-terracotta-wash);
+  border-color: var(--color-terracotta);
+  color: var(--color-terracotta-ink);
+}
+/* quiet: a removal link inside a list, not a decision. Still 44px tall, still focusable, but it does not
+ * compete with the step's action. */
+.wf button.quiet,
+.wf .btn.quiet {
+  min-block-size: 2.75rem;
+  padding-inline: calc(var(--spacing) * 2);
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--color-ink);
+  font-weight: 400;
+  text-decoration: underline;
+  text-decoration-color: var(--color-gold);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.wf button.quiet:hover,
+.wf .btn.quiet:hover {
+  border-color: transparent;
+  background-color: var(--color-peach);
+  color: var(--color-ink);
+}
+/* the primary action grows when it carries an icon (a photo, a download, an upload) */
+.wf .with-icon {
+  gap: calc(var(--spacing) * 2.5);
+}
+.wf .with-icon > svg {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+/* disabled recedes to a surface that still reads, it is never a wash of grey or a hatch pattern */
+.wf button:disabled,
+.wf .btn[aria-disabled="true"] {
+  border-color: var(--color-line);
+  background-color: var(--color-peach);
+  color: var(--color-ink-soft);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.wf button:disabled:hover,
+.wf .btn[aria-disabled="true"]:hover {
+  border-color: var(--color-line);
+  background-color: var(--color-peach);
+  color: var(--color-ink-soft);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wf .btn,
+  .wf button {
+    transition:
+      background-color var(--dur-1) var(--ease-out),
+      border-color var(--dur-1) var(--ease-out),
+      color var(--dur-1) var(--ease-out),
+      transform var(--dur-1) var(--ease-out),
+      box-shadow var(--dur-2) var(--ease-out);
+  }
+  .wf .btn:hover:not(:disabled),
+  .wf button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-float);
+  }
+  .wf .btn:active,
+  .wf button:active {
+    transform: translateY(1px);
+    box-shadow: none;
+  }
 }
 
 /* ---- grids ---- */
@@ -251,6 +533,120 @@
   border: 1px solid var(--color-line-strong);
   border-radius: var(--radius-card);
 }
+/* the photograph-or-choose picker (the policy box), as opposed to the drag area above it */
+.wf .picker > label {
+  display: block;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.wf .picker-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+}
+/* a native file input cannot be restyled wholesale, so the picker button inside it is given the same recipe
+ * as every other control and the chosen-file name is set in the quiet text colour. */
+.wf .file-input {
+  min-width: 0;
+  max-width: 100%;
+  min-block-size: 2.75rem;
+  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-ctl);
+  background-color: var(--color-paper);
+  color: var(--color-ink-soft);
+  font-family: inherit;
+  font-size: var(--text-control);
+}
+.wf .file-input::file-selector-button {
+  margin-inline-end: calc(var(--spacing) * 3);
+  min-block-size: 2.25rem;
+  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 4);
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-ctl);
+  background-color: var(--color-ink);
+  color: var(--color-on-ink);
+  font-family: inherit;
+  font-size: var(--text-control);
+  font-weight: 600;
+  cursor: pointer;
+}
+.wf .file-input:hover::file-selector-button {
+  border-color: var(--color-apricot);
+  background-color: var(--color-apricot);
+  color: var(--color-ink);
+}
+.wf .file-input:disabled {
+  border-color: var(--color-line);
+  background-color: var(--color-peach);
+  color: var(--color-ink-soft);
+  cursor: not-allowed;
+}
+.wf .file-input:disabled::file-selector-button {
+  border-color: var(--color-line);
+  background-color: var(--color-peach);
+  color: var(--color-ink-soft);
+  cursor: not-allowed;
+}
+.wf .picked ul {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+  border-block: 1px solid var(--color-line);
+}
+.wf .picked li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+  padding-block: calc(var(--spacing) * 2);
+  font-size: var(--text-control);
+}
+.wf .picked li + li {
+  border-block-start: 1px solid var(--color-line);
+}
+.wf .picked li > svg {
+  flex: none;
+  color: var(--color-ink-soft);
+}
+.wf .fname {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* the drop target: quiet until something is over it, then unmistakably open. No dashed border (design doctrine). */
+.wf .dropzone {
+  border-color: var(--color-line-strong);
+  background-color: var(--color-paper);
+}
+.wf .dropzone[data-drop="drag"] {
+  border-color: var(--color-ink);
+  background-color: var(--color-peach);
+  box-shadow: inset 0 0 0 2px var(--color-ink), var(--shadow-float);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wf .dropzone {
+    transition:
+      background-color var(--dur-1) var(--ease-out),
+      border-color var(--dur-1) var(--ease-out),
+      box-shadow var(--dur-1) var(--ease-out),
+      transform var(--dur-1) var(--ease-out);
+  }
+  .wf .dropzone[data-drop="drag"] {
+    transform: scale(1.004);
+  }
+}
+.wf .picked-list {
+  border-block: 1px solid var(--color-line);
+}
+.wf .picked-file + .picked-file {
+  border-block-start: 1px solid var(--color-line);
+}
 
 /* ---- the result: one finding per verdict ---- */
 .wf .findings {
@@ -293,7 +689,100 @@
   list-style: none;
 }
 
-/* ---- plan: checklist and deadlines ---- */
+/* ---- plan: steps, checklist and deadlines ---- */
+.wf .plan {
+  display: grid;
+  gap: calc(var(--spacing) * 6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+  counter-reset: step;
+}
+.wf .plan > li {
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+  counter-increment: step;
+}
+.wf .plan > li > h4 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+/* the step number is decoration for a sighted reader; the <ol> already tells a screen reader the order */
+.wf .plan > li > h4::before {
+  content: counter(step);
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background-color: var(--color-ink);
+  color: var(--color-on-ink);
+  font-size: var(--text-control);
+  font-variant-numeric: tabular-nums;
+}
+.wf .plan > li > ul {
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+/* an action, with its rule behind it: a left rule, not a box — the sheet is already a box */
+.wf .plan > li > ul > li {
+  display: grid;
+  gap: calc(var(--spacing) * 2);
+  min-width: 0;
+  padding-block: calc(var(--spacing) * 1);
+  padding-inline-start: calc(var(--spacing) * 4);
+  border-inline-start: 2px solid var(--color-line-strong);
+  overflow-wrap: anywhere;
+}
+.wf .plan-text,
+.wf .plan-date {
+  max-width: var(--measure-prose);
+}
+.wf .plan-date {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--spacing) * 1);
+  font-size: var(--text-body);
+}
+.wf .plan-date time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.wf .plan-link {
+  margin-block-start: calc(var(--spacing) * 1);
+}
+/* a chip is a label, not a row: inside a grid it must not stretch to the full measure */
+.wf .rule-chip {
+  width: fit-content;
+  max-width: 100%;
+}
+/* the letter is offered twice on the result screen: once inside a plan step, once as the step's action.
+ * Only the one in .actions gets to be the loud ink button. */
+.wf .plan-link button {
+  border-color: var(--color-ink);
+  background-color: transparent;
+  color: var(--color-ink);
+}
+.wf .plan-link button:hover {
+  border-color: var(--color-ink);
+  background-color: var(--color-peach-deep);
+  color: var(--color-ink);
+}
 .wf .checklist,
 .wf .deadlines {
   display: grid;
@@ -306,9 +795,7 @@
 .wf .checklist li,
 .wf .deadlines li {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: calc(var(--spacing) * 3);
-  align-items: start;
+  gap: calc(var(--spacing) * 2);
   min-width: 0;
   padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
   background-color: var(--color-ivory);
@@ -316,29 +803,51 @@
   border-radius: var(--radius-ctl);
   overflow-wrap: anywhere;
 }
+/* a document to ask for, not a control: a bullet, never a tick box that cannot be ticked */
+.wf .checklist li {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+.wf .checklist li::before {
+  content: "";
+  margin-block-start: 0.6em;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--color-line-strong);
+}
+/* a deadline reads as one line: label and date inline, the rule that produced it underneath */
+.wf .deadlines li {
+  display: block;
+}
+.wf .deadlines li > * + * {
+  margin-block-start: calc(var(--spacing) * 2);
+}
+.wf .deadlines time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
 .wf .grievance {
   display: grid;
   gap: calc(var(--spacing) * 3);
   min-width: 0;
 }
 
-/* ---- motion: the sheet is placed, rows settle into it, the stamp is pressed ---- */
+/* ---- motion: the sheet is placed, rows settle into it, the stamp is pressed ----
+ * Rows read their position from --i (see lib/motion.ts rowOrder), so a group of twelve does not need twelve rules. */
 @media (prefers-reduced-motion: no-preference) {
   .wf .sheet {
     animation: sheet-rise var(--dur-3) var(--ease-out) both;
   }
   .wf .finding,
-  .wf .fact {
+  .wf .fact,
+  .wf .picked-file,
+  .wf .checklist > li,
+  .wf .deadlines > li {
     animation: row-settle var(--dur-2) var(--ease-out) both;
-  }
-  .wf .finding:nth-child(2) {
-    animation-delay: 60ms;
-  }
-  .wf .finding:nth-child(3) {
-    animation-delay: 120ms;
-  }
-  .wf .finding:nth-child(4) {
-    animation-delay: 180ms;
+    animation-delay: calc(var(--i, 0) * 45ms);
   }
   .wf .stamp {
     animation: stamp-press var(--dur-2) var(--ease-out) both;

@@ -112,6 +112,11 @@ const TEXT = [
   ["color-amber-ink", "color-ivory", 4.5, "Warm tag text on the page"],
   ["color-sage-ink", "color-sage-wash", 4.5, "CONSISTENT stamp"],
   ["color-ink", "color-terracotta-wash", 4.5, "Body text inside an error box"],
+  // the two glass plates (the sticky stepper, the result summary): text is supposed to sit on the solid plate
+  // in front, but the blur is checked to carry ink on its own anyway, over both bands it is ever placed on.
+  ["color-ink", { mix: ["color-ivory", "color-peach", 0.74] }, 4.5, "Ink on the glass plate over a peach band"],
+  ["color-ink", { mix: ["color-ivory", "color-paper", 0.74] }, 4.5, "Ink on the glass plate over the paper sheet"],
+  ["color-ink-soft", { mix: ["color-ivory", "color-paper", 0.74] }, 4.5, "Secondary ink on the glass plate over the paper sheet"],
   // non-text (3:1)
   ["color-line-strong", "color-ivory", 3, "Control borders on the page"],
   ["color-line-strong", "color-paper", 3, "Input borders on a card"],

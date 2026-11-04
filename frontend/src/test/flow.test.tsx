@@ -163,7 +163,10 @@ describe("confirm screen", () => {
     await waitFor(() => expect(document.body.textContent).toMatch(/documented possible inconsistency/));
     expect(m.calls.map((c) => c.key)).toEqual(["PUT /session/s1/facts", "POST /session/s1/check", "POST /session/s1/explain"]);
     // the result links on to the plan and to a printable report whose address is NOT the server session id
-    expect(screen.getByRole("link", { name: "Open my action plan" }).getAttribute("href")).toBe("/action-plan");
+    // (the plan is offered twice on purpose: once in the sticky summary, once in the actions at the end)
+    const plans = screen.getAllByRole("link", { name: "Open my action plan" });
+    expect(plans.length).toBeGreaterThan(0);
+    expect(plans[0].getAttribute("href")).toBe("/action-plan");
     const report = screen.getByRole("link", { name: "Open the printable report" }).getAttribute("href")!;
     expect(report).toMatch(/^\/results\/[0-9a-f-]{8,}$/);
     expect(report).not.toContain("s1");

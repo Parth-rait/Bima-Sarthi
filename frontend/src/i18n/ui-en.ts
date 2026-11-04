@@ -62,6 +62,8 @@ export const uiEn = {
   // result additions
   open_plan: "Open my action plan",
   open_report: "Open the printable report",
+  rail_h: "At a glance",
+  rail_next: "Every finding is a rule, a quote and the page it came from.",
   del_confirm_h: "Delete your data now?",
   del_confirm_p: "This removes your session and everything read from your documents from the server. It cannot be undone, and you would have to upload again to run another check.",
   del_confirm_yes: "Yes, delete my data",

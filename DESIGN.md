@@ -114,7 +114,7 @@ Someone has just read a hard letter at a table by a window. The light is low and
 Surfaces keep the phase-2 split (see PRODUCT.md):
 - **Persuade** (the landing page): a full-bleed sky hero (the Aceternity CloudShader, or its CSS sunset), then full-width alternating bands. This is where atmosphere, parallax and glass live.
 - **Read** (about, how it works, privacy, help): editorial pages, a pale peach-to-sky header, wide two-column compositions, running text capped at 68ch. `/how-it-works` is the one reading page with its own light (the Lamp) and the scroll Timeline.
-- **Operate** (check claim, action plan, report): flat and clear; ink on ivory/paper, one action colour. No WebGL, no glass, no parallax.
+- **Operate** (check claim, action plan, report): flat surfaces with restrained depth — a lifted sheet, a hairline, a soft shadow, motion that explains a change of state. Ink on ivory/paper, one action colour. No WebGL, no parallax. Glass appears only as a non-textual plate behind solid content (the sticky stepper, the result summary); every word is on an opaque surface.
 
 It never borrows government or insurer identity (no emblem, no tricolour, no lion capital). The gold seal in the artwork is an abstract rosette.
 
@@ -234,7 +234,7 @@ Breakpoints: 640 (gutter 24, parallax tiles appear), 768, 1024 (full navbar, her
 
 ## Elevation & Depth
 
-Depth is soft and warm: `shadow-sheet` (hairline + 32px blur), `shadow-lift`, `shadow-stage`, all in ink at low alpha, always with an offset. Glass is allowed in exactly one place: the landing hero's lens chip (words sit on a solid ink plate). No paper grain, no stacked sheets.
+Depth is soft and warm: `shadow-sheet` (hairline + 32px blur), `shadow-float` (a plate that hovers over moving content), `shadow-lift`, `shadow-stage`, all in ink at low alpha, always with an offset. Glass is allowed in exactly three places, and only ever as a plate behind a solid surface: the landing hero's lens chip, the claim-flow stepper once it sticks under the navbar, and the result summary rail. Each one sits over a plain ivory or peach band — never over artwork, never over the sky shader — and every word on it is on an opaque paper plate. No paper grain, no stacked sheets.
 
 ## Shapes
 
@@ -282,8 +282,9 @@ No component contains `innerHTML`/`dangerouslySetInnerHTML` (a test scans all of
 
 - **Landing:** the sky drifts (30fps cap, paused off-screen and in hidden tabs); the hero art responds to the pointer on non-touch devices; later sections ease in through pure CSS `animation-timeline: view()` where supported (content is visible without it).
 - **How it works:** the lamp beams widen once when the section enters; the timeline line fills with scroll. Both are decoration: all content is visible without them.
-- **Workflow:** the leaf and the stamp press-down (phase 1). **Feedback:** 150ms colour change, 1px press.
-- `prefers-reduced-motion: reduce`: all CSS animation and transition durations collapse to 0.01ms; no parallax, no blur-in, one still sky frame, static timeline line, beams at full width, chromatic image replaced by the still, no dragging.
+- **Operate (the claim flow):** motion marks a change of state and nothing else. The sheet is placed (`sheet-rise`, 380ms); a step replaces a step — the new screen arrives from 18px below while the old one is simply gone, so no two gated steps are ever in the DOM at once; rows settle into reading order (`row-settle`, 240ms, 45ms apart, capped at the eighth row); the verdict stamp is pressed (`stamp-press`); the stepper sticks under the navbar and condenses behind its glass plate; a drop area answers a drag with border, wash and 0.4% scale. Timings are tokens (`--dur-1/2/3`), the easing is `cubic-bezier(.16,1,.3,1)`, and rows take their position from `--i` (`lib/motion.ts`).
+- **Feedback:** 140ms colour change, 1px press.
+- `prefers-reduced-motion: reduce`: all CSS animation and transition durations collapse to 0.01ms; the flow's step change becomes an instant swap with the focus move intact; no parallax, no blur-in, one still sky frame, static timeline line, beams at full width, chromatic image replaced by the still, no dragging.
 
 ## Temporary aliases (for agent 3b to delete)
 
@@ -305,7 +306,7 @@ Old token names still resolve (to new values) so unported pages work. Delete eac
 - **Do** use bands, columns and hairlines to organise a page; reach for a Card last.
 
 ### Don't:
-- **Don't** use bright yellow, burgundy, neon, a purple gradient, gradient text, or decorative glass (the one lens chip is the exception).
+- **Don't** use bright yellow, burgundy, neon, a purple gradient, gradient text, or decorative glass. Glass is structural only: a plate that separates a floating surface from the content moving under it (the three places above), never behind text and never for looks.
 - **Don't** use apricot, gold, rose, lavender or sky blue as text or as a control colour (apricot only as the primary hover and key highlight).
 - **Don't** put a coloured `border-left`/`border-right` above 1px on any card, callout or list item, or use dashed or double borders.
 - **Don't** nest boxes, or build a page from rows of same-sized icon-heading-text cards.

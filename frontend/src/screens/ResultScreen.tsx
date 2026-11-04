@@ -5,6 +5,7 @@ import { ErrorBox } from "../components/ErrorBox";
 import { IconPrint, IconTrash } from "../components/icons";
 import { ChecklistSection, DeadlinesBox, LetterButton, PlanSection } from "../components/Plan";
 import { PolicySection } from "../components/Policy";
+import { ResultSummary } from "../components/Summary";
 import { VerdictCard, sortFindings } from "../components/Verdict";
 import { Field, Stitch } from "../components/evidence";
 import { describeError, type ViewError } from "../lib/errors";
@@ -82,6 +83,10 @@ export function ResultScreen() {
         {t("r_h")}
       </h2>
 
+      {result.findings.length ? <ResultSummary findings={result.findings} /> : null}
+
+      {/* one block, not a grid row each: the summary has to be able to stick the length of the report */}
+      <div className="report">
       {general ? (
         <p className="not-rules-check" role="note">
           {t("not_rules_check")}
@@ -146,6 +151,7 @@ export function ResultScreen() {
             {t("open_report")}
           </Button>
         ) : null}
+      </div>
       </div>
       <Modal
         open={confirmDelete}

@@ -689,6 +689,106 @@
   list-style: none;
 }
 
+/* ---- the summary rail: the result read at a glance, following you down the report ----
+ * The glass is the plate BEHIND the card; every word on it is on solid paper. Nothing scrolls under blurred text. */
+.wf .rail {
+  position: sticky;
+  top: calc(var(--nav-h) + 4.25rem);
+  z-index: var(--z-rail);
+  isolation: isolate;
+  min-width: 0;
+  margin-block-end: calc(var(--spacing) * 5);
+}
+.wf .rail::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--spacing) * -2) calc(var(--spacing) * -3);
+  z-index: -1;
+  border-radius: var(--radius-card);
+  background-color: color-mix(in srgb, var(--color-ivory) 74%, transparent);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  backdrop-filter: blur(12px) saturate(1.15);
+  box-shadow: var(--shadow-float);
+}
+.wf .rail-plate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
+  min-width: 0;
+  padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
+  background-color: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-under);
+}
+.wf .rail-plate > h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  line-height: var(--text-h3--line-height);
+  font-weight: 500;
+  color: var(--color-ink);
+}
+.wf .rail-counts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 3) calc(var(--spacing) * 6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+.wf .rail-count {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 1.5);
+  min-width: 0;
+}
+.wf .rail-n {
+  font-size: var(--text-lead);
+  line-height: 1;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+.wf .rail-next {
+  flex: 1 1 18rem;
+  min-width: 0;
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-control);
+  line-height: var(--text-control--line-height);
+  color: var(--color-ink-soft);
+}
+.wf .rail-cta {
+  margin-inline-start: auto;
+}
+/* on a phone the plate would cover half the screen, so it is a summary that scrolls away rather than a rail */
+@media (max-width: 47.99rem) {
+  .wf .rail {
+    position: static;
+  }
+  .wf .rail-next {
+    display: none;
+  }
+  .wf .rail-cta {
+    margin-inline-start: 0;
+  }
+}
+
+/* ---- the report: the result's own rhythm, because a sticky item only travels the length of its parent ---- */
+.wf .report {
+  display: block;
+}
+.wf .report > * + *:not(.block) {
+  margin-block-start: calc(var(--spacing) * 5);
+}
+.wf .report > * + .block {
+  margin-block-start: calc(var(--spacing) * 2);
+}
+
 /* ---- plan: steps, checklist and deadlines ---- */
 .wf .plan {
   display: grid;
@@ -840,6 +940,10 @@
 @media (prefers-reduced-motion: no-preference) {
   .wf .sheet {
     animation: sheet-rise var(--dur-3) var(--ease-out) both;
+  }
+  .wf .rail-plate {
+    animation: sheet-rise var(--dur-3) var(--ease-out) both;
+    animation-delay: 60ms;
   }
   .wf .finding,
   .wf .fact,

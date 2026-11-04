@@ -2,7 +2,8 @@
  * Stylesheet entry. Layer order matters:
  *   theme < base (preflight + our base) < components (layout primitives) < utilities
  * so every Tailwind utility on a component beats the layout/base rules. (The phase-1 "legacy" layer and workflow.css were
- * deleted in 3b: every screen is now built from Tailwind utilities and the ds components.)
+ * deleted in 3b. The claim flow's own layout now lives in operate.css, which styles the same semantic hooks the
+ * screens emit and print.css already targets.
  */
 @layer theme, base, components, utilities;
 @import "./fonts.css";
@@ -11,5 +12,6 @@
 @import "./tokens.css";
 @import "./base.css" layer(base);
 @import "./layout.css" layer(components);
+@import "./operate.css" layer(components);
 @import "tailwindcss/utilities.css" layer(utilities);
 @import "./print.css";

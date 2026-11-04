@@ -3,7 +3,7 @@ import { useService } from "@/app/ServiceStatus";
 import { Button } from "@/components/ds/Button";
 import { ErrorState } from "@/components/ds/ErrorState";
 import { Stepper } from "@/components/ds/Stepper";
-import { Container } from "@/components/ds/Section";
+import { Band, Wrap } from "@/components/ds/Section";
 import { RoleToggle } from "@/components/layout/Seg";
 import { ErrorBox } from "@/components/ErrorBox";
 import { useSession } from "@/state/store";
@@ -15,7 +15,10 @@ import { UploadScreen } from "@/screens/UploadScreen";
 /**
  * The working claim flow (upload > confirm > result), re-hosted unchanged in behaviour inside the new shell.
  * Gating, error mapping and the API calls live in the screens and the session store; this page only adds the page header,
- * the service-status notice, the stepper and the step-change focus handling. STAGE 7 ports the screens to the new components.
+ * the service-status notice, the stepper and the step-change focus handling.
+ * Layout: a band (full-bleed tone + section rhythm) holding the default well, and inside it the .flow / .desk / .sheet
+ * vocabulary that operate.css styles for screen and print.css styles for paper. The page never constrains a screen's width —
+ * that is each screen's job, and pinning it here is what left the desktop half empty once.
  */
 export default function CheckClaim() {
   const { state, actions, t } = useSession();
@@ -43,8 +46,8 @@ export default function CheckClaim() {
 
   return (
     <>
-      <header className="border-b border-line bg-peach">
-        <Container className="flex flex-wrap items-end justify-between gap-6 py-8 md:py-10">
+      <Band as="header" tone="peach" pad="tight" className="border-b border-line">
+        <Wrap width="default" className="flex flex-wrap items-end justify-between gap-6">
           <div>
             <h1 tabIndex={-1} data-page-heading className="m-0 font-display text-h1 font-medium text-ink">
               {t("nav_check")}
@@ -52,41 +55,46 @@ export default function CheckClaim() {
             <p className="mb-0 mt-3 max-w-[52ch] text-lead">{t("tagline")}</p>
           </div>
           <RoleToggle idPrefix="" tone="light" />
-        </Container>
-      </header>
+        </Wrap>
+      </Band>
 
-      <div className="wf bg-ivory pb-16" ref={body}>
-        <Container className="max-w-4xl pt-6">
-          {svc.status === "down" ? (
-            <ErrorState title={t("svc_title")} what={t("svc_what")} why={t("svc_why")} next={t("svc_next")} className="mb-6">
-              <Button variant="secondary" onClick={svc.retry}>
-                {t("svc_retry")}
-              </Button>
-            </ErrorState>
-          ) : null}
-          {stepped ? <Stepper steps={steps} current={state.view} label={t("steps_label")} /> : null}
-          <div className="desk px-0 md:px-0">
-            <div className="sheet">
-              {state.expired ? (
-                <ErrorBox message={t("expired")}>
-                  <p>
-                    <button type="button" onClick={() => actions.restart()}>
-                      {t("again")}
-                    </button>
-                  </p>
-                </ErrorBox>
-              ) : null}
-              {state.view === "upload" ? <UploadScreen /> : null}
-              {state.view === "confirm" ? <ConfirmScreen /> : null}
-              {state.view === "result" ? <ResultScreen /> : null}
-              {state.view === "deleted" ? <DeletedScreen /> : null}
+      <Band as="div" tone="ivory" pad="tight" className="wf">
+        <Wrap width="narrow">
+          <div className="flow" ref={body}>
+            {svc.status === "down" ? (
+              <ErrorState title={t("svc_title")} what={t("svc_what")} why={t("svc_why")} next={t("svc_next")}>
+                <Button variant="secondary" onClick={svc.retry}>
+                  {t("svc_retry")}
+                </Button>
+              </ErrorState>
+            ) : null}
+            {/* the stepper's tabs meet the sheet's top edge, so they share one flush frame */}
+            <div className="frame">
+              {stepped ? <Stepper steps={steps} current={state.view} label={t("steps_label")} /> : null}
+              <div className="desk">
+                <div className="sheet">
+                  {state.expired ? (
+                    <ErrorBox message={t("expired")}>
+                      <p>
+                        <button type="button" onClick={() => actions.restart()}>
+                          {t("again")}
+                        </button>
+                      </p>
+                    </ErrorBox>
+                  ) : null}
+                  {state.view === "upload" ? <UploadScreen /> : null}
+                  {state.view === "confirm" ? <ConfirmScreen /> : null}
+                  {state.view === "result" ? <ResultScreen /> : null}
+                  {state.view === "deleted" ? <DeletedScreen /> : null}
+                </div>
+              </div>
             </div>
           </div>
-        </Container>
+        </Wrap>
         <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
           {screenTitle}
         </div>
-      </div>
+      </Band>
     </>
   );
 }

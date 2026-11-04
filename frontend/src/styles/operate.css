@@ -1,0 +1,346 @@
+/*
+ * The operate surface: the claim flow's own layout.
+ *
+ * The screens emit a semantic vocabulary (.wf .sheet .screen .block .facts .finding ...) and print.css has always
+ * targeted it. Phase 3b deleted workflow.css, which styled that vocabulary on screen, and never replaced it — so the
+ * whole flow rendered as unstyled soup. This file is that replacement: same hooks, so every existing selector and
+ * the print stylesheet keep working.
+ *
+ * Loaded in the components layer, so a Tailwind utility on any of these elements still wins.
+ * Sizes, depths and timings come from tokens.css; nothing here hard-codes a colour or a font.
+ */
+
+/* ---- the sheet: one lifted paper, centred, that everything in the flow sits on ---- */
+.wf {
+  min-width: 0;
+}
+.wf .flow {
+  display: grid;
+  gap: calc(var(--spacing) * 5);
+  min-width: 0;
+}
+/* stepper above, sheet below, no gap: the step tabs are drawn as folder tabs onto the sheet's top edge */
+.wf .frame {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+}
+.wf .desk {
+  display: grid;
+  min-width: 0;
+}
+.wf .sheet {
+  display: grid;
+  gap: calc(var(--spacing) * 6);
+  min-width: 0;
+  max-width: var(--sheet-w);
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  background-color: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sheet);
+}
+
+/* ---- a screen: one step of the flow ---- */
+.wf .screen {
+  display: grid;
+  gap: calc(var(--spacing) * 5);
+  min-width: 0;
+}
+.wf .screen > h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+  font-weight: 500;
+  letter-spacing: var(--text-h2--letter-spacing);
+  color: var(--color-ink);
+  text-box: cap text;
+}
+.wf .lede {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  color: var(--color-ink-soft);
+}
+.wf .stack {
+  display: grid;
+  gap: calc(var(--spacing) * 5);
+  min-width: 0;
+}
+
+/* ---- a block: a titled group inside the sheet, divided by a hairline ---- */
+.wf .block {
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+  padding-block-start: calc(var(--spacing) * 6);
+  border-block-start: 1px solid var(--color-line);
+}
+.wf .block:first-of-type {
+  padding-block-start: 0;
+  border-block-start: 0;
+}
+.wf .block > h2,
+.wf .block > h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  line-height: var(--text-h3--line-height);
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+/* ---- supporting text ---- */
+.wf .hint,
+.wf .hint-line,
+.wf .status {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-control);
+  line-height: var(--text-control--line-height);
+  color: var(--color-ink-soft);
+}
+.wf .status {
+  min-block-size: calc(var(--spacing) * 5);
+}
+.wf .label,
+.wf .dl-label {
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+.wf .field-error {
+  margin: 0;
+  font-size: var(--text-control);
+  color: var(--color-terracotta-ink);
+}
+.wf .expl {
+  max-width: var(--measure-prose);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+
+/* ---- actions ---- */
+.wf .actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+}
+
+/* ---- grids ---- */
+.wf .grid2 {
+  display: grid;
+  gap: calc(var(--spacing) * 4);
+  min-width: 0;
+}
+@media (min-width: 40rem) {
+  .wf .grid2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---- the confirm step: one row per extracted fact ---- */
+.wf .facts {
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+.wf .fact {
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+  padding: calc(var(--spacing) * 4);
+  background-color: var(--color-ivory);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+}
+.wf .fact.pending {
+  border-color: var(--color-line-strong);
+  background-color: var(--color-amber-wash);
+}
+.wf .fact.has-error {
+  border-color: var(--color-terracotta);
+}
+@media (min-width: 56rem) {
+  .wf .fact {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+    align-items: start;
+  }
+}
+.wf .fact > div {
+  min-width: 0;
+}
+.wf .fact h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--spacing) * 2);
+  margin: 0 0 calc(var(--spacing) * 2);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.wf .fname {
+  overflow-wrap: anywhere;
+}
+.wf .fact-src,
+.wf .fact-edit {
+  min-width: 0;
+}
+
+/* a state word, never colour alone */
+.wf .tag {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 1.5);
+  padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 2);
+  border-radius: var(--radius-ctl);
+  border: 1px solid var(--color-line-strong);
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+  font-weight: 600;
+  text-transform: none;
+  color: var(--color-ink);
+  background-color: var(--color-peach);
+}
+.wf .tag-ok {
+  border-color: var(--color-sage);
+  background-color: var(--color-sage-wash);
+  color: var(--color-sage-ink);
+}
+.wf .tag-need {
+  border-color: var(--color-amber-ink);
+  background-color: var(--color-amber-wash);
+  color: var(--color-amber-ink);
+}
+
+/* ---- checkboxes and choices ---- */
+.wf .check,
+.wf .radio,
+.wf .choice-row {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+  font-size: var(--text-control);
+  line-height: var(--text-control--line-height);
+  cursor: pointer;
+}
+.wf .check input,
+.wf .radio input {
+  margin-block-start: 0.2em;
+  accent-color: var(--color-ink);
+}
+
+/* ---- the drop area ---- */
+.wf .picker {
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+  padding: calc(var(--spacing) * 4);
+  background-color: var(--color-ivory);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-card);
+}
+
+/* ---- the result: one finding per verdict ---- */
+.wf .findings {
+  display: grid;
+  gap: calc(var(--spacing) * 4);
+  min-width: 0;
+}
+.wf .finding {
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+  padding: calc(var(--spacing) * 5);
+  background-color: var(--color-ivory);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-under);
+}
+.wf .finding-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+}
+.wf .finding h3 {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  font-weight: 600;
+  color: var(--color-ink);
+  max-width: var(--measure-prose);
+}
+.wf .facts-used,
+.wf .facts-used ul {
+  display: grid;
+  gap: calc(var(--spacing) * 2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---- plan: checklist and deadlines ---- */
+.wf .checklist,
+.wf .deadlines {
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+.wf .checklist li,
+.wf .deadlines li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: calc(var(--spacing) * 3);
+  align-items: start;
+  min-width: 0;
+  padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
+  background-color: var(--color-ivory);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-ctl);
+  overflow-wrap: anywhere;
+}
+.wf .grievance {
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+}
+
+/* ---- motion: the sheet is placed, rows settle into it, the stamp is pressed ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .wf .sheet {
+    animation: sheet-rise var(--dur-3) var(--ease-out) both;
+  }
+  .wf .finding,
+  .wf .fact {
+    animation: row-settle var(--dur-2) var(--ease-out) both;
+  }
+  .wf .finding:nth-child(2) {
+    animation-delay: 60ms;
+  }
+  .wf .finding:nth-child(3) {
+    animation-delay: 120ms;
+  }
+  .wf .finding:nth-child(4) {
+    animation-delay: 180ms;
+  }
+  .wf .stamp {
+    animation: stamp-press var(--dur-2) var(--ease-out) both;
+  }
+}

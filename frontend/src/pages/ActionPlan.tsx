@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ds/Button";
 import { EmptyState } from "@/components/ds/EmptyState";
 import { PageHeader } from "@/components/ds/PageHeader";
@@ -83,6 +83,18 @@ export default function ActionPlan() {
   const complaintEntered = !!state.facts.complaint_sent_date?.value;
   const page = (n: number | null) => (n != null ? ` (${t("page")} ${n})` : "");
 
+  const sections = [
+    { id: "ap-what", label: t("ap_what_h") },
+    ...(result.supported ? [{ id: "ap-issues", label: t("ap_issues_h") }] : []),
+    { id: "ap-docs", label: t("ap_docs_h") },
+    { id: "ap-raise", label: t("ap_raise_h") },
+    { id: "ap-esc", label: t("ap_esc_h") },
+    { id: "ap-check", label: t("ap_check_h") },
+    { id: "ap-resources", label: t("ap_resources_h") },
+    { id: "ap-not", label: t("ap_not_h") },
+  ];
+  const current = useCurrentSection(sections.map((s) => s.id));
+
   const finding = (f: (typeof flagged)[number], i: number): ReactNode => {
     const q = lang === "hi" ? f.question_hi || f.question_en : f.question_en;
     const a = lang === "hi" ? f.action_hi || f.action_en : f.action_en;
@@ -112,13 +124,25 @@ export default function ActionPlan() {
   return (
     <>
       <PageHeader title={t("ap_h")} lead={t("ap_lead")} />
-      <Container className="max-w-3xl space-y-12 py-10 md:py-14">
+      <Container className="plan-grid max-w-5xl py-10 md:py-14">
         <p className="m-0 border border-line-strong bg-paper px-4 py-3 font-semibold text-ink" role="note">
           {RESULT_NOTICE}
           {lang === "hi" ? <span lang="hi"> {t("notice_result_hi")}</span> : null}
         </p>
 
-        <ReportSection title={t("ap_what_h")}>
+        <nav className="plan-rail no-print" aria-label={t("rail_sections")}>
+          <ul>
+            {sections.map((s) => (
+              <li key={s.id}>
+                <a href={`#${s.id}`} aria-current={current === s.id ? "true" : undefined}>
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <ReportSection id="ap-what" title={t("ap_what_h")}>
           <dl className="m-0 grid gap-x-8 gap-y-3 sm:grid-cols-[12rem_1fr]">
             <dt className="font-semibold text-ink">{t("ap_type")}</dt>
             <dd className="m-0">{product}</dd>
@@ -130,16 +154,16 @@ export default function ActionPlan() {
         </ReportSection>
 
         {result.supported ? (
-          <ReportSection title={t("ap_issues_h")}>
+          <ReportSection id="ap-issues" title={t("ap_issues_h")}>
             {flagged.length ? <ul className="m-0 list-none space-y-5 p-0">{flagged.map(finding)}</ul> : <p className="m-0">{result.findings.length ? t("ap_none_flagged") : t("no_find")}</p>}
           </ReportSection>
         ) : null}
 
-        <ReportSection title={t("ap_docs_h")}>
+        <ReportSection id="ap-docs" title={t("ap_docs_h")}>
           {docs.length ? <ul className="m-0 list-disc space-y-1 pl-5">{docs.map((d) => <li key={d.id}>{d.text}</li>)}</ul> : <p className="m-0">{t("ap_docs_none")}</p>}
         </ReportSection>
 
-        <ReportSection title={t("ap_raise_h")}>
+        <ReportSection id="ap-raise" title={t("ap_raise_h")}>
           {challengeable ? (
             <ul className="m-0 list-disc space-y-2 pl-5">
               {raise.map((f, i) => (
@@ -151,14 +175,14 @@ export default function ActionPlan() {
           )}
         </ReportSection>
 
-        <ReportSection title={t("ap_esc_h")}>
+        <ReportSection id="ap-esc" title={t("ap_esc_h")}>
           <div className="wf">
             {result.deadlines && (result.deadlines.available || result.deadlines.note) ? <DeadlinesBox d={result.deadlines} complaintEntered={complaintEntered} /> : null}
             {result.plan ? <PlanSection plan={result.plan} /> : null}
           </div>
         </ReportSection>
 
-        <ReportSection title={t("ap_check_h")}>
+        <ReportSection id="ap-check" title={t("ap_check_h")}>
           {tasks.length ? (
             <>
               <p role="status" aria-live="polite" className="m-0 text-ink-soft">
@@ -183,11 +207,11 @@ export default function ActionPlan() {
           )}
         </ReportSection>
 
-        <ReportSection title={t("ap_resources_h")}>
+        <ReportSection id="ap-resources" title={t("ap_resources_h")}>
           <p className="m-0">{t("ap_resources_p")}</p>
         </ReportSection>
 
-        <ReportSection title={t("ap_not_h")}>
+        <ReportSection id="ap-not" title={t("ap_not_h")}>
           <p className="m-0">{t("ap_not_p")}</p>
         </ReportSection>
 
@@ -212,4 +236,24 @@ export default function ActionPlan() {
       </Container>
     </>
   );
+}
+
+/** Which section is being read: the last one whose top has passed the band just under the navbar. */
+function useCurrentSection(ids: string[]) {
+  const [current, setCurrent] = useState(ids[0] ?? "");
+  const key = ids.join(",");
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) if (e.isIntersecting) setCurrent(e.target.id);
+      },
+      { rootMargin: "-20% 0px -65% 0px", threshold: 0 },
+    );
+    for (const id of key.split(",")) {
+      const el = document.getElementById(id);
+      if (el) io.observe(el);
+    }
+    return () => io.disconnect();
+  }, [key]);
+  return current;
 }

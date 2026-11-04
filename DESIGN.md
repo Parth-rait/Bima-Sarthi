@@ -258,6 +258,9 @@ Paper fill, 1px line-strong border, 44px, label above, hint, error below (terrac
 ### The gate (confirm screen)
 The check refuses to run while facts need an answer; the gate says so before the button is pressed, not after. A sheet in the peach family: the count of answered items over the pending total in `--text-h2` tabular numerals, then one chip per unanswered item — paper fill, line-strong border, the fact's own label and a `→`, each a real `#fact-<key>` link that focuses the row and rings it with `:target`. When nothing is left it becomes the sage family and states that everything has an answer. The count and the run guard read the same predicate (`unresolvedKeys`), so they cannot disagree. A row answered here but not yet sent keeps its pending state and loses the amber: neutral tag "Answered, not saved yet" (`tag-ans`: paper, ink-soft, line-strong).
 
+### The plan rail (`/action-plan`, 64rem and up)
+A sticky column of section links, the current one on a solid paper plate with a line-strong edge. It is deliberately **not** glass — the blurred plate is permitted in exactly two places (the sticky stepper, the result summary) and a long report is not a third. Below 64rem it becomes a wrapping chip row above the content. Links are jumps (`#ap-what` … `#ap-not`), each section carries `scroll-margin-block-start` so it lands under the navbar.
+
 ### Quote slip and verdict stamp (signature)
 Quote slip: pale peach panel, serif text, caption with rule and page. Verdict stamp: shape + word + sentence, 2px border, muted wash (families above).
 

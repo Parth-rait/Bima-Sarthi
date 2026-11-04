@@ -886,16 +886,90 @@
 .wf .rail-cta {
   margin-inline-start: auto;
 }
-/* on a phone the plate would cover half the screen, so it is a summary that scrolls away rather than a rail */
+/* on a phone the plate would cover half the screen, so it is a summary that scrolls away rather than a rail.
+   It stays `relative`, not `static`: the glass plate is absolutely positioned against the rail, and a static
+   rail would let that plate fall back to the initial containing block and blur the whole page. */
 @media (max-width: 47.99rem) {
   .wf .rail {
-    position: static;
+    position: relative;
+  }
+  .wf .rail::before {
+    display: none;
   }
   .wf .rail-next {
     display: none;
   }
   .wf .rail-cta {
     margin-inline-start: 0;
+  }
+}
+
+/* ---- the plan's own rail: where you are in eight sections, and a jump to any of them ----
+ * Solid, not glass: exactly two plates in this product are blurred (the stepper, the result summary) and this is not a third. */
+.plan-grid {
+  display: grid;
+  gap: calc(var(--spacing) * 12) calc(var(--spacing) * 10);
+  align-items: start;
+  min-width: 0;
+}
+.plan-grid > * {
+  grid-column: 1;
+  min-width: 0;
+}
+.plan-grid section[id] {
+  scroll-margin-block-start: calc(var(--nav-h) + 3rem);
+}
+.plan-rail ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing) * 2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+.plan-rail a {
+  display: block;
+  min-width: 0;
+  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-ctl);
+  font-size: var(--text-control);
+  line-height: var(--text-control--line-height);
+  color: var(--color-ink-soft);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out);
+}
+.plan-rail a:hover {
+  background-color: var(--color-peach);
+  color: var(--color-ink);
+}
+.plan-rail a[aria-current="true"] {
+  border-color: var(--color-line-strong);
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+@media (min-width: 64rem) {
+  .plan-grid {
+    grid-template-columns: 15rem minmax(0, 1fr);
+  }
+  .plan-grid > * {
+    grid-column: 2;
+  }
+  .plan-rail {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    position: sticky;
+    top: calc(var(--nav-h) + 3rem);
+  }
+  .plan-rail ul {
+    display: grid;
+    gap: calc(var(--spacing) * 1);
   }
 }
 

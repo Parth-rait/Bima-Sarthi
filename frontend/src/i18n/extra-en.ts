@@ -26,6 +26,7 @@ export const extraEn = {
   gate_meter: "answered",
   gate_ready: "Everything that needed an answer has one. Run the check.",
   tag_answered: "Answered, not saved yet",
+  rail_sections: "Sections of this plan",
   dl_need_date: "Add the date you sent your complaint to see your Ombudsman dates",
   cd_h: "Your complaint dates",
   cd_p: "Enter the dates only if they are real. We never assume a date for you.",

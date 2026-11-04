@@ -247,13 +247,16 @@ Original SVG in `frontend/src/assets/art`, recoloured in 3a to the sunset palett
 ## Components
 
 ### Buttons (`ds/Button`)
-`rounded-ctl`, 44px minimum, 600 weight. **Primary:** ink fill, on-ink text; hover/pressed apricot with ink text. **Secondary:** transparent, 1px ink border; hover peach-deep. **Quiet:** ink text, champagne underline. **Danger:** terracotta border and ink text (deletion only, behind a confirmation). **On ink / on ink quiet:** ivory fill / outline, for the ink band. States: hover, focus-visible (3px ink ring, ivory on the ink band), pressed (1px down), disabled (dimmed and hatched), loading (spinner, `aria-busy`).
+`rounded-ctl`, 44px minimum, 600 weight. **Primary:** ink fill, on-ink text; hover/pressed apricot with ink text. **Secondary:** transparent, 1px ink border; hover peach-deep. **Quiet:** ink text, champagne underline. **Danger:** terracotta border and ink text (deletion only, behind a confirmation). **On ink / on ink quiet:** ivory fill / outline, for the ink band. States: hover, focus-visible (3px ink ring, ivory on the ink band), pressed (1px down), disabled (peach fill, `ink-soft` text, no shadow, `cursor-not-allowed` — never a hatch, never opacity below the 4.5:1 the contrast suite measures), loading (spinner, `aria-busy`).
 
 ### Navbar, mobile menu, footer
 Navbar: full width, wrap `wide`, ink links with a champagne underline on the current page (`aria-current="page"`), an Explore disclosure, the language toggle, a primary "Check my claim", and under 1024px a Menu button opening an ivory full-screen modal dialog. Footer: the ink band, 12-column grid, both required notices on every page.
 
 ### Form controls, accordion, modal, toast, stepper, loader, states
 Paper fill, 1px line-strong border, 44px, label above, hint, error below (terracotta border and ink-coloured text with the word). Accordion headers peach on hover. Dashed drop zones and dashed stepper steps are solid now.
+
+### The gate (confirm screen)
+The check refuses to run while facts need an answer; the gate says so before the button is pressed, not after. A sheet in the peach family: the count of answered items over the pending total in `--text-h2` tabular numerals, then one chip per unanswered item — paper fill, line-strong border, the fact's own label and a `→`, each a real `#fact-<key>` link that focuses the row and rings it with `:target`. When nothing is left it becomes the sage family and states that everything has an answer. The count and the run guard read the same predicate (`unresolvedKeys`), so they cannot disagree. A row answered here but not yet sent keeps its pending state and loses the amber: neutral tag "Answered, not saved yet" (`tag-ans`: paper, ink-soft, line-strong).
 
 ### Quote slip and verdict stamp (signature)
 Quote slip: pale peach panel, serif text, caption with rule and page. Verdict stamp: shape + word + sentence, 2px border, muted wash (families above).

@@ -444,9 +444,38 @@
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
 }
+.wf .fact,
+.wf .fact-target {
+  /* a jump from the gate must land below the sticky navbar and stepper, not behind them */
+  scroll-margin-block-start: calc(var(--nav-h) + 5.5rem);
+}
+.wf .fact:target,
+.wf .fact-target:target {
+  border-radius: var(--radius-card);
+  box-shadow: 0 0 0 3px var(--color-apricot-soft), var(--shadow-float);
+}
+.wf .fact:target {
+  border-color: var(--color-ink);
+}
+/* a gate jump focuses the row so a keyboard user lands in context. The :target ring already says
+   "this one", so the ring is not drawn twice — but it stays for anyone who arrived by keyboard. */
+.wf .fact:focus:not(:focus-visible),
+.wf .fact-target:focus:not(:focus-visible) {
+  outline: none;
+}
+.wf .fact:focus-visible,
+.wf .fact-target:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
 .wf .fact.pending {
   border-color: var(--color-line-strong);
   background-color: var(--color-amber-wash);
+}
+/* answered in this form: it no longer asks anything, so it stops glowing amber */
+.wf .fact.answered {
+  border-color: var(--color-line);
+  background-color: var(--color-ivory);
 }
 .wf .fact.has-error {
   border-color: var(--color-terracotta);
@@ -503,6 +532,98 @@
   border-color: var(--color-amber-ink);
   background-color: var(--color-amber-wash);
   color: var(--color-amber-ink);
+}
+/* answered here, not yet sent: neither a request nor a confirmation, so neither amber nor green */
+.wf .tag-ans {
+  border-color: var(--color-line-strong);
+  background-color: var(--color-paper);
+  color: var(--color-ink-soft);
+}
+
+/* ---- the gate: what still blocks the check, said before the button is pressed ---- */
+.wf .gate {
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+  padding: calc(var(--spacing) * 4) calc(var(--spacing) * 5);
+  background-color: var(--color-peach);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-card);
+}
+.wf .gate-clear {
+  background-color: var(--color-sage-wash);
+  border-color: var(--color-sage-ink);
+}
+.wf .gate > h3 {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.wf .gate-meter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--spacing) * 2);
+  margin: 0;
+  font-size: var(--text-control);
+  line-height: var(--text-control--line-height);
+  color: var(--color-ink-soft);
+}
+.wf .gate-n {
+  font-family: var(--font-display);
+  font-size: var(--text-h2);
+  line-height: 1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+.wf .gate-list {
+  display: grid;
+  gap: calc(var(--spacing) * 2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+@media (min-width: 48rem) {
+  .wf .gate-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* each one is a jump, so it looks like a jump: the label, then where it takes you */
+.wf .gate-list a {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 3);
+  min-width: 0;
+  padding: calc(var(--spacing) * 2) calc(var(--spacing) * 3);
+  background-color: var(--color-paper);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-ctl);
+  font-size: var(--text-control);
+  font-weight: 600;
+  color: var(--color-ink);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.wf .gate-list a::after {
+  content: "→";
+  flex: none;
+  margin-inline-start: auto;
+  color: var(--color-ink-soft);
+}
+.wf .gate-list a:hover {
+  background-color: var(--color-peach-deep);
+}
+.wf .gate-ready {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  font-weight: 600;
+  color: var(--color-sage-ink);
 }
 
 /* ---- checkboxes and choices ---- */
@@ -948,6 +1069,8 @@
   .wf .finding,
   .wf .fact,
   .wf .picked-file,
+  .wf .gate-list > li,
+  .wf .terms > li,
   .wf .checklist > li,
   .wf .deadlines > li {
     animation: row-settle var(--dur-2) var(--ease-out) both;

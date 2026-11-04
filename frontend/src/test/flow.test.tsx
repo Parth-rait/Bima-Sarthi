@@ -114,6 +114,27 @@ describe("confirm screen", () => {
     expect(m.fn).not.toHaveBeenCalled();
   });
 
+  it("the gate counts what still needs an answer, links to each one, and clears as they are answered", async () => {
+    await start();
+    const gate = document.querySelector(".gate") as HTMLElement;
+    expect(gate.textContent).toMatch(/0 \/ 2/);
+    const links = [...gate.querySelectorAll<HTMLAnchorElement>(".gate-list a")];
+    expect(links.map((a) => a.getAttribute("href"))).toEqual(["#fact-rejection_ground", "#fact-fraud_alleged"]);
+    for (const a of links) expect(document.getElementById(a.getAttribute("href")!.slice(1))).toBeTruthy();
+    expect(links[0].textContent).toBe("reason given for rejection");
+
+    fireEvent.click(within(document.querySelector('li[data-key="fraud_alleged"]') as HTMLElement).getAllByRole("radio")[0]);
+    expect(gate.textContent).toMatch(/1 \/ 2/);
+    const row = document.querySelector('li[data-key="fraud_alleged"]') as HTMLElement;
+    expect(row.className).toContain("answered");
+    expect(row.textContent).toMatch(/Answered, not saved yet/);
+
+    fireEvent.click(document.getElementById("c-rejection_ground") as HTMLInputElement);
+    expect(gate.className).toBe("gate gate-clear");
+    expect(gate.querySelector(".gate-list")).toBeNull();
+    expect(gate.textContent).toMatch(/2 \/ 2/);
+  });
+
   it("shows every fact with its source quote and page, pending facts first, and API labels", async () => {
     await start();
     const items = [...document.querySelectorAll("li.fact")].map((li) => li.getAttribute("data-key"));

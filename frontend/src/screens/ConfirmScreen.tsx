@@ -11,6 +11,7 @@ import {
   initialForm,
   isBoolFact,
   isPending,
+  isResolved,
   knownGround,
   needsContinuity,
   unresolvedKeys,
@@ -37,6 +38,8 @@ export function ConfirmScreen() {
 
   const label = (k: string) => labelOf(k, lang, { facts, labels: state.labels, policy: state.policy });
   const rows = useMemo(() => visibleFacts(facts), [facts]);
+  /** what still blocks the check, recomputed as the person types: the gate below and the run() guard read the same thing */
+  const need = useMemo(() => unresolvedKeys(facts, form), [facts, form]);
   const upd = (patch: Partial<ConfirmForm>) => setForm((f) => ({ ...f, ...patch }));
   const flagged = new Set([...(err?.flagged ?? []), ...unresolved]);
 
@@ -53,7 +56,7 @@ export function ConfirmScreen() {
       setErr({ message: t("pl_need"), items: [], fieldErrors: {}, flagged: [], productMissing: true, canEnterManually: false, expired: false });
       return;
     }
-    const open = unresolvedKeys(facts, form);
+    const open = need;
     if (open.length) {
       setUnresolved(open);
       setErr({ message: t("unanswered"), items: open.map(label), fieldErrors: {}, flagged: open, productMissing: false, canEnterManually: false, expired: false });
@@ -181,21 +184,24 @@ export function ConfirmScreen() {
           )}
         </Field>
         {needsContinuity(facts) ? (
-          <Choice
-            legend={t("cont")}
-            name="cont"
-            value={form.cont}
-            onChange={(v) => upd({ cont: v as ConfirmForm["cont"] })}
-            error={err?.fieldErrors.continuity_confirmed ?? (flagged.has("continuity_confirmed") ? t("unanswered_item") : null)}
-            options={[
-              { value: "yes", label: t("yes") },
-              { value: "no", label: t("no") },
-              { value: "unsure", label: t("notsure") },
-            ]}
-          />
+          <div id="fact-continuity_confirmed" className="fact-target" tabIndex={-1}>
+            <Choice
+              legend={t("cont")}
+              name="cont"
+              value={form.cont}
+              onChange={(v) => upd({ cont: v as ConfirmForm["cont"] })}
+              error={err?.fieldErrors.continuity_confirmed ?? (flagged.has("continuity_confirmed") ? t("unanswered_item") : null)}
+              options={[
+                { value: "yes", label: t("yes") },
+                { value: "no", label: t("no") },
+                { value: "unsure", label: t("notsure") },
+              ]}
+            />
+          </div>
         ) : null}
       </section>
 
+      <Gate need={need} rows={rows} label={label} />
       <ErrorBox boxRef={errRef} message={err?.message ?? null} items={err?.items} />
       <p role="status" className="status">
         {state.busy === "facts" ? t("saving") : state.busy === "check" ? t("checking") : state.busy === "explain" ? t("checking") : ""}
@@ -209,6 +215,40 @@ export function ConfirmScreen() {
           {t("back")}
         </button>
       </div>
+    </section>
+  );
+}
+
+/**
+ * The gate, shown while there is still time rather than after the check refused to run: how many of the items
+ * that needed an answer have one, and a link to every item that does not.
+ */
+function Gate({ need, rows, label }: { need: string[]; rows: Array<[string, Fact]>; label: (k: string) => string }) {
+  const { state, t } = useSession();
+  const cont = state.facts.continuity_confirmed;
+  const pending = rows.filter(([, f]) => isPending(f)).length + (cont && isPending(cont) ? 1 : 0);
+  if (!pending) return null;
+  const done = Math.max(0, pending - need.length);
+  return (
+    <section className={`gate${need.length ? " gate-open" : " gate-clear"}`} aria-labelledby="gate-h">
+      <h3 id="gate-h">{t("gate_h")}</h3>
+      <p className="gate-meter">
+        <span className="gate-n">
+          {done} / {pending}
+        </span>{" "}
+        {t("gate_meter")}
+      </p>
+      {need.length ? (
+        <ul className="gate-list">
+          {need.map((k, i) => (
+            <li key={k} style={rowOrder(i)}>
+              <a href={`#fact-${k}`}>{label(k)}</a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="gate-ready">{t("gate_ready")}</p>
+      )}
     </section>
   );
 }
@@ -248,7 +288,9 @@ function FactRow({
 }) {
   const { state, t } = useSession();
   const pend = isPending(f);
-  const tagText = pend ? t("need") : f.status === "user_confirmed" ? t("done") : t("ok_read");
+  /** answered in this form but not yet saved: the same predicate the gate's count uses, so the two can never disagree */
+  const open = pend && !isResolved(k, f, form);
+  const tagText = !pend ? (f.status === "user_confirmed" ? t("done") : t("ok_read")) : open ? t("need") : t("tag_answered");
   let control: React.ReactNode;
 
   if (k === "rejection_ground") {
@@ -331,10 +373,10 @@ function FactRow({
   }
 
   return (
-    <li id={`fact-${k}`} data-key={k} style={rowOrder(i)} className={`fact${pend ? " pending" : ""}${error ? " has-error" : ""}`}>
+    <li id={`fact-${k}`} data-key={k} tabIndex={-1} style={rowOrder(i)} className={`fact${pend ? " pending" : ""}${pend && !open ? " answered" : ""}${error ? " has-error" : ""}`}>
       <div className="fact-src">
         <h3>
-          {label} <span className={`tag ${pend ? "tag-need" : "tag-ok"}`}>{tagText}</span>
+          {label} <span className={`tag ${pend ? (open ? "tag-need" : "tag-ans") : "tag-ok"}`}>{tagText}</span>
         </h3>
         <SourceLine f={f} />
       </div>

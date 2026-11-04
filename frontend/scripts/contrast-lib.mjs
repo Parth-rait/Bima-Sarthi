@@ -110,7 +110,9 @@ const TEXT = [
   ["color-terracotta-ink", "color-terracotta-wash", 4.5, "CHALLENGEABLE stamp; error box"],
   ["color-amber-ink", "color-amber-wash", 4.5, "NEED_INFO stamp; Please-confirm tag"],
   ["color-amber-ink", "color-ivory", 4.5, "Warm tag text on the page"],
-  ["color-sage-ink", "color-sage-wash", 4.5, "CONSISTENT stamp"],
+  ["color-sage-ink", "color-sage-wash", 4.5, "CONSISTENT stamp; the gate when it is clear"],
+  ["color-ink", "color-sage-wash", 4.5, "Gate heading and count on the cleared band"],
+  ["color-ink-soft", "color-sage-wash", 4.5, "Gate caption on the cleared band"],
   ["color-ink", "color-terracotta-wash", 4.5, "Body text inside an error box"],
   // the two glass plates (the sticky stepper, the result summary): text is supposed to sit on the solid plate
   // in front, but the blur is checked to carry ink on its own anyway, over both bands it is ever placed on.
@@ -121,6 +123,7 @@ const TEXT = [
   ["color-line-strong", "color-ivory", 3, "Control borders on the page"],
   ["color-line-strong", "color-paper", 3, "Input borders on a card"],
   ["color-line-strong", "color-peach", 3, "Control borders on a peach band"],
+  ["color-line-strong", "color-sage-wash", 3, "Gate chip borders on the cleared band"],
   ["color-focus-ring", "color-ivory", 3, "Focus ring on the page"],
   ["color-focus-ring", "color-paper", 3, "Focus ring on a card"],
   ["color-focus-ring", "color-peach", 3, "Focus ring on a peach band"],

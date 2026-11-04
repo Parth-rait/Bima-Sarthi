@@ -19,6 +19,8 @@ export default defineConfig({
       "/gallery": API,
       "/health": API,
       "/legacy": API,
+      // the schemes finder and the evidence page read /api/schemes, /api/schemes/match and /api/evidence
+      "/api": API,
     },
   },
   build: { outDir: "dist", sourcemap: false },

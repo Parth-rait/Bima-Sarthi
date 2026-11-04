@@ -131,6 +131,106 @@
   outline: none;
 }
 
+/* ---- trace back: a reached step in the stepper is a button that looks like the step ---- */
+.wf .stepper .step:has(> .step-go) {
+  padding: 0;
+}
+.wf .stepper button.step-go,
+.wf .stepper button.step-go:hover,
+.wf .stepper button.step-go:active {
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: inherit;
+  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2);
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.wf .stepper button.step-go:hover {
+  background-color: color-mix(in srgb, var(--color-lavender) 55%, transparent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.wf .stepper button.step-go:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+.wf .stepper button.step-go:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background: transparent;
+  text-decoration: none;
+}
+
+/* ---- the result in one picture: two bars of counts ---- */
+.wf .fx-chart {
+  display: grid;
+  gap: calc(var(--spacing) * 7);
+}
+.wf .fx-chart h3 {
+  margin: 0;
+}
+.wf .fx-row {
+  display: grid;
+  gap: calc(var(--spacing) * 2);
+}
+.wf .fx-title {
+  margin: 0;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.wf .fx-line {
+  margin: 0;
+  max-inline-size: 62ch;
+  color: var(--color-ink-soft);
+}
+.wf .fx-bar {
+  display: flex;
+  gap: 4px;
+  inline-size: 100%;
+  min-block-size: 3rem;
+}
+.wf .fx-seg {
+  display: flex;
+  flex-basis: 0;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--spacing) * 1.5);
+  min-inline-size: 3rem;
+  padding-inline: calc(var(--spacing) * 2);
+  border: 2px solid;
+  border-radius: var(--radius-ctl);
+  font-size: 0.9375rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.wf .fx-seg strong {
+  font-size: 1.125rem;
+}
+@container (max-width: 30rem) {
+  .wf .fx-seg-word {
+    display: none;
+  }
+}
+@media (max-width: 40rem) {
+  .wf .fx-seg-word {
+    display: none;
+  }
+}
+.wf .fx-more,
+.wf .fx-note {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-ink-soft);
+}
+.wf .fx-more a {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
 /* ---- the plan as a route ---- */
 .route-plate {
   position: relative;

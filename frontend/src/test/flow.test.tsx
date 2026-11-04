@@ -182,7 +182,8 @@ describe("confirm screen", () => {
     expect(put.facts).not.toHaveProperty("inception_date"); // unchanged verified fact is not resent
     expect(put.insurer_reply_date).toBe("01/11/2026");
     await waitFor(() => expect(document.body.textContent).toMatch(/documented possible inconsistency/));
-    expect(m.calls.map((c) => c.key)).toEqual(["PUT /session/s1/facts", "POST /session/s1/check", "POST /session/s1/explain"]);
+    // the session calls, in order (the result also reads the public real-case list, GET /gallery, for its chart)
+    expect(m.calls.map((c) => c.key).filter((k) => k !== "GET /gallery")).toEqual(["PUT /session/s1/facts", "POST /session/s1/check", "POST /session/s1/explain"]);
     // the result links on to the plan and to a printable report whose address is NOT the server session id
     // (the plan is offered twice on purpose: once in the sticky summary, once in the actions at the end)
     const plans = screen.getAllByRole("link", { name: "Open my action plan" });

@@ -3,12 +3,16 @@ import { Button } from "../components/ds/Button";
 import { Modal } from "../components/ds/Modal";
 import { ErrorBox } from "../components/ErrorBox";
 import { IconPrint, IconTrash } from "../components/icons";
+import { FindingsChart } from "../components/charts/FindingsChart";
+import { RealCases } from "../components/charts/RealCases";
 import { ChecklistSection, DeadlinesBox, LetterButton, PlanSection } from "../components/Plan";
 import { PolicySection } from "../components/Policy";
 import { ResultSummary } from "../components/Summary";
 import { VerdictCard, sortFindings } from "../components/Verdict";
 import { Field, Stitch } from "../components/evidence";
 import { describeError, type ViewError } from "../lib/errors";
+import type { Key } from "../i18n";
+import { REJECTION_GROUNDS, type RejectionGround } from "../i18n/labels";
 import { labelOf } from "../lib/facts";
 import { useSession } from "../state/store";
 
@@ -76,6 +80,8 @@ export function ResultScreen() {
   const general = !result.supported;
   const thinking = state.busy === "explain";
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const gv = state.facts.rejection_ground?.value;
+  const groundKey = typeof gv === "string" && (REJECTION_GROUNDS as readonly string[]).includes(gv) ? (gv as RejectionGround) : null;
 
   return (
     <section aria-labelledby="h-result" className="screen result">
@@ -92,6 +98,8 @@ export function ResultScreen() {
           {t("not_rules_check")}
         </p>
       ) : null}
+      {/* the result in one picture: rules by verdict, and real cases with the same reason by who won (counts only) */}
+      <FindingsChart findings={result.findings} ground={groundKey} />
 
       {!result.findings.length && !general ? <p>{t("no_find")}</p> : null}
 
@@ -124,12 +132,17 @@ export function ResultScreen() {
 
       {d && (d.available || (d.note && challengeable)) ? <DeadlinesBox d={d} complaintEntered={complaintEntered} /> : null}
       {result.plan ? <PlanSection plan={result.plan} /> : null}
+      {result.findings.length && groundKey ? <RealCases ground={groundKey} /> : null}
       {state.policy ? <PolicySection policy={state.policy} /> : null}
 
       <ComplaintDates />
 
       <Stitch />
       <div className="actions result-actions">
+        {/* trace back: the answers are kept, so changing one and pressing the check again replaces this result */}
+        <button type="button" className="secondary" onClick={() => actions.setStep(2)} disabled={!!state.busy}>
+          {t("back_answers" as Key)}
+        </button>
         {challengeable && d?.available && d.letter_available !== false ? <LetterButton /> : null}
         {state.helper ? (
           <button type="button" className="secondary with-icon" onClick={() => window.print()}>

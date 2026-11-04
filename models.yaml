@@ -70,6 +70,7 @@ gemini_flash:    # Google AI Studio free tier, vision; synthetic/public document
   key_env: GEMINI_API_KEY
   vision: true
   min_max_tokens: 4000
+  timeout_s: 60   # a healthy page reads in seconds; when it hangs, the 120 s default cost two minutes per call (5 Nov)
 groq_qwen_vl:    # Groq free tier, vision (Alibaba Qwen3.8 27B); synthetic/public documents only
   base_url_env: GROQ_BASE_URL
   default_base_url: https://api.groq.com/openai/v1

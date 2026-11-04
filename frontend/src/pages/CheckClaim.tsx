@@ -8,7 +8,11 @@ import { Band, Wrap } from "@/components/ds/Section";
 import { RoleToggle } from "@/components/layout/Seg";
 import { ErrorBox } from "@/components/ErrorBox";
 import { Tumble } from "@/components/flow/Tumble";
+import { fill } from "@/components/charts/RealCases";
+import type { Key } from "@/i18n";
 import { EASE } from "@/lib/motion";
+import type { ViewName } from "@/state/activity";
+import { stepForView } from "@/state/session";
 import { useSession } from "@/state/store";
 import { ConfirmScreen } from "@/screens/ConfirmScreen";
 import { DeletedScreen } from "@/screens/DeletedScreen";
@@ -100,7 +104,17 @@ export default function CheckClaim() {
             ) : null}
             {/* the stepper's tabs meet the sheet's top edge, so they share one flush frame */}
             <div className="frame">
-              {stepped ? <Stepper steps={steps} current={state.view} label={t("steps_label")} /> : null}
+              {stepped ? (
+                <Stepper
+                  steps={steps}
+                  current={state.view}
+                  label={t("steps_label")}
+                  reachable={steps.map((s) => s.id).filter((id) => stepForView(id as ViewName) <= state.reached)}
+                  onGo={(id) => actions.setStep(stepForView(id as ViewName))}
+                  disabled={!!state.busy}
+                  goLabel={(text) => fill(t("step_go" as Key), { step: text })}
+                />
+              ) : null}
               <div className="desk">
                 <Tumble view={state.view} dir={dir} reduce={!!reduce}>
                   {/* one step replaces another: the new sheet is the real screen from its first frame; the falling copy above it is decoration */}

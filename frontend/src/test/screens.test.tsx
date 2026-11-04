@@ -222,8 +222,9 @@ describe("result screen", () => {
     fireEvent.change(screen.getByLabelText(/Date you sent your complaint/), { target: { value: "02/11/2026" } });
     fireEvent.click(screen.getByRole("button", { name: "Update my dates" }));
     await waitFor(() => expect(container.querySelector("#deadlines")!.textContent).toMatch(/16\/11\/2026/));
-    expect(m.calls.map((c) => c.key)).toEqual(["PUT /session/s1/facts", "POST /session/s1/check", "POST /session/s1/explain"]);
-    expect(m.calls[0].body).toEqual({ facts: { complaint_sent_date: { value: "02/11/2026" } } });
+    // the session calls, in order (the result also reads the public real-case list, GET /gallery, for its chart)
+    expect(m.calls.map((c) => c.key).filter((k) => k !== "GET /gallery")).toEqual(["PUT /session/s1/facts", "POST /session/s1/check", "POST /session/s1/explain"]);
+    expect(m.calls.find((c) => c.key === "PUT /session/s1/facts")!.body).toEqual({ facts: { complaint_sent_date: { value: "02/11/2026" } } });
   });
 
   it("a 409 from the letter route is shown, not navigated to", async () => {

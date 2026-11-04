@@ -11,8 +11,9 @@ import { STAGES } from "@/content/stages";
 import { WorkStage, type StageStep } from "@/components/stage/WorkStage";
 import { PlanSection } from "@/components/Plan";
 import { DeadlineTimeline } from "@/components/charts/DeadlineTimeline";
+import { FindingsChart } from "@/components/charts/FindingsChart";
 import { Spark } from "@/components/ds/Spark";
-import type { Plan, PlanItem } from "@/api";
+import type { Finding, Plan, PlanItem } from "@/api";
 import { Tumble } from "@/components/flow/Tumble";
 import { motion, useReducedMotion } from "motion/react";
 import { usePrefersReducedMotion } from "@/hooks/useMedia";
@@ -66,6 +67,13 @@ const pi = (p: Partial<PlanItem> = {}): PlanItem => ({
   key: null, rule_id: null, text: B("What to do at this step."), quote: null, page_no: null, source_id: null,
   source_title: null, source_label: null, date: null, date_label: null, link: null, ...p,
 });
+const demoFinding = (verdict: Finding["verdict"], rule_id: string): Finding => ({
+  rule_id, rule_version: 1, verdict, reason: null, rule_quote: "", source_sha256: "", page_no: null, facts_used: {},
+  question_en: null, question_hi: null, action_en: null, action_hi: null,
+});
+/** sample findings for the one-picture chart (two challengeable, one needs info, one consistent) */
+const DEMO_FINDINGS: Finding[] = [demoFinding("CHALLENGEABLE", "MORATORIUM_60M"), demoFinding("CHALLENGEABLE", "PED_DISCLOSURE"), demoFinding("NEED_INFO", "WAITING_30D"), demoFinding("CONSISTENT", "ROOM_RENT")];
+
 const DEMO_PLAN: Plan = {
   kind: "health", supported: true, product_line: "health", unverified: null, title: B("Your plan"), text: B(""), verified: true,
   steps: [
@@ -307,6 +315,7 @@ export default function DevComponents() {
               <button type="button">Run the check</button>
             </Spark>
           </p>
+          <FindingsChart findings={DEMO_FINDINGS} ground="pre_existing_disease" />
           <DeadlineTimeline d={DEMO_DL} />
           <PlanSection plan={DEMO_PLAN} />
         </div>

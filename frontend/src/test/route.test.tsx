@@ -1,14 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fireEvent, screen, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { Plan, PlanItem, PlanStep } from "../api";
 import { PlanSection } from "../components/Plan";
 import { DeadlineTimeline, daysUntil } from "../components/charts/DeadlineTimeline";
 import { stops } from "../components/plan/RouteMap";
 import { Spark } from "../components/ds/Spark";
-import { check } from "./fixtures";
-import { renderIn } from "./render";
+import { Stepper } from "../components/ds/Stepper";
+import { FindingsChart } from "../components/charts/FindingsChart";
+import { resetGalleryCache } from "../components/charts/RealCases";
+import { check, finding, resultSession } from "./fixtures";
+import { mockFetch } from "./mockFetch";
+import { renderApp, renderIn } from "./render";
 
 const SRC = path.resolve(__dirname, "..");
 const B = (en: string) => ({ en, hi: `${en} (hi)` });
@@ -119,5 +123,88 @@ describe("motion that explains", () => {
     expect(rings).not.toMatch(/from "three"/);
     expect(rings).not.toMatch(/#[0-9a-f]{6}/i);
     expect(rings).toMatch(/prefers-reduced-motion/);
+  });
+});
+
+const STEPS = [
+  { id: "upload", text: "1. Upload" },
+  { id: "confirm", text: "2. Confirm" },
+  { id: "result", text: "3. Result" },
+];
+const CASE = (id: string, won: boolean | null, ground = "pre_existing_disease") => ({
+  case_id: id,
+  rejection_ground: ground,
+  policyholder_prevailed: won,
+  citation: { forum: "District Commission", case_number: null, decided_on: "2024-01-02", source_url: null },
+  outcome: null,
+  verdicts: [],
+});
+
+describe("tracing back through the claim steps", () => {
+  it("a reached step is a button, the current step and unreached steps are not", () => {
+    const go = vi.fn();
+    renderIn(<Stepper steps={STEPS} current="confirm" label="Steps" reachable={["upload", "confirm"]} onGo={go} />);
+    const nav = screen.getByRole("navigation", { name: "Steps" });
+    expect(within(nav).getAllByRole("button")).toHaveLength(1);
+    fireEvent.click(within(nav).getByRole("button", { name: "1. Upload" }));
+    expect(go).toHaveBeenCalledWith("upload");
+  });
+
+  it("no step can be opened while the app is busy", () => {
+    renderIn(<Stepper steps={STEPS} current="result" label="Steps" reachable={["upload", "confirm", "result"]} onGo={() => {}} disabled />);
+    for (const b of within(screen.getByRole("navigation", { name: "Steps" })).getAllByRole("button")) expect((b as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("from the result you can go back to Confirm and return to the result without running the check again", async () => {
+    resetGalleryCache();
+    const m = mockFetch({ "GET /gallery": () => ({ json: { attribution: "x", cases: [] } }) });
+    await renderApp({ ...resultSession(), step: 5, reached: 5 });
+    const nav = screen.getByRole("navigation", { name: "Steps" });
+    fireEvent.click(within(nav).getByRole("button", { name: "Go back to step: 2. Confirm" }));
+    expect(await screen.findByRole("button", { name: "Run the check" })).toBeTruthy();
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Steps" })).getByRole("button", { name: "Go back to step: 3. Result" }));
+    expect(await screen.findByRole("heading", { name: "Result" })).toBeTruthy();
+    expect(m.calls.filter((c) => c.key !== "GET /gallery")).toHaveLength(0);
+  });
+
+  it("the result has a Change my answers button that opens Confirm", async () => {
+    resetGalleryCache();
+    mockFetch({ "GET /gallery": () => ({ json: { attribution: "x", cases: [] } }) });
+    await renderApp({ ...resultSession(), step: 5, reached: 5 });
+    fireEvent.click(screen.getByRole("button", { name: "Change my answers" }));
+    expect(await screen.findByRole("button", { name: "Run the check" })).toBeTruthy();
+  });
+});
+
+describe("the result in one picture", () => {
+  const F = [finding("CHALLENGEABLE", "A"), finding("CHALLENGEABLE", "B"), finding("NEED_INFO", "C"), finding("CONSISTENT", "D")];
+
+  it("counts the rules by verdict, writes the count on each part, and says it is not a chance of winning", () => {
+    resetGalleryCache();
+    mockFetch({ "GET /gallery": () => ({ json: { attribution: "x", cases: [] } }) });
+    renderIn(<FindingsChart findings={F} ground={null} />);
+    expect(document.body.textContent).toContain("checked against 4 IRDAI rules: 2 say the decision can be challenged, 1 need more information, 1 agree with the insurer");
+    const bar = screen.getByRole("img", { name: "Challengeable: 2, Need info: 1, Consistent: 1" });
+    expect(bar.querySelectorAll("[data-part]")).toHaveLength(3);
+    expect(document.body.textContent).toMatch(/not a chance of winning/);
+  });
+
+  it("adds real cases with the same reason, counted by who won, when there are any", async () => {
+    resetGalleryCache();
+    mockFetch({ "GET /gallery": () => ({ json: { attribution: "x", cases: [CASE("c1", true), CASE("c2", false), CASE("c3", true, "exclusion")] } }) });
+    renderIn(<FindingsChart findings={F} ground="pre_existing_disease" />);
+    await waitFor(() => expect(document.body.textContent).toContain("The policyholder won 1 of 2 similar real cases."));
+  });
+
+  it("draws nothing without findings", () => {
+    const { container } = renderIn(<FindingsChart findings={[]} ground={null} />);
+    expect(container.textContent).toBe("");
+  });
+});
+
+describe("dev server", () => {
+  it("forwards /api to the backend (the schemes finder and the evidence page read /api/...)", () => {
+    const cfg = fs.readFileSync(path.resolve(SRC, "../vite.config.ts"), "utf8");
+    expect(cfg).toMatch(/"\/api": API/);
   });
 });

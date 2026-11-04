@@ -73,8 +73,9 @@ def test_schema_has_new_columns_and_is_rerunnable(store):
     cols = {r[0] for r in store.con.execute("DESCRIBE \"case\"").fetchall()}
     assert {"appellant", "policyholder_prevailed"} <= cols
     icols = [r[0] for r in store.con.execute("DESCRIBE case_issue").fetchall()]
+    # issue_family / family_status are the additive columns of the resolver change
     assert icols == ["case_id", "issue", "holding", "holding_quote", "page_no", "status",
-                     "reviewer_note"]
+                     "reviewer_note", "issue_family", "family_status"]
     assert Case(case_id="x").appellant is None
     assert CaseIssue(case_id="x", issue="i", holding="not_decided").status == "drafted"
 
@@ -356,3 +357,40 @@ def test_cli_set_appellant_derives_prevailed(store, monkeypatch, capsys):
     assert args.func(args) == 0
     assert store.con.execute('SELECT appellant, policyholder_prevailed FROM "case"').fetchone() == \
         ("insurer", True)
+
+
+# ---------- issue family drafted by the model stays 'drafted' ----------
+
+def test_model_drafted_family_is_stored_as_drafted_never_reviewed(store, monkeypatch):
+    out = good_out(issues=[OutIssue(issue="R_MORATORIUM", holding="for_policyholder",
+                                    quote="the moratorium of 60 months bars repudiation", page_no=1,
+                                    family="NON_DISCLOSURE")])
+    stub(monkeypatch, [result(out)])
+    draft_issues("c1", store)
+    fam = store.con.execute("SELECT issue_family, family_status FROM case_issue "
+                            "WHERE case_id='c1' AND issue='R_MORATORIUM'").fetchone()
+    assert fam == ("NON_DISCLOSURE", "drafted")
+    assert case_issues.load_reviewed_families(store) == {}
+
+
+def test_model_family_outside_the_allowed_list_is_dropped_not_stored(store, monkeypatch):
+    out = good_out(issues=[OutIssue(issue="R_MORATORIUM", holding="for_policyholder",
+                                    quote="the moratorium of 60 months bars repudiation", page_no=1,
+                                    family="MORATORIUM_60M")])
+    stub(monkeypatch, [result(out)])
+    draft_issues("c1", store)
+    assert store.con.execute("SELECT issue_family, family_status FROM case_issue "
+                             "WHERE issue='R_MORATORIUM'").fetchone() == (None, None)
+
+
+def test_redrafting_never_overwrites_a_reviewed_family(store, monkeypatch):
+    stub(monkeypatch, [result(good_out())])
+    draft_issues("c1", store)
+    case_issues.set_family(store, "c1", "R_MORATORIUM", "OTHER")
+    out = good_out(issues=[OutIssue(issue="R_MORATORIUM", holding="for_policyholder",
+                                    quote="the moratorium of 60 months bars repudiation", page_no=1,
+                                    family="NON_DISCLOSURE")])
+    stub(monkeypatch, [result(out)])
+    draft_issues("c1", store, force=True)
+    assert store.con.execute("SELECT issue_family, family_status FROM case_issue "
+                             "WHERE issue='R_MORATORIUM'").fetchone() == ("OTHER", "reviewed")

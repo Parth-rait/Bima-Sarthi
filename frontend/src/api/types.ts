@@ -202,7 +202,113 @@ export interface PolicyBody {
   terms: Record<string, FactEdit>;
 }
 
+// ---- scheme finder (Maharashtra agriculture workers) ----
+export type SchemeStatus = "likely" | "check" | "not_eligible";
+export type SchemeGroupKey = "start" | "ask" | "not_now";
+export type SchemeQuestionId = "work" | "age" | "bank" | "ration";
+
+export interface SchemeQuestionOption {
+  value: string;
+  label: Bilingual;
+}
+export interface SchemeQuestion {
+  id: SchemeQuestionId;
+  text: Bilingual;
+  hint: Bilingual;
+  options: SchemeQuestionOption[];
+}
+export interface SchemeGroup {
+  title: Bilingual;
+  intro: Bilingual;
+}
+export interface SchemeStatusMeta {
+  label: Bilingual;
+  sentence: Bilingual;
+}
+export interface SchemeCatalogue {
+  version: number;
+  checked_on: string;
+  state: string;
+  audience: Bilingual;
+  disclaimer: Bilingual;
+  questions: SchemeQuestion[];
+  statuses: Record<SchemeStatus, SchemeStatusMeta>;
+  groups: Record<SchemeGroupKey, SchemeGroup>;
+  scheme_count: number;
+}
+export interface SchemeSource {
+  name: Bilingual;
+  url: string;
+  note: Bilingual;
+}
+export interface SchemeResult {
+  id: string;
+  name: Bilingual;
+  short: Bilingual;
+  status: SchemeStatus;
+  status_label: Bilingual;
+  status_sentence: Bilingual;
+  group: SchemeGroupKey;
+  why: Bilingual;
+  what: Bilingual;
+  cover: Bilingual;
+  eligibility: Bilingual;
+  steps: Bilingual[];
+  fails: Bilingual[];
+  official_url: string;
+  source: SchemeSource;
+  verified_on: string;
+  premium?: Bilingual;
+  deadline?: Bilingual;
+  /** Present only on insurance schemes: the claim check's type of insurance for a rejected claim. */
+  claim_product_line?: "health" | "life" | "accident" | "motor" | "crop" | "credit_life" | "other";
+}
+export interface SchemeAnswers {
+  work: string;
+  age: string;
+  bank: string;
+  ration: string;
+}
+export interface SchemeMatch {
+  checked_on: string;
+  state: string;
+  disclaimer: Bilingual;
+  groups: Record<SchemeGroupKey, SchemeGroup>;
+  statuses: Record<SchemeStatus, SchemeStatusMeta>;
+  results: SchemeResult[];
+}
+
 // ---- gallery ----
+export interface EvidenceRate {
+  of: number;
+  rate: number;
+  agree?: number;
+  false_hope?: number;
+}
+export interface EvidenceMethod {
+  scorable_findings: number;
+  agreement: EvidenceRate | null;
+  false_hope_rate: EvidenceRate | null;
+  abstained_findings: number;
+  excluded_findings: number;
+  quote_coverage: number | null;
+  stability: number | null;
+  safe_abstention: { safe: number; of: number } | null;
+  cost_usd: number;
+}
+export interface EvidenceSummary {
+  run_id: string | null;
+  generated_on: string;
+  repeats: number;
+  n_cases: number;
+  n_skipped_no_facts: number;
+  n_eligible: number;
+  n_skipped_unresolved: number;
+  n_out_of_scope: number;
+  n_no_usable: number;
+  methods: Record<string, EvidenceMethod>;
+  limitation: string;
+}
 export interface GalleryCitation {
   forum: string | null;
   case_number: string | null;
@@ -213,6 +319,11 @@ export interface GalleryListItem {
   case_id: string;
   citation: GalleryCitation;
   outcome: string | null;
+  /** Direction-corrected winner; the raw `outcome` can say "dismissed" for a policyholder win (an insurer's appeal). */
+  policyholder_prevailed?: boolean | null;
+  rejection_ground?: string | null;
+  days_to_decision?: number | null;
+  policy_years_at_claim?: number | null;
   verdicts: Verdict[];
 }
 export interface GalleryList {
@@ -224,7 +335,11 @@ export interface GalleryCase {
   citation: GalleryCitation;
   insurer: string | null;
   outcome: string | null;
+  policyholder_prevailed?: boolean | null;
   relief_amount: number | null;
+  rejection_ground?: string | null;
+  days_to_decision?: number | null;
+  policy_years_at_claim?: number | null;
   licence_note: string | null;
   findings: Finding[];
   attribution: string;

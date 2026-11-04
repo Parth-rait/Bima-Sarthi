@@ -57,6 +57,8 @@ def env(tmp_path, monkeypatch):
     monkeypatch.setenv("TXT_URL", "http://txt.test/v1")
     monkeypatch.setenv("TXT_KEY", "k")
     monkeypatch.delenv("SPEND_CAP_USD", raising=False)
+    from sarthi.llm import client
+    client._benched.clear()  # benches are per process; every test starts with none
     return tmp_path
 
 
@@ -164,6 +166,8 @@ def test_5xx_falls_back_but_4xx_raises(monkeypatch):
     respx.post(PRIMARY).mock(return_value=httpx.Response(503, json={"error": "down"}))
     h = respx.post(HPC).mock(return_value=httpx.Response(200, json=completion("ok")))
     assert chat("reader", MSG, cache=False).backend == "hpc24"
+    from sarthi.llm import client
+    client._benched.clear()  # the 503 benched primary; this half is about how a 400 is treated
     respx.post(PRIMARY).mock(return_value=httpx.Response(400, json={"error": "bad"}))
     with pytest.raises(openai.BadRequestError):
         chat("reader", MSG, cache=False)
@@ -275,6 +279,48 @@ def test_429_falls_back(monkeypatch):
 
 
 @respx.mock
+def test_5xx_is_retried_on_the_same_rung(monkeypatch):
+    monkeypatch.setattr("sarthi.llm.client.time.sleep", lambda s: None)
+    route = respx.post(PRIMARY).mock(side_effect=[httpx.Response(503),
+                                                  httpx.Response(200, json=completion("ok"))])
+    r = chat("reader", MSG, cache=False)
+    assert r.backend == "primary" and route.call_count == 2
+
+
+@respx.mock
+def test_429_honors_retry_after_beyond_the_5xx_cap(monkeypatch):
+    waits: list[float] = []
+    monkeypatch.setattr("sarthi.llm.client.time.sleep", waits.append)
+    route = respx.post(PRIMARY).mock(side_effect=[
+        httpx.Response(429, headers={"retry-after": "45"}),
+        httpx.Response(200, json=completion("ok"))])
+    r = chat("reader", MSG, cache=False)
+    assert r.backend == "primary" and route.call_count == 2
+    assert waits == [45.0]
+
+
+@respx.mock
+def test_provider_json_generation_400_retries_without_response_format():
+    route = respx.post(PRIMARY).mock(side_effect=[
+        httpx.Response(400, json={"error": {"message": "Failed to generate JSON. Please adjust your prompt."}}),
+        httpx.Response(200, json=completion('{"n": 4}'))])
+    r = chat("reader", MSG, cache=False, schema=Strict)
+    assert r.parsed == Strict(n=4) and route.call_count == 2
+    assert "response_format" in json.loads(route.calls[0].request.content)
+    assert "response_format" not in json.loads(route.calls[1].request.content)
+
+
+@respx.mock
+@pytest.mark.parametrize("status", [401, 402, 403])
+def test_billing_or_auth_failure_falls_back(monkeypatch, status):
+    """A rung whose key is unpaid/invalid (402/401/403) is unavailable, not a request bug."""
+    monkeypatch.setenv("READER_FALLBACKS", "hpc24")
+    respx.post(PRIMARY).mock(return_value=httpx.Response(status, json={"error": "payment required"}))
+    h = respx.post(HPC).mock(return_value=httpx.Response(200, json=completion("ok")))
+    assert chat("reader", MSG, cache=False).backend == "hpc24" and h.call_count == 1
+
+
+@respx.mock
 def test_judge_roles_ignore_fallbacks_by_default(monkeypatch):
     monkeypatch.setenv("JUDGE_SPARK_BASE_URL", "http://primary.test/v1")
     monkeypatch.setenv("JUDGE_SPARK_MODEL", "spark")
@@ -312,3 +358,52 @@ def test_new_fallback_prices():
     assert cost_usd("moonshotai/Kimi-K3", 1_000_000, 1_000_000) == pytest.approx(18.0)
     assert cost_usd("nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B", 1_000_000, 1_000_000) == pytest.approx(3.0)
     assert cost_usd("deepseek-ai/DeepSeek-V4-Flash-0731", 1_000_000, 1_000_000) == pytest.approx(0.39)
+
+
+def test_rung_timeout_comes_from_models_yaml(monkeypatch, tmp_path):
+    """A slow local rung can declare its own timeout_s; other rungs keep the default."""
+    from sarthi.llm import client
+    y = tmp_path / "m.yaml"
+    y.write_text("slow:\n  base_url_env: SLOW_URL\n  model: m\n  key_env: SLOW_KEY\n  timeout_s: 300\n"
+                 "fast:\n  base_url_env: FAST_URL\n  model: m\n  key_env: FAST_KEY\n")
+    monkeypatch.setenv("SARTHI_MODELS_YAML", str(y))
+    monkeypatch.setenv("READER_FALLBACKS", "slow,fast")
+    rungs = client._rungs("reader")
+    assert [r.timeout_s for r in rungs] == [None, 300.0, None]
+
+
+@respx.mock
+def test_a_failed_rung_is_skipped_on_the_next_call(monkeypatch):
+    """The second page of an upload must not wait on the rung that just refused or timed out on the first."""
+    monkeypatch.setattr("sarthi.llm.client.time.sleep", lambda s: None)
+    monkeypatch.setenv("READER_FALLBACKS", "hpc24")
+    p = respx.post(PRIMARY).mock(return_value=httpx.Response(503, json={"error": "overloaded"}))
+    h = respx.post(HPC).mock(return_value=httpx.Response(200, json=completion("ok")))
+    assert chat("reader", MSG, cache=False).backend == "hpc24"
+    assert p.call_count == 2  # retried once, then benched
+    assert chat("reader", MSG, cache=False).backend == "hpc24"
+    assert p.call_count == 2 and h.call_count == 2
+
+
+@respx.mock
+def test_a_refused_key_is_benched_for_the_session(monkeypatch):
+    monkeypatch.setenv("READER_FALLBACKS", "hpc24")
+    p = respx.post(PRIMARY).mock(return_value=httpx.Response(403, json={"error": "forbidden"}))
+    respx.post(HPC).mock(return_value=httpx.Response(200, json=completion("ok")))
+    for _ in range(3):
+        assert chat("reader", MSG, cache=False).backend == "hpc24"
+    assert p.call_count == 1
+
+
+@respx.mock
+def test_when_every_rung_is_benched_they_are_all_tried_again(monkeypatch):
+    from sarthi.llm import client
+    monkeypatch.setenv("READER_FALLBACKS", "hpc24")
+    respx.post(PRIMARY).mock(side_effect=httpx.ConnectError("refused"))
+    respx.post(HPC).mock(side_effect=httpx.ConnectError("refused"))
+    with pytest.raises(ModelUnavailable):
+        chat("reader", MSG, cache=False)
+    assert len(client._benched) == 2
+    p = respx.post(PRIMARY).mock(return_value=httpx.Response(200, json=completion("back")))
+    assert chat("reader", MSG, cache=False).backend == "primary"
+    assert p.call_count == 2  # respx keeps one route per URL: the refused call, then this one

@@ -79,41 +79,47 @@ const T={
 en:{tagline:"Check a health-insurance claim decision against IRDAI rules.",self:"My claim",helper:"Helping someone",gallery:"Real cases",
 s1:"1. Upload",s2:"2. Confirm",s3:"3. Result",
 up_h:"Upload your documents",up_p:"Photos or PDFs of the rejection or settlement letter and the policy schedule. JPG, PNG or PDF; up to 20 pages and 25 MB in total. Your files are deleted after the result or after 1 hour.",
-up_l:"Choose files or take a photo",up_b:"Read my documents",reading:"Reading your documents...",
+up_l:"Choose files or take a photo",up_b:"Read my documents",reading:"Reading your documents…",manual:"Enter the facts myself instead",
 cf_h:"Confirm what we read",cf_p:"Check each item against its source line. Items marked Please confirm come first; they must be confirmed before the check runs.",
 need:"Please confirm",ok_read:"Read from your document",done:"Confirmed by you",src:"Source line",page:"page",none:"No source line",edit:"Edit value",confirm:"This is correct",
 more:"Details for the letter (optional)",name:"Name on the policy",policy:"Policy number",claimno:"Claim number",amount:"Claim amount (for example 1,20,000)",insurer:"Insurer name",sentdate:"Date you sent your complaint to the insurer, if you already did (DD/MM/YYYY)",
 cont:"My cover was continuous (no gap, and any port was without a break)",replydate:"Date the insurer replied to your complaint, if it did (DD/MM/YYYY)",
 run:"Run the check",back:"Back",
-r_h:"Result",CHALLENGEABLE:"Challengeable",CONSISTENT:"No ground to challenge under this rule",NEED_INFO:"Need more information",
+r_h:"Result",CHALLENGEABLE:"Possible inconsistency to raise with the insurer",CONSISTENT:"No ground to challenge under this rule",NEED_INFO:"Need more information",
 rule:"Rule",fq:"Facts used",ask:"What we need",act:"What you can do",expl:"Explanation",dl:"Deadlines",
 d1:"Insurer should reply by",d2:"Ombudsman complaint earliest from",d3:"Ombudsman complaint no later than",
 letter:"Download grievance letter (PDF)",print:"Print this summary",del:"Delete my data now",deleted:"Your data was deleted.",again:"Start again",
 no_find:"We don't have a checked rule for this reason yet. This does not mean the decision is correct.",
 g_h:"Real judgment cases",g_p:"Decided cases checked by the same rules. These are public judgments, never users' documents.",g_empty:"No gallery cases have been published yet.",
 outcome:"Outcome",powered:"powered by IKanoon",srcurl:"Judgment source",gback:"Back",
-pl_label:"Type of insurance",pl_choose:"Choose the type of insurance...",pl_need:"Please choose the type of insurance before the check runs.",pl_hint:"Suggested from your documents. Please check it and change it if it is wrong.",pl_why:"Only health-insurance claims can be checked against our rules today. For other types you get a general plan, not a verdict.",plan_h:"Your plan",plan_gen_h:"A general plan",
-err:"Something went wrong",expired:"Your session has expired. Please start again.",fixing:"Please fix:",yes:"Yes",no:"No",choose:"Choose the reason...",pick:"Please choose Yes or No",notsure:"Not sure",
- add_h:"Add a missing fact",add_p:"If a date the check needs was not read from your documents, enter it here as DD/MM/YYYY. Leave it empty if you do not know it.",listed_q:"Is this item on the insurer's standard list of non-payable items?",backend:"Documents read by"},
+pl_label:"Type of insurance",pl_choose:"Choose the type of insurance…",pl_need:"Please choose the type of insurance before the check runs.",pl_hint:"Suggested from your documents. Please check it and change it if it is wrong.",pl_why:"Only health-insurance claims can be checked against our rules today. For other types you get a general plan, not a verdict.",plan_h:"Your plan",plan_gen_h:"A general plan",
+err:"Something went wrong",expired:"Your session has expired. Please start again.",fixing:"Please fix:",yes:"Yes",no:"No",choose:"Choose the reason…",pick:"Please choose Yes or No",notsure:"Not sure",
+ add_h:"Add a missing fact",add_p:"If a date the check needs was not read from your documents, enter it here as DD/MM/YYYY. Leave it empty if you do not know it.",listed_q:"Is this item on the insurer's standard list of non-payable items?",backend:"Documents read by",
+ pol_up_h:"Your policy document (optional)",pol_up_p:"If you have the full policy document, add it and we will show its key terms next to the exact words and page they came from. The check works without it. The pages are deleted as soon as they are read; the terms we read are deleted with your session.",
+ pol_l:"Choose the policy file or take a photo",pol_b:"Read my policy",pol_reading:"Reading your policy…",pol_save:"Save changes to policy terms",pol_remove:"Remove policy terms",
+ pol_enter:"Enter the value from your document",pol_found:"Read from your document",pol_confirmed:"Confirmed by you",pol_entered:"Entered by you",pol_removed:"Policy terms removed."},
 hi:{tagline:"स्वास्थ्य बीमा दावे के फ़ैसले को IRDAI नियमों से मिलाकर देखें।",self:"मेरा दावा",helper:"किसी की मदद",gallery:"असली मामले",
 s1:"1. अपलोड",s2:"2. पुष्टि",s3:"3. नतीजा",
 up_h:"अपने दस्तावेज़ अपलोड करें",up_p:"अस्वीकृति या निपटान पत्र और पॉलिसी शेड्यूल की फ़ोटो या PDF। JPG, PNG या PDF; कुल 20 पृष्ठ और 25 MB तक। नतीजे के बाद या 1 घंटे में आपकी फ़ाइलें हटा दी जाती हैं।",
-up_l:"फ़ाइलें चुनें या फ़ोटो लें",up_b:"मेरे दस्तावेज़ पढ़ें",reading:"दस्तावेज़ पढ़े जा रहे हैं...",
+up_l:"फ़ाइलें चुनें या फ़ोटो लें",up_b:"मेरे दस्तावेज़ पढ़ें",reading:"दस्तावेज़ पढ़े जा रहे हैं…",manual:"इसके बजाय मैं खुद तथ्य भरूँगा/भरूँगी",
 cf_h:"जो पढ़ा गया उसकी पुष्टि करें",cf_p:"हर बात को उसकी स्रोत पंक्ति से मिलाएँ। \"पुष्टि करें\" वाली बातें पहले हैं; जाँच से पहले इनकी पुष्टि ज़रूरी है।",
 need:"पुष्टि करें",ok_read:"आपके दस्तावेज़ से पढ़ा",done:"आपने पुष्टि की",src:"स्रोत पंक्ति",page:"पृष्ठ",none:"कोई स्रोत पंक्ति नहीं",edit:"मान बदलें",confirm:"यह सही है",
 more:"पत्र के लिए विवरण (वैकल्पिक)",name:"पॉलिसी पर नाम",policy:"पॉलिसी संख्या",claimno:"दावा संख्या",amount:"दावे की राशि (जैसे 1,20,000)",insurer:"बीमाकर्ता का नाम",sentdate:"बीमाकर्ता को शिकायत भेजने की तारीख़, यदि भेज चुके हों (DD/MM/YYYY)",
 cont:"मेरा कवर लगातार था (कोई अंतराल नहीं, पोर्ट में भी नहीं)",replydate:"बीमाकर्ता ने शिकायत का जवाब दिया हो तो उसकी तारीख़ (DD/MM/YYYY)",
 run:"जाँच चलाएँ",back:"वापस",
-r_h:"नतीजा",CHALLENGEABLE:"चुनौती दी जा सकती है",CONSISTENT:"इस नियम के तहत चुनौती का आधार नहीं",NEED_INFO:"और जानकारी चाहिए",
+r_h:"नतीजा",CHALLENGEABLE:"संभावित असंगति, बीमाकर्ता के सामने उठाने योग्य",CONSISTENT:"इस नियम के तहत चुनौती का आधार नहीं",NEED_INFO:"और जानकारी चाहिए",
 rule:"नियम",fq:"इस्तेमाल किए गए तथ्य",ask:"हमें क्या चाहिए",act:"आप क्या कर सकते हैं",expl:"व्याख्या",dl:"समय-सीमाएँ",
 d1:"बीमाकर्ता को जवाब देना चाहिए",d2:"लोकपाल में शिकायत कम से कम इस तारीख़ से",d3:"लोकपाल में शिकायत अधिकतम इस तारीख़ तक",
 letter:"शिकायत पत्र डाउनलोड करें (PDF)",print:"यह सार प्रिंट करें",del:"मेरा डेटा अभी हटाएँ",deleted:"आपका डेटा हटा दिया गया।",again:"फिर से शुरू करें",
 no_find:"इस कारण के लिए हमारे पास अभी कोई जाँचा हुआ नियम नहीं है। इसका मतलब यह नहीं कि फ़ैसला सही है।",
 g_h:"असली फ़ैसलों के मामले",g_p:"तय हो चुके मामले, उन्हीं नियमों से जाँचे गए। ये सार्वजनिक फ़ैसले हैं, उपयोगकर्ताओं के दस्तावेज़ नहीं।",g_empty:"अभी कोई गैलरी मामला प्रकाशित नहीं हुआ है।",
 outcome:"नतीजा",powered:"powered by IKanoon",srcurl:"फ़ैसले का स्रोत",gback:"वापस",
-pl_label:"बीमा का प्रकार",pl_choose:"बीमा का प्रकार चुनें...",pl_need:"जाँच चलाने से पहले कृपया बीमा का प्रकार चुनें।",pl_hint:"आपके दस्तावेज़ों के आधार पर सुझाया गया। कृपया जाँचें और गलत हो तो बदलें।",pl_why:"आज केवल स्वास्थ्य बीमा दावों को हमारे नियमों से जाँचा जा सकता है। अन्य प्रकारों के लिए आपको सामान्य योजना मिलेगी, कोई फ़ैसला नहीं।",plan_h:"आपकी योजना",plan_gen_h:"सामान्य योजना",
-err:"कुछ गड़बड़ हुई",expired:"आपका सत्र समाप्त हो गया है। कृपया फिर से शुरू करें।",fixing:"कृपया सुधारें:",yes:"हाँ",no:"नहीं",choose:"कारण चुनें...",pick:"कृपया हाँ या नहीं चुनें",notsure:"पक्का नहीं पता",
- add_h:"छूटा हुआ तथ्य जोड़ें",add_p:"अगर जाँच के लिए ज़रूरी कोई तारीख़ आपके दस्तावेज़ों से नहीं पढ़ी गई, तो उसे यहाँ DD/MM/YYYY में लिखें। पता न हो तो खाली छोड़ें।",listed_q:"क्या यह मद बीमाकर्ता की मानक गैर-भुगतान योग्य मदों की सूची में है?",backend:"दस्तावेज़ किसने पढ़े"}
+pl_label:"बीमा का प्रकार",pl_choose:"बीमा का प्रकार चुनें…",pl_need:"जाँच चलाने से पहले कृपया बीमा का प्रकार चुनें।",pl_hint:"आपके दस्तावेज़ों के आधार पर सुझाया गया। कृपया जाँचें और गलत हो तो बदलें।",pl_why:"आज केवल स्वास्थ्य बीमा दावों को हमारे नियमों से जाँचा जा सकता है। अन्य प्रकारों के लिए आपको सामान्य योजना मिलेगी, कोई फ़ैसला नहीं।",plan_h:"आपकी योजना",plan_gen_h:"सामान्य योजना",
+err:"कुछ गड़बड़ हुई",expired:"आपका सत्र समाप्त हो गया है। कृपया फिर से शुरू करें।",fixing:"कृपया सुधारें:",yes:"हाँ",no:"नहीं",choose:"कारण चुनें…",pick:"कृपया हाँ या नहीं चुनें",notsure:"पक्का नहीं पता",
+ add_h:"छूटा हुआ तथ्य जोड़ें",add_p:"अगर जाँच के लिए ज़रूरी कोई तारीख़ आपके दस्तावेज़ों से नहीं पढ़ी गई, तो उसे यहाँ DD/MM/YYYY में लिखें। पता न हो तो खाली छोड़ें।",listed_q:"क्या यह मद बीमाकर्ता की मानक गैर-भुगतान योग्य मदों की सूची में है?",backend:"दस्तावेज़ किसने पढ़े",
+ pol_up_h:"आपका पॉलिसी दस्तावेज़ (वैकल्पिक)",pol_up_p:"अगर आपके पास पूरा पॉलिसी दस्तावेज़ है तो उसे जोड़ें; हम उसकी मुख्य शर्तें उसी मूल पाठ और पृष्ठ के साथ दिखाएँगे। इसके बिना भी जाँच चलती है। पन्ने पढ़ते ही हटा दिए जाते हैं; पढ़ी गई शर्तें आपके सत्र के साथ हट जाती हैं।",
+ pol_l:"पॉलिसी की फ़ाइल चुनें या फ़ोटो लें",pol_b:"मेरी पॉलिसी पढ़ें",pol_reading:"आपकी पॉलिसी पढ़ी जा रही है…",pol_save:"पॉलिसी की शर्तों में बदलाव सहेजें",pol_remove:"पॉलिसी की शर्तें हटाएँ",
+ pol_enter:"अपने दस्तावेज़ से मान दर्ज करें",pol_found:"आपके दस्तावेज़ से पढ़ा",pol_confirmed:"आपने पुष्टि की",pol_entered:"आपने दर्ज किया",pol_removed:"पॉलिसी की शर्तें हटा दी गईं।"}
 };
 const DRAFT_HI="हिन्दी पाठ अभी मसौदा है और समीक्षा बाकी है (Q-007)। Hindi text is a draft pending review.";
 const REJECTION_GROUNDS=["non_disclosure","pre_existing_disease","specific_waiting_period","initial_waiting_period","portability","exclusion","deduction","room_rent","sub_limit","cashless_delay","discharge_delay","process_defect","other"];
@@ -128,7 +134,7 @@ const BOOL_KEYS=["fraud_alleged","crc_approval_mentioned","reasons_cite_terms","
 const LETTER_FIELDS=[["policyholder_name","name"],["policy_number","policy"],["claim_number","claimno"],["claim_amount_inr","amount"],["insurer_name","insurer"],["complaint_sent_date","sentdate"]];
 const CONT_GROUNDS=["pre_existing_disease","portability","specific_waiting_period","initial_waiting_period","non_disclosure"];
 const ADD_KEYS=["claim_date","admission_date","inception_date","policy_renewal_date"];
-let lang="en",helper=false,sid=null,facts={},result=null,view="upload",labelMap={},backend=null,productChoice=null,plHint=null;
+let lang="en",helper=false,sid=null,facts={},result=null,view="upload",labelMap={},backend=null,productChoice=null,plHint=null,policy=null;
 const $=id=>document.getElementById(id);
 const t=k=>(T[lang][k]??T.en[k]??k);
 function el(tag,attrs,...kids){const e=document.createElement(tag);
@@ -148,7 +154,7 @@ function showErr(box,e){box.replaceChildren();if(e.status===404&&sid){sid=null;}
  box.append(el("p",{class:"err",role:"alert"},msg));
  if(d&&d.errors)box.append(el("ul",{},Object.entries(d.errors).map(([k,v])=>el("li",{},labelOf(k)+": "+v))));}
 async function refreshExplain(){if(!result||!sid)return;
- try{const ex=await api("POST",`/session/${sid}/explain?lang=${lang}&helper=${helper?1:0}`);result.text=ex.text||"";result.findings=ex.findings||result.findings;result.deadlines=ex.deadlines||result.deadlines;result.plan=ex.plan||result.plan;labelMap=ex.labels||labelMap;backend=ex.reader_backend||backend;}catch(e){}
+ try{const ex=await api("POST",`/session/${sid}/explain?lang=${lang}&helper=${helper?1:0}`);result.text=ex.text||"";result.findings=ex.findings||result.findings;result.deadlines=ex.deadlines||result.deadlines;result.plan=ex.plan||result.plan;result.request_checklist=ex.request_checklist??result.request_checklist;labelMap=ex.labels||labelMap;backend=ex.reader_backend||backend;}catch(e){}
  if(view==="result")renderResult();}
 function applyLang(){document.documentElement.lang=lang;
  $("tagline").textContent=t("tagline");$("role-self").textContent=t("self");$("role-helper").textContent=t("helper");$("gal-link").textContent=t("gallery");
@@ -168,12 +174,13 @@ function renderUpload(){const s=$("s-upload");s.replaceChildren();
   try{if(!sid)sid=(await api("POST","/session")).session_id;
    const fd=new FormData();for(const f of file.files)fd.append("files",f);
    const r=await api("POST",`/session/${sid}/extract`,null,fd);facts=r.facts;backend=r.reader_backend||null;plHint=r.product_line_hint||null;result=null;renderConfirm();show("confirm");}
-  catch(e){showErr(err,e);}finally{btn.disabled=false;status.textContent="";}}},
+  catch(e){showErr(err,e);if(e.status===502||e.status===503){err.append(el("p",{},el("button",{type:"button",onclick:async()=>{try{if(!sid)sid=(await api("POST","/session")).session_id;facts={};result=null;renderConfirm();show("confirm");}catch(e2){showErr(err,e2);}}},t("manual"))));}}finally{btn.disabled=false;status.textContent="";}}},
   el("label",{for:"files"},t("up_l")),file,el("p",{},btn),status,err);
  s.append(el("h2",{},t("up_h")),el("p",{},t("up_p")),form);}
 
 /* ---- step 2 ---- */
-function labelOf(k){const l=(facts[k]&&facts[k].label)||(Object.hasOwn(labelMap,k)?labelMap[k]:null);return l?(l[lang]||l.en):k.replaceAll("_"," ");}
+function labelOf(k){const pt=policy&&policy.terms.find(x=>x.key===k);
+ const l=(facts[k]&&facts[k].label)||(Object.hasOwn(labelMap,k)?labelMap[k]:null)||(pt?pt.label:null);return l?(l[lang]||l.en):k.replaceAll("_"," ");}
 function factLabel(k){return labelOf(k);}
 function valText(v){if(v==null)return"";if(typeof v==="boolean")return v?t("yes"):t("no");if(typeof v==="object")return JSON.stringify(v);return String(v);}
 function showVal(v,k){if(v==null)return"";if(typeof v==="boolean")return v?t("yes"):t("no");
@@ -254,10 +261,10 @@ function renderConfirm(){const s=$("s-confirm");s.replaceChildren();
    const c=await api("POST",`/session/${sid}/check`);
    let ex={text:"",findings:c.findings,deadlines:c.deadlines};
    try{ex=await api("POST",`/session/${sid}/explain?lang=${lang}&helper=${helper?1:0}`);}catch(e){}
-   labelMap=c.labels||labelMap;backend=c.reader_backend||backend;result={findings:c.findings,deadlines:c.deadlines,text:ex.text||"",plan:c.plan||null,supported:c.supported!==false};renderResult();show("result");}
+   labelMap=c.labels||labelMap;backend=c.reader_backend||backend;result={findings:c.findings,deadlines:c.deadlines,text:ex.text||"",plan:c.plan||null,request_checklist:c.request_checklist||null,supported:c.supported!==false};renderResult();show("result");}
   catch(e){showErr(err,e);if(e.detail&&e.detail.needs_confirmation)err.append(el("ul",{},e.detail.needs_confirmation.map(k=>el("li",{},factLabel(k)))));}
   finally{run.disabled=false;}}},t("run"));
- s.append(el("h2",{},t("cf_h")),el("p",{},t("cf_p")),plBox,list,addBox,more,err,el("p",{},run," ",el("button",{type:"button",class:"secondary",onclick:()=>show("upload")},t("back"))));}
+ s.append(el("h2",{},t("cf_h")),el("p",{},t("cf_p")),plBox,list,addBox,renderPolicyBox(),more,err,el("p",{},run," ",el("button",{type:"button",class:"secondary",onclick:()=>show("upload")},t("back"))));}
 
 /* ---- step 3 ---- */
 function verdictCard(f,withLocalised){
@@ -288,6 +295,53 @@ function renderPlan(p){if(!p||!p.steps)return"";const general=p.kind==="general"
   el("h3",{id:"plan-h"},general?t("plan_gen_h"):t("plan_h")),
   general?el("p",{},p.title[lang]||p.title.en):"",
   el("ol",{},p.steps.map(st=>el("li",{},el("strong",{},st.title[lang]||st.title.en),el("ul",{},st.items.map(planItem))))));}
+/* ---- policy key terms (display only) ---- */
+function polTag(x){const k={found:"pol_found",confirmed:"pol_confirmed",entered:"pol_entered"}[x.state];
+ if(k)return el("span",{class:"tag"},t(k));
+ return x.state==="absent"?"":el("span",{class:"tag v-NEED_INFO"},t("need"));}
+function polValText(v){return v==null?"":Array.isArray(v)?v.join("; "):String(v);}
+function renderPolicyTerms(p,inputs){const list=el("div");
+ for(const x of p.terms){const shown=!!x.display,pend=x.state==="unverified"||x.state==="conflict";
+  const c=el("div",{class:"card"+(pend?" pending":""),"data-key":x.key},
+   el("h3",{},x.label[lang]+" ",polTag(x)),
+   shown?el("p",{},el("strong",{},x.display[lang])):el("p",{},x.message[lang]));
+  if(x.quote)c.append(el("p",{class:"src"},t("src")+(x.page_no!=null?` (${t("page")} ${x.page_no})`:"")+":"),el("blockquote",{},x.quote));
+  if(inputs){const inp=el("input",{type:"text",id:"pt-"+x.key,value:polValText(x.value)});
+   const o={inp,shown:inp.value};inputs[x.key]=o;
+   c.append(el("label",{for:"pt-"+x.key},shown?t("edit"):t("pol_enter")),inp);
+   if(x.state==="found"){o.chk=el("input",{type:"checkbox",id:"pc-"+x.key});
+    c.append(el("p",{},el("label",{for:"pc-"+x.key,style:"font-weight:400"},o.chk,t("confirm"))));}}
+  list.append(c);}
+ return list;}
+function renderPolicySection(p){if(!p||!p.terms)return"";
+ return el("section",{class:"card","aria-labelledby":"pol-h",id:"policy-section"},
+  el("h3",{id:"pol-h"},p.heading[lang]||p.heading.en),el("p",{class:"src"},p.disclaimer[lang]||p.disclaimer.en),renderPolicyTerms(p,null));}
+function renderChecklist(c){if(!c||!c.items)return"";
+ return el("section",{class:"card","aria-labelledby":"ck-h",id:"checklist"},
+  el("h3",{id:"ck-h"},c.title[lang]||c.title.en),el("p",{},c.intro[lang]||c.intro.en),
+  el("ul",{},c.items.map(i=>el("li",{},i[lang]||i.en))));}
+function refreshPolicyBox(){const old=$("policy-box");if(old)old.replaceWith(renderPolicyBox());}
+function renderPolicyBox(){const box=el("div",{class:"card",id:"policy-box"});
+ const err=el("div"),status=el("p",{role:"status"}),inputs={};
+ const file=el("input",{type:"file",id:"policy-files",accept:".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf",multiple:true});
+ const btn=el("button",{type:"button",onclick:async()=>{err.replaceChildren();
+  if(!file.files.length||!sid)return;btn.disabled=true;status.textContent=t("pol_reading");
+  try{const fd=new FormData();for(const f of file.files)fd.append("files",f);
+   const r=await api("POST",`/session/${sid}/policy/extract`,null,fd);policy=r.policy||null;refreshPolicyBox();}
+  catch(e){showErr(err,e);}finally{btn.disabled=false;status.textContent="";}}},t("pol_b"));
+ box.append(el("h3",{},t("pol_up_h")),el("p",{class:"src"},t("pol_up_p")),el("label",{for:"policy-files"},t("pol_l")),file,el("p",{},btn),status,err);
+ if(policy&&policy.terms){
+  box.append(el("h3",{},policy.heading[lang]||policy.heading.en),el("p",{class:"src"},policy.disclaimer[lang]||policy.disclaimer.en),renderPolicyTerms(policy,inputs));
+  const save=el("button",{type:"button",onclick:async()=>{err.replaceChildren();const terms={};
+   for(const[k,o]of Object.entries(inputs)){if(o.inp.value!==o.shown&&o.inp.value.trim())terms[k]={value:o.inp.value};else if(o.chk&&o.chk.checked)terms[k]={confirm:true};}
+   if(!Object.keys(terms).length)return;save.disabled=true;
+   try{const r=await api("PUT",`/session/${sid}/policy`,{terms});policy=r.policy||null;refreshPolicyBox();}
+   catch(e){showErr(err,e);}finally{save.disabled=false;}}},t("pol_save"));
+  const rm=el("button",{type:"button",class:"danger",onclick:async()=>{err.replaceChildren();
+   try{await api("DELETE",`/session/${sid}/policy`);policy=null;refreshPolicyBox();}catch(e){showErr(err,e);}}},t("pol_remove"));
+  box.append(el("p",{},save," ",rm));}
+ return box;}
+
 function renderResult(){const s=$("s-result");s.replaceChildren();
  const err=el("div");
  s.append(el("h2",{},t("r_h")));
@@ -295,6 +349,7 @@ function renderResult(){const s=$("s-result");s.replaceChildren();
  const ord={CHALLENGEABLE:0,NEED_INFO:1,CONSISTENT:2};
  [...result.findings].sort((a,b)=>ord[a.verdict]-ord[b.verdict]).forEach(f=>s.append(verdictCard(f)));
  if(result.text)s.append(el("h3",{},t("expl")),el("pre",{class:"expl"},result.text));
+ s.append(renderChecklist(result.request_checklist));
  if(backend)s.append(el("p",{class:"src"},t("backend")+": "+backend));
  const d=result.deadlines;
  if(d&&d.available){s.append(el("div",{class:"card"},el("h3",{},t("dl")),el("ul",{},
@@ -304,11 +359,12 @@ function renderResult(){const s=$("s-result");s.replaceChildren();
   d.rule_quote?el("blockquote",{},d.rule_quote):""));}
  else if(d&&d.note&&result.findings.some(f=>f.verdict==="CHALLENGEABLE"))s.append(el("p",{class:"src"},d.note));
  s.append(renderPlan(result.plan));
+ s.append(renderPolicySection(policy));
  const acts=el("p");
  if(result.findings.some(f=>f.verdict==="CHALLENGEABLE")&&d&&d.available&&d.letter_available!==false)acts.append(el("a",{class:"btn",href:`/session/${sid}/letter.pdf?lang=${lang}`,download:"grievance-letter.pdf"},t("letter"))," ");
  if(helper)acts.append(el("button",{type:"button",class:"secondary",onclick:()=>window.print()},t("print"))," ");
  acts.append(el("button",{type:"button",class:"danger",onclick:async()=>{try{if(sid)await api("DELETE","/session/"+sid);}catch(e){}
-   sid=null;facts={};result=null;productChoice=null;plHint=null;renderUpload();$("s-result").replaceChildren(el("p",{role:"status"},t("deleted")),el("button",{type:"button",onclick:()=>show("upload")},t("again")));}},t("del")));
+   sid=null;facts={};result=null;policy=null;productChoice=null;plHint=null;renderUpload();$("s-result").replaceChildren(el("p",{role:"status"},t("deleted")),el("button",{type:"button",onclick:()=>show("upload")},t("again")));}},t("del")));
  s.append(acts,err);}
 
 /* ---- gallery ---- */

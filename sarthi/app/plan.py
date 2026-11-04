@@ -13,6 +13,7 @@ import logging
 from datetime import date
 
 from sarthi.app.explain import _localised, _tpl
+from sarthi.app.labels import GROUND_LABELS, value_label
 from sarthi.app.letter import _v, cap_note_text, deadline_sources, deadlines
 from sarthi.app.verify import verify
 from sarthi.core.models import Finding
@@ -152,12 +153,12 @@ def B(en: str, hi: str) -> dict:
 
 MISSING_COMPLAINT = B("Add the date you sent your complaint to see your Ombudsman dates",
                       "अपनी शिकायत भेजने की तारीख़ जोड़ें, तब आपकी लोकपाल की तारीख़ें दिखेंगी")
-NEEDS_CHALLENGEABLE = B("Deadlines apply when a finding is challengeable.",
-                        "समय-सीमाएँ तब लागू होती हैं जब कोई निष्कर्ष चुनौती देने योग्य हो।")
+NEEDS_CHALLENGEABLE = B("Deadlines apply when a finding shows a possible inconsistency to raise.",
+                        "समय-सीमाएँ तब लागू होती हैं जब किसी निष्कर्ष में उठाने योग्य संभावित असंगति दर्ज हो।")
 NEEDS_CARD = B("Deadlines need the grievance-route rule card to be approved",
                "समय-सीमाओं के लिए शिकायत-मार्ग नियम कार्ड का अनुमोदित होना आवश्यक है")
 VERDICT_TEXT = {
-    "CHALLENGEABLE": B("Challengeable", "चुनौती दी जा सकती है"),
+    "CHALLENGEABLE": B("Possible inconsistency to raise with the insurer", "संभावित असंगति, बीमाकर्ता के सामने उठाने योग्य"),
     "CONSISTENT": B("No ground to challenge under this rule", "इस नियम के तहत चुनौती का आधार नहीं"),
     "NEED_INFO": B("Need more information", "और जानकारी चाहिए"),
 }
@@ -218,6 +219,43 @@ def _params_ok(params: dict | None) -> bool:
         return False
 
 
+# ---------- personalisation from the user's own facts (templates only) ----------
+
+CASE_TITLE = B("Your case", "आपका मामला")
+ASK_REASON = {
+    "en": ("Ask the insurer to explain in writing how its stated reason — {reason} — applies to your "
+           "claim, and which policy clause it relied on."),
+    "hi": ("बीमाकर्ता से लिखित में पूछें कि उसका बताया कारण — {reason} — आपके दावे पर कैसे लागू होता है, "
+           "और उसने पॉलिसी की किस धारा का सहारा लिया।"),
+}
+
+
+def _recorded_ground(facts: dict | None) -> str | None:
+    """The rejection-ground VALUE the user recorded: a reviewed choice, not awaiting confirmation."""
+    fv = (facts or {}).get("rejection_ground")
+    v = getattr(fv, "value", None)
+    status = getattr(fv, "status", None)
+    if isinstance(fv, dict):
+        v = fv.get("value")
+        status = fv.get("status", status)
+    if status == "needs_confirmation":
+        return None
+    return v if isinstance(v, str) and v in GROUND_LABELS else None
+
+
+def _case_step(line: str, facts: dict | None) -> dict:
+    """Name the product line and the reason recorded for the decision. Uses only existing labels."""
+    items = [item(B(f"Type of insurance: {product_label(line, 'en')}.",
+                    f"बीमा का प्रकार: {product_label(line, 'hi')}।"),
+                  key="case_product_line")]
+    if ground := _recorded_ground(facts):
+        items.append(item(B(
+            f"Reason recorded for the insurer's decision: {value_label(ground, 'en')}.",
+            f"बीमाकर्ता के फ़ैसले के लिए दर्ज कारण: {value_label(ground, 'hi')}।"),
+            key="case_rejection_ground"))
+    return step("case", CASE_TITLE, items)
+
+
 # ---------- general plan (not health) ----------
 
 def _papers() -> dict:
@@ -229,6 +267,16 @@ def _papers() -> dict:
 
 ASK_REASONS = B("Ask the insurer in writing for the reasons for its decision, and for the policy terms it relied on.",
                 "बीमाकर्ता से उसके फ़ैसले के कारण, और जिन पॉलिसी शर्तों पर वह आधारित है, लिखित में माँगें।")
+
+
+def _ask_item(facts: dict | None) -> dict:
+    """The insurer ask, naming the user's recorded reason when there is one."""
+    if ground := _recorded_ground(facts):
+        return item(B(ASK_REASON["en"].format(reason=value_label(ground, "en")),
+                      ASK_REASON["hi"].format(reason=value_label(ground, "hi"))))
+    return item(ASK_REASONS)
+
+
 NOT_VERIFIED = B("We have not verified the complaint route for this type of insurance.",
                  "हमने इस प्रकार के बीमा के लिए शिकायत का रास्ता जाँचा नहीं है।")
 UNVERIFIED_HELP = {
@@ -257,11 +305,11 @@ def _date_items(params, complaint, reply, line):
 
 
 def general_plan(line: str, *, params: dict | None, complaint_date: date | None,
-                 reply_date: date | None) -> tuple[dict, dict]:
+                 reply_date: date | None, facts: dict | None = None) -> tuple[dict, dict]:
     """The non-health plan. NOT a verdict. Returns (plan, verify-extras)."""
     supported = line in SUPPORTED_LINES
-    steps = [_papers()]
-    ask = [item(ASK_REASONS)]
+    steps = [_case_step(line, facts), _papers()]
+    ask = [_ask_item(facts)]
     unverified = None
     if supported:
         card_ok = _params_ok(params)
@@ -357,16 +405,16 @@ def _cited_param(src: dict | None, text: dict, **kw) -> dict:
 
 
 def health_plan(findings: list[Finding], *, params: dict | None, complaint_date: date | None,
-                reply_date: date | None, claim_amount) -> tuple[dict, dict]:
+                reply_date: date | None, claim_amount, facts: dict | None = None) -> tuple[dict, dict]:
     ordered = sorted(findings, key=lambda f: _ORDER[f.verdict])
-    steps = []
+    steps = [_case_step("health", facts)]
     s1 = [item(VERDICT_TEXT[f.verdict], rule_id=f.rule_id, quote=f.rule_quote, page_no=f.page_no)
           for f in ordered]
     if not s1:
         s1 = [item(B(_tpl("en")["labels"]["no_rule"], _tpl("hi")["labels"]["no_rule"]))]
     steps.append(step("findings", B("What the check found", "जाँच में क्या मिला"), s1))
 
-    asks = []
+    asks = [_ask_item(facts)]
     for f in ordered:
         if f.verdict == "CONSISTENT":
             continue
@@ -381,7 +429,6 @@ def health_plan(findings: list[Finding], *, params: dict | None, complaint_date:
             parts[lang] = " ".join(bits)
         if parts["en"]:
             asks.append(item(B(parts["en"], parts["hi"]), rule_id=f.rule_id))
-    asks.append(item(ASK_REASONS))
     steps.append(step("ask", B("What to ask your insurer for", "बीमाकर्ता से क्या माँगें"), asks))
 
     challengeable = any(f.verdict == "CHALLENGEABLE" for f in findings)
@@ -429,9 +476,15 @@ def health_plan(findings: list[Finding], *, params: dict | None, complaint_date:
                       "लोकपाल को शिकायत इस तारीख़ तक करनी होती है।"),
                     key="ombudsman_latest", date_=d.ombudsman_latest,
                     date_label=B("Ombudsman complaint no later than", "लोकपाल में शिकायत अधिकतम इस तारीख़ तक")))
-    steps.append(step("letter", B("Send your grievance letter", "अपना शिकायत पत्र भेजें"), letter))
-    steps.append(step("ombudsman", B("If there is no reply, or it does not settle the matter: Insurance Ombudsman",
-                                     "जवाब न मिले या बात न सुलझे तो: बीमा लोकपाल"), omb))
+    if letter == omb:
+        # One message covers both (nothing to raise, no approved route card, or a missing date):
+        # say it once instead of repeating it under two headings.
+        steps.append(step("grievance", B("Grievance letter and the Insurance Ombudsman",
+                                         "शिकायत पत्र और बीमा लोकपाल"), letter))
+    else:
+        steps.append(step("letter", B("Send your grievance letter", "अपना शिकायत पत्र भेजें"), letter))
+        steps.append(step("ombudsman", B("If there is no reply, or it does not settle the matter: Insurance Ombudsman",
+                                         "जवाब न मिले या बात न सुलझे तो: बीमा लोकपाल"), omb))
     values = set()
     if params and claim_amount not in (None, ""):
         notes = {lang: cap_note_text(claim_amount, params, lang).strip() for lang in ("en", "hi")}

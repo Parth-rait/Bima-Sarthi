@@ -126,7 +126,7 @@ describe("design-system guardrails", () => {
   });
   it("every page component has exactly one place that renders its page heading", () => {
     const pages = files.filter((f) => rel(f).startsWith(`pages${path.sep}`) && f.endsWith(".tsx"));
-    expect(pages.length).toBe(11);
+    expect(pages.length).toBe(13); // + Schemes and Evidence, restored from the 4 Nov iteration
     for (const f of pages) {
       const t = read(f);
       const heading = /data-page-heading|pageHeading|<PageHeader|<EmptyState[\s\S]{0,40}pageHeading/.test(t);

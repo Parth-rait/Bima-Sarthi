@@ -15,13 +15,14 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict
 
 from sarthi.app.extract import ready_for_rules
+from sarthi.core.context import CaseContext, blocking_fields, load_family_map, resolve_case_context
 from sarthi.core.engine import run_rules
 from sarthi.core.models import FactValue, RuleCard, Verdict
 from sarthi.core.store import Store
 from sarthi.data.case_facts import load_reviewed_facts, load_unresolved_facts
-from sarthi.data.case_issues import load_reviewed_issues
+from sarthi.data.case_issues import load_reviewed_families, load_reviewed_issues
 from sarthi.data.parse_docs import normalise_ws
-from sarthi.data.rule_cards import approved_cards
+from sarthi.data.rule_cards import approved_cards, unapproved_cards
 from sarthi.llm.client import chat
 
 Method = Literal["rules", "glimmer_only", "spark_only"]
@@ -121,6 +122,10 @@ class EvalSummary(BaseModel):
     by_method: dict[str, Metrics]
     cases: list[CaseRow] = []
     finding_rows: list[FindingRow] = []
+    # rule-context resolver (per case trace; counts are candidate cards by resolution status)
+    traces: dict[str, dict] = {}
+    resolver_counts: dict[str, int] = {}
+    family_sources: dict[str, int] = {}
 
 
 def case_verdict(verdicts: list[str]) -> str:
@@ -143,27 +148,22 @@ def skipped_findings(facts: dict[str, FactValue], unresolved: dict[str, FactValu
 
     Readiness is the app's own `ready_for_rules` (which reads `INPUT_FACTS`): a field blocks a
     rule when marking just that field unconfirmed makes the app say "not ready" for one of the
-    rule's cards. `"*"` stands for every rule: the rejection ground itself is unresolved, so
-    which cards are triggered is not known. Unrelated unresolved fields block nothing."""
+    rule's cards (`sarthi.core.context.blocking_fields`). `"*"` stands for every rule: the
+    rejection ground itself is unresolved, so which cards are triggered is not known. Unrelated
+    unresolved fields block nothing. Kept as the standalone check; evaluation itself now reads
+    the same answer from the resolver trace."""
     if not unresolved:
         return {}
     if findings is None:
         findings = run_rules(facts, cards)
-    pending = dict(unresolved)
-    if "claim_date" not in facts and "claim_date" not in pending and "admission_date" in pending:
-        # the engine falls back to admission_date when no claim_date exists at all
-        pending["claim_date"] = pending["admission_date"]
     if not findings:
         return {"*": ["rejection_ground"]} if ("rejection_ground" in unresolved
                                                and "rejection_ground" not in facts) else {}
     out: dict[str, list[str]] = {}
     for f in findings:
-        rule_cards = [c for c in cards if c.rule_id == f.rule_id]
-        blockers = {("admission_date" if k == "claim_date" and k not in unresolved else k)
-                    for k, fv in pending.items()
-                    if any(not ready_for_rules({**facts, k: fv}, [c]) for c in rule_cards)}
+        blockers = blocking_fields([c for c in cards if c.rule_id == f.rule_id], facts, unresolved)
         if blockers:
-            out[f.rule_id] = sorted(blockers)
+            out[f.rule_id] = blockers
     return out
 
 
@@ -204,10 +204,21 @@ def _agrees(verdict: str, prevailed: bool | None) -> bool | None:
     return (verdict == "CHALLENGEABLE") == prevailed
 
 
-def _rules_case_verdict(findings) -> str:
+def _not_engine_findings(ctx: CaseContext | None):
+    """Triggered candidates the engine was not asked about: no version in force, or no
+    applicability date. They behave as the engine's own NEED_INFO findings used to."""
+    return ctx.results("not_in_force", "missing_applicability_date") if ctx is not None else []
+
+
+def _rules_case_verdict(findings, ctx: CaseContext | None = None) -> str:
     vs = [f.verdict for f in findings]
-    return (NO_USABLE if not findings else OUT_OF_SCOPE if _rules_out_of_scope(findings)
-            else case_verdict(vs))
+    extra = _not_engine_findings(ctx)
+    if not findings and extra and all(r.status == "not_in_force" for r in extra):
+        return OUT_OF_SCOPE
+    if not findings and not extra:
+        return NO_USABLE
+    return (OUT_OF_SCOPE if _rules_out_of_scope(findings)
+            else case_verdict(vs + ["NEED_INFO"] * len(extra)))
 
 
 def _resolve_issue(rule_id: str, triggers: list, issues: dict[str, dict]) -> tuple[str, dict] | None:
@@ -227,17 +238,19 @@ def _classify(verdict: str, holding: str) -> str:
     return "agree" if holding == "for_insurer" else "disagree"
 
 
-def _run_once(method, case_id, facts, cards, quotes_norm):
-    """-> (per-finding verdicts, case verdict, quote_hits, quote_total, backend, ms, tokens, cost)"""
+def _run_once(method, case_id, facts, cards, quotes_norm, engine_cards=None, ctx=None):
+    """-> (per-finding verdicts, case verdict, quote_hits, quote_total, backend, ms, tokens, cost)
+
+    `engine_cards`: for the rules method, only the cards the resolver found applicable."""
     t0 = time.perf_counter()
     if method == "rules":
-        findings = run_rules(facts, cards)
+        findings = run_rules(facts, cards if engine_cards is None else engine_cards)
         ms = int((time.perf_counter() - t0) * 1000)
         vs = {f.rule_id: f.verdict for f in findings}
+        for r in _not_engine_findings(ctx):
+            vs.setdefault(r.rule_id, "NEED_INFO")
         hits = sum(bool(f.rule_quote and f.rule_quote.strip()) for f in findings)
-        cv = (NO_USABLE if not findings else OUT_OF_SCOPE if _rules_out_of_scope(findings)
-              else case_verdict(list(vs.values())))
-        return vs, cv, hits, len(findings), "rules", ms, 0, 0.0
+        return vs, _rules_case_verdict(findings, ctx), hits, len(findings), "rules", ms, 0, 0.0
     res = chat(ROLES[method], build_prompt(cards, facts), schema=ModelAnswer, cache=False)
     ms = int((time.perf_counter() - t0) * 1000)
     toks = res.tokens_in + res.tokens_out
@@ -287,8 +300,12 @@ def run_eval(run_id: str, methods: list[Method], repeats: int, store: Store) -> 
                   if line not in (None, HEALTH, "unknown")]
     line_unknown = [cid for cid, _, _, reason, line in all_cases
                     if not reason and line in (None, "unknown")]
-    cases = [(cid, o, p) for cid, o, p, reason, line in all_cases if not reason and line == HEALTH]
+    cases = [(cid, o, p, line) for cid, o, p, reason, line in all_cases if not reason and line == HEALTH]
     cards = approved_cards(store)
+    verified = {(c.rule_id, c.version) for c in cards}
+    pool = cards + unapproved_cards(store, exclude=verified)  # the resolver also reports non-runnable cards
+    family_map = load_family_map()
+    reviewed_families = load_reviewed_families(store)
     reviewed = load_reviewed_issues(store)
     quotes_norm = normalise_ws(" ".join(c.quote for c in cards if c.quote))
     stats = {m: dict(agree=0, answered=0, chall=0, fh=0, abst=0, hits=0, total=0, ms=[], cost=0.0,
@@ -298,7 +315,8 @@ def run_eval(run_id: str, methods: list[Method], repeats: int, store: Store) -> 
              for m in methods}
     case_rows, finding_rows, n_cases, skipped_facts, excluded = [], {}, 0, 0, 0
     buckets = dict(eligible=0, skipped=0, oos=0, nu=0)
-    for case_id, outcome, prevailed in cases:
+    traces, resolver_counts, family_sources = {}, {}, {}
+    for case_id, outcome, prevailed, line in cases:
         facts = load_reviewed_facts(case_id, store)
         if not facts:
             skipped_facts += 1
@@ -306,11 +324,23 @@ def run_eval(run_id: str, methods: list[Method], repeats: int, store: Store) -> 
         n_cases += 1
         excluded += prevailed is None
         issues = reviewed.get(case_id, {})
+        # WHAT the dispute is (reviewed families, else the reviewed ground's family) vs WHICH
+        # approved cards can decide it; the engine runs only on the applicable ones
+        ctx, engine_cards = resolve_case_context(
+            list(reviewed_families.get(case_id, {}).values()), facts, pool, line,
+            unresolved=load_unresolved_facts(case_id, store), verified=verified,
+            family_map=family_map)
+        trace = {"families": ctx.families, "family_source": ctx.family_source,
+                 "product_line": line, "candidates": [r.model_dump(mode="json") for r in ctx.trace]}
+        traces[case_id] = trace
+        family_sources[ctx.family_source] = family_sources.get(ctx.family_source, 0) + 1
+        for r in ctx.trace:
+            resolver_counts[r.status] = resolver_counts.get(r.status, 0) + 1
         # dataset tag comes from the (deterministic) rules verdict, whichever methods are run
-        rule_findings = run_rules(facts, cards)
+        rule_findings = run_rules(facts, engine_cards)
         # a finding that needs a fact nobody has reviewed is skipped, never answered
-        skips = skipped_findings(facts, load_unresolved_facts(case_id, store), cards, rule_findings)
-        tag_cv = SKIPPED if skips else _rules_case_verdict(rule_findings)
+        skips = ctx.skips()
+        tag_cv = SKIPPED if skips else _rules_case_verdict(rule_findings, ctx)
         buckets["skipped" if skips else "oos" if tag_cv == OUT_OF_SCOPE
                 else "nu" if tag_cv == NO_USABLE else "eligible"] += 1
         tag = ("skipped" if skips else "abstention" if tag_cv in (OUT_OF_SCOPE, NO_USABLE)
@@ -324,7 +354,7 @@ def run_eval(run_id: str, methods: list[Method], repeats: int, store: Store) -> 
                 continue
             for rep in range(repeats):
                 vs, cv, hits, total, backend, ms, toks, cost = _run_once(
-                    m, case_id, facts, cards, quotes_norm)
+                    m, case_id, facts, cards, quotes_norm, engine_cards, ctx)
                 if skips:  # rules method: drop the skipped findings, keep the rest at finding level
                     vs = {k: v for k, v in vs.items() if k not in skips}
                     cv = SKIPPED
@@ -380,6 +410,8 @@ def run_eval(run_id: str, methods: list[Method], repeats: int, store: Store) -> 
                             finding_rows[key] = fr
                 extra = ({"_skipped": {r: skip_reason(f) for r, f in skips.items()}}
                          if cv == SKIPPED else {})
+                if m == "rules":
+                    extra["_trace"] = trace
                 rows.append(dict(run_id=run_id, case_id=case_id, method=m, repeat=rep,
                                  backend=backend,
                                  verdicts=json.dumps({**vs, "_case": cv, **extra}),
@@ -432,7 +464,8 @@ def run_eval(run_id: str, methods: list[Method], repeats: int, store: Store) -> 
                        not_health=not_health, product_line_unknown=line_unknown,
                        n_abstention_set=tags.count("abstention"), n_untagged=tags.count("untagged"),
                        repeats=repeats, by_method=by_method, cases=case_rows,
-                       finding_rows=list(finding_rows.values()))
+                       finding_rows=list(finding_rows.values()), traces=traces,
+                       resolver_counts=resolver_counts, family_sources=family_sources)
 
 
 def _fmt(x, pct=True):
@@ -474,6 +507,42 @@ def _count_line(label: str, cases: list[str]) -> str:
     n = len(cases)
     return (f"{label}: {', '.join(cases)} ({n} case{'s' if n != 1 else ''}; "
             "excluded from agreement and false-hope rates).")
+
+
+def write_summary(summary: EvalSummary, path: Path = Path("docs/eval/summary.json"), *,
+                  run_id: str | None = None) -> None:
+    """The published numbers as JSON for the app's evidence page. A rate is written only when
+    it was computed (a non-zero denominator); otherwise it is null, never 0 and never a guess."""
+    import json
+    from datetime import date
+
+    def rate(num: int, den: int, r: float | None, key: str):
+        return {key: num, "of": den, "rate": r if r is not None else num / den} if den else None
+
+    methods = {}
+    for m, x in summary.by_method.items():
+        methods[m] = {
+            "scorable_findings": x.finding_n,
+            "agreement": rate(x.finding_agreeing, x.finding_n, x.finding_agreement, "agree"),
+            "false_hope_rate": rate(x.finding_false_hope_runs, x.finding_challengeable,
+                                    x.finding_false_hope_rate, "false_hope"),
+            "abstained_findings": x.finding_abstentions,
+            "excluded_findings": x.finding_excluded,
+            "quote_coverage": x.quote_coverage,
+            "stability": x.stability,
+            "safe_abstention": ({"safe": x.safe_abstention_runs, "of": x.abstention_set_runs}
+                                if x.abstention_set_runs else None),
+            "cost_usd": round(x.cost_usd, 4),
+        }
+    out = {
+        "run_id": run_id, "generated_on": date.today().isoformat(), "repeats": summary.repeats,
+        "n_cases": summary.n_cases, "n_skipped_no_facts": summary.n_skipped_no_facts,
+        "n_eligible": summary.n_eligible, "n_skipped_unresolved": summary.n_skipped,
+        "n_out_of_scope": summary.n_out_of_scope, "n_no_usable": summary.n_no_usable,
+        "methods": methods, "limitation": LIMITATION,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def write_report(summary: EvalSummary, path: Path = Path("docs/eval/report.md")) -> None:
@@ -563,6 +632,26 @@ def write_report(summary: EvalSummary, path: Path = Path("docs/eval/report.md"))
         for r in skipped_rows:
             times = f" x{r.count}" if r.count > 1 else ""
             L.append(f"- [{r.method}] {r.case_id} {r.rule_id}: {r.skip_reason}{times}")
+    if summary.traces:
+        L += ["", "## Rule-context resolver", "",
+              "What the dispute is (issue family) is kept apart from which approved card can decide "
+              "it. The engine ran only on candidates marked `applicable`; every other status is a "
+              "reason it did not run, never a verdict. Candidate counts by status "
+              f"(over {len(summary.traces)} cases): "
+              + (", ".join(f"{k} {v}" for k, v in sorted(summary.resolver_counts.items())) or "none")
+              + ". Family source (cases): "
+              + (", ".join(f"{k} {v}" for k, v in sorted(summary.family_sources.items())) or "none")
+              + " (reviewed = human-reviewed issue family; ground = family of the reviewed "
+              "rejection ground; none = neither).", "",
+              "Per case: families (source), then each candidate card with its status and reason.", ""]
+        for cid, t in summary.traces.items():
+            fams = ", ".join(t["families"]) or "no family"
+            L.append(f"- {cid}: {fams} ({t['family_source']})")
+            for c in t["candidates"]:
+                cand = (f"{c['rule_id']} v{c['version']}" if c["rule_id"] and c["version"] is not None
+                        else c["rule_id"] or "-")
+                warn = f" [warning: {'; '.join(c['warnings'])}]" if c["warnings"] else ""
+                L.append(f"  - {cand}: {c['status']}: {c['reason']}{warn}")
     if summary.excluded_by_reviewer:
         L += [""] + [f"Excluded by reviewer: {cid} \u2014 {reason}"
                      for cid, reason in summary.excluded_by_reviewer]

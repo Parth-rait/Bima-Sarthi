@@ -100,17 +100,19 @@ SELECT source_id, sha256 FROM source ORDER BY source_id;
 
 Run on real, human-reviewed court judgments (not generated cases): the rule engine on reviewed facts is compared with what the court decided, against Glimmer-only and Spark-only baselines that get the same facts and the regulation text. Reading accuracy is measured separately.
 
-**All numbers below are pending**: they are filled from `docs/eval/report.md` only after `cli eval` has run on the real reviewed cases.
+Rules column: run `eval-20261104-143527` (4 Nov 2026, rules method only, 3 repeats, no model calls), copied from `docs/eval/report.md` and served to the app's `/evidence` page from `docs/eval/summary.json`. The model-only columns are pending: they need the model runs in runbook 20.
 
 | Measure | rules | glimmer_only | spark_only |
 |---|---|---|---|
-| Cases (n) | pending | pending | pending |
-| Agreement with court outcome | pending | pending | pending |
-| False-hope rate (we said challengeable, the court dismissed) | pending | pending | pending |
-| Abstentions | pending | pending | pending |
-| Quote coverage | pending | pending | pending |
-| Stability over 3 repeats | pending | pending | pending |
-| Cost (USD) | pending | pending | pending |
+| Cases (n) | 13 evaluated; 5 with an engine answer (2 skipped: a needed fact not yet reviewed; 1 no rule in force; 5 no usable ground or rule) | pending | pending |
+| Agreement with court outcome | not measurable: 0 findings could be scored against a reviewed holding | pending | pending |
+| False-hope rate (we said challengeable, the court dismissed) | not measurable: no challengeable finding met a reviewed holding | pending | pending |
+| Abstentions | 15 of 15 findings answered NEED_INFO; safe abstention 18/18 | pending | pending |
+| Quote coverage | 100% | pending | pending |
+| Stability over 3 repeats | 100% | pending | pending |
+| Cost (USD) | 0.00 | pending | pending |
+
+What this shows, and what it does not: on every reviewed case so far the engine asked for a missing fact rather than guess, so it never gave false hope; but no agreement rate exists yet. The blocker is human review of more case facts, not the calculation.
 
 | Reading and lookup | Result |
 |---|---|

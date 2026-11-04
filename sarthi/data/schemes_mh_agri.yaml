@@ -1,0 +1,539 @@
+# Scheme finder catalogue: agriculture workers in Maharashtra.
+# Every amount, age and condition below was read from the official source named on the scheme.
+# Hindi is a DRAFT pending human review (Q-007). Do not add a scheme without a source URL.
+version: 3
+checked_on: 2026-11-02
+state: Maharashtra
+audience:
+  en: Agriculture workers
+  hi: कृषि श्रमिक
+
+disclaimer:
+  en: This is information, not an eligibility decision. The office or insurer decides. We do not fill or send any form.
+  hi: यह जानकारी है, पात्रता का फ़ैसला नहीं। अंतिम फ़ैसला कार्यालय या बीमाकर्ता करता है। हम कोई फ़ॉर्म नहीं भरते या भेजते।
+
+questions:
+  - id: work
+    text:
+      en: What work do you do?
+      hi: आप क्या काम करते हैं?
+    hint:
+      en: Choose the closest one.
+      hi: जो सबसे मिलता हो वह चुनें।
+    options:
+      - value: own_land
+        label:
+          en: I farm my own land
+          hi: मैं अपनी ज़मीन पर खेती करता हूँ
+      - value: both
+        label:
+          en: I farm my land and work on other farms
+          hi: मैं अपनी ज़मीन पर भी खेती करता हूँ और दूसरों के खेत पर भी काम करता हूँ
+      - value: farm_labour
+        label:
+          en: I work on other people's farms
+          hi: मैं दूसरों के खेत पर काम करता हूँ
+      - value: other
+        label:
+          en: Something else
+          hi: कुछ और
+
+  - id: age
+    text:
+      en: How old are you?
+      hi: आपकी उम्र क्या है?
+    hint:
+      en: This decides which schemes can accept you.
+      hi: इससे पता चलता है कि कौन सी योजना आपको ले सकती है।
+    options:
+      - value: under_18
+        label:
+          en: Under 18
+          hi: १८ साल से कम
+      - value: "18_50"
+        label:
+          en: 18 to 50
+          hi: १८ से ५० साल
+      - value: "51_70"
+        label:
+          en: 51 to 70
+          hi: ५१ से ७० साल
+      - value: over_70
+        label:
+          en: Over 70
+          hi: ७० साल से ज़्यादा
+
+  - id: bank
+    text:
+      en: Do you have your own bank or post office account?
+      hi: क्या आपका अपना बैंक या डाकघर खाता है?
+    hint:
+      en: Two schemes here work through that account.
+      hi: यहाँ दो योजनाएँ उसी खाते से चलती हैं।
+    options:
+      - value: "yes"
+        label:
+          en: "Yes"
+          hi: हाँ
+      - value: "no"
+        label:
+          en: "No"
+          hi: नहीं
+      - value: unsure
+        label:
+          en: Not sure
+          hi: पता नहीं
+
+  - id: ration
+    text:
+      en: Does your family have a ration card?
+      hi: क्या आपके परिवार का राशन कार्ड है?
+    hint:
+      en: Health cover uses a different list, but this helps us point you to the right office.
+      hi: स्वास्थ्य योजना दूसरी सूची देखती है, पर इससे हम सही कार्यालय बता पाते हैं।
+    options:
+      - value: "yes"
+        label:
+          en: "Yes"
+          hi: हाँ
+      - value: "no"
+        label:
+          en: "No"
+          hi: नहीं
+      - value: unsure
+        label:
+          en: Not sure
+          hi: पता नहीं
+
+statuses:
+  likely:
+    label:
+      en: Likely eligible
+      hi: संभावित पात्र
+    sentence:
+      en: Your answers match the main conditions. The office still decides.
+      hi: आपके उत्तर मुख्य शर्तों से मिलते हैं। अंतिम फ़ैसला कार्यालय करेगा।
+  check:
+    label:
+      en: Check with the office
+      hi: कार्यालय से पूछें
+    sentence:
+      en: You may qualify, but one condition needs checking.
+      hi: आप पात्र हो सकते हैं, पर एक शर्त जाँचनी होगी।
+  not_eligible:
+    label:
+      en: Not eligible from your answers
+      hi: आपके उत्तरों से पात्र नहीं
+    sentence:
+      en: From your answers, this one does not fit. If an answer is wrong, change it.
+      hi: आपके उत्तरों से यह योजना नहीं बैठती। कोई उत्तर ग़लत हो तो बदल दें।
+
+groups:
+  start:
+    title:
+      en: Start with these
+      hi: इनसे शुरू करें
+    intro:
+      en: The main conditions match your answers. Ask at the office with the documents listed.
+      hi: मुख्य शर्तें आपके उत्तरों से मिलती हैं। सूची में दिए कागज़ लेकर कार्यालय जाएँ।
+  ask:
+    title:
+      en: Ask about these
+      hi: इनके बारे में पूछें
+    intro:
+      en: One condition needs a document or an office check before you know.
+      hi: एक शर्त के लिए कागज़ या कार्यालय की जाँच चाहिए।
+  not_now:
+    title:
+      en: These do not fit your answers
+      hi: ये आपके उत्तरों से नहीं बैठतीं
+    intro:
+      en: Open each one to see why. If an answer was wrong, change it above.
+      hi: कारण देखने के लिए खोलें। कोई उत्तर ग़लत था तो ऊपर बदल दें।
+
+schemes:
+  - id: gopinath_munde
+    priority: 10
+    name:
+      en: Gopinath Munde Shetkari Apghat Suraksha
+      hi: गोपीनाथ मुंडे शेतकरी अपघात सुरक्षा
+    short:
+      en: Accident cover for a registered landholding farmer
+      hi: ७/१२ धारक किसान के लिए दुर्घटना बीमा
+    what:
+      en: A State accident scheme for a farmer registered on the 7/12 extract. If the farmer dies or loses a limb or an eye in an accident, the family gets a fixed amount.
+      hi: ७/१२ उताऱ्यावर नोंद असलेल्या किसान के लिए राज्य की दुर्घटना योजना। दुर्घटना में मृत्यु या अंग या आँख की हानि होने पर परिवार को तय राशि मिलती है।
+    cover:
+      en: ₹2 lakh for death. ₹1 lakh for loss of one limb or one eye. ₹2 lakh for loss of two limbs, two eyes, or one limb and one eye.
+      hi: मृत्यु पर ₹२ लाख। एक अंग या एक आँख की हानि पर ₹१ लाख। दो अंग, दो आँखें, या एक अंग और एक आँख की हानि पर ₹२ लाख।
+    eligibility:
+      en: A farmer registered on the 7/12 extract, aged 10 to 75, with one family member named as in the Government Resolution. Covered accidents include road or rail accidents, drowning, pesticide poisoning, electric shock, lightning, snake or animal bite, and accidents while farming.
+      hi: ७/१२ उताऱ्यावर नोंद असलेला किसान, उम्र १० से ७५ साल, और शासन निर्णय के अनुसार परिवार का एक सदस्य। दुर्घटनाओं में सड़क या रेल दुर्घटना, डूबना, कीटनाशक से ज़हर, बिजली का झटका, आकाशीय बिजली, साँप या जानवर का काटना, और खेती करते समय की दुर्घटना शामिल है।
+    steps:
+      - en: Apply on MahaDBT (Aaple Sarkar DBT) and complete the farmer profile.
+        hi: महाडीबीटी (आपले सरकार डीबीटी) पर आवेदन करें और किसान प्रोफ़ाइल पूरी करें।
+      - en: Keep the 7/12 extract, death certificate, Village Form 6-C, age proof, FIR, spot verification and village police patil certificate ready.
+        hi: ७/१२ उतारा, मृत्यु प्रमाण पत्र, गाँव नमुना ६-क, उम्र का सबूत, एफआईआर, स्थल जाँच और गाँव के पुलिस पाटील का प्रमाण पत्र तैयार रखें।
+      - en: Submit the claim on the same portal and keep checking the application status.
+        hi: उसी पोर्टल पर दावा जमा करें और आवेदन की स्थिति देखते रहें।
+    fails:
+      - en: The person is not a registered 7/12 landholder.
+        hi: व्यक्ति ७/१२ का नोंदणीकृत धारक नहीं है।
+      - en: The accident is not one the scheme covers, or there is no police or village record.
+        hi: दुर्घटना योजना में शामिल नहीं है, या पुलिस या गाँव का रिकॉर्ड नहीं है।
+      - en: The name or age does not match the 7/12 record.
+        hi: नाम या उम्र ७/१२ के रिकॉर्ड से नहीं मिलती।
+    official_url: https://mahadbt.maharashtra.gov.in/Farmer/SchemeData/SchemeData?str=E9DDFA703C38E51A41E9076B9F87E641
+    source:
+      name:
+        en: MahaDBT scheme page, Agriculture Department, Maharashtra
+        hi: महाडीबीटी योजना पृष्ठ, कृषि विभाग, महाराष्ट्र
+      url: https://mahadbt.maharashtra.gov.in/Farmer/SchemeData/SchemeData?str=E9DDFA703C38E51A41E9076B9F87E641
+      note:
+        en: Benefit, eligibility and required documents read on 2 November 2026.
+        hi: लाभ, पात्रता और ज़रूरी कागज़ २ नवंबर २०२६ को पढ़े गए।
+    reasons:
+      land_ok:
+        en: You farm your own land and your age is within the scheme's range.
+        hi: आप अपनी ज़मीन पर खेती करते हैं और आपकी उम्र योजना की सीमा में है।
+      age_check:
+        en: You farm your own land. The age limit is 10 to 75, so the office must confirm your exact age.
+        hi: आप अपनी ज़मीन पर खेती करते हैं। उम्र की सीमा १० से ७५ साल है, इसलिए कार्यालय को आपकी सही उम्र जाँचनी होगी।
+      land_check:
+        en: You farm your own land and also work on other farms. The scheme needs a 7/12 record.
+        hi: आप अपनी ज़मीन पर भी खेती करते हैं और दूसरों के खेत पर भी काम करते हैं। योजना के लिए ७/१२ का रिकॉर्ड चाहिए।
+      no_712:
+        en: This scheme is for a registered 7/12 landholder. If you or your family hold 7/12 land, ask the office anyway.
+        hi: यह योजना ७/१२ धारक के लिए है। अगर आपके या परिवार के नाम ७/१२ ज़मीन है, तो कार्यालय से ज़रूर पूछें।
+
+  - id: pmsby
+    # The claim check's type of insurance for a rejected claim under this scheme (4 Nov; Parth to confirm).
+    claim_product_line: accident
+    priority: 20
+    name:
+      en: PMSBY (Pradhan Mantri Suraksha Bima Yojana)
+      hi: पीएमएसबीवाई (प्रधानमंत्री सुरक्षा बीमा योजना)
+    short:
+      en: ₹20 a year for accident cover through your bank account
+      hi: बैंक खाते से सालाना ₹२० में दुर्घटना बीमा
+    what:
+      en: A one year accident insurance attached to a bank or post office account. One small yearly debit gives accident cover.
+      hi: बैंक या डाकघर खाते से जुड़ा एक साल का दुर्घटना बीमा। साल में एक छोटी किस्त कटती है और दुर्घटना का कवर मिलता है।
+    cover:
+      en: ₹2 lakh for accidental death, or loss of both eyes, both hands or both feet. ₹1 lakh for loss of one eye, one hand or one foot. The premium is ₹20 per year.
+      hi: दुर्घटना में मृत्यु, या दोनों आँखें, दोनों हाथ या दोनों पैर की हानि पर ₹२ लाख। एक आँख, एक हाथ या एक पैर की हानि पर ₹१ लाख। प्रीमियम सालाना ₹२० है।
+    eligibility:
+      en: Any individual bank or post office account holder aged 18 to 70. You can join through one account only.
+      hi: बैंक या डाकघर का व्यक्तिगत खाताधारक, उम्र १८ से ७० साल। एक ही खाते से जुड़ सकते हैं।
+    steps:
+      - en: Ask your bank or post office for the PMSBY form and consent for the yearly auto debit.
+        hi: बैंक या डाकघर से पीएमएसबीवाई का फ़ॉर्म और सालाना कटौती की सहमति माँगें।
+      - en: Keep at least ₹20 in the account when the debit is due.
+        hi: कटौती के समय खाते में कम से कम ₹२० रखें।
+      - en: For a claim, the nominee or legal heir files with the bank, with the accident and hospital records.
+        hi: दावे के लिए नामांकित व्यक्ति या कानूनी वारिस बैंक में दुर्घटना और अस्पताल के कागज़ देकर आवेदन करे।
+    fails:
+      - en: The account has too little money on the debit date, so the cover lapses.
+        hi: कटौती की तारीख़ पर खाते में पैसे कम हैं, तो कवर बंद हो जाता है।
+      - en: The injury is not an accident, is suicide, or does not cause the listed loss.
+        hi: चोट दुर्घटना नहीं है, आत्महत्या है, या सूची में दी गई हानि नहीं हुई।
+      - en: There is no police record for a road, rail or drowning accident, or no hospital record for a snake bite or fall.
+        hi: सड़क, रेल या डूबने की दुर्घटना का पुलिस रिकॉर्ड नहीं है, या साँप के काटने या गिरने का अस्पताल रिकॉर्ड नहीं है।
+    official_url: https://jansuraksha.in/
+    source:
+      name:
+        en: PMSBY official FAQ, Jan Suraksha
+        hi: पीएमएसबीवाई आधिकारिक सामान्य प्रश्न, जन सुरक्षा
+      url: https://jansuraksha.gov.in/Files/PMSBY/ENGLISH/FAQ.pdf
+      note:
+        en: Benefits, premium and eligibility read on 2 November 2026.
+        hi: लाभ, प्रीमियम और पात्रता २ नवंबर २०२६ को पढ़े गए।
+    reasons:
+      ok:
+        en: You have your own account and your age is within 18 to 70.
+        hi: आपका अपना खाता है और आपकी उम्र १८ से ७० साल के बीच है।
+      age_minor:
+        en: This cover starts at age 18.
+        hi: यह कवर १८ साल की उम्र से शुरू होता है।
+      age_senior:
+        en: This cover ends at age 70.
+        hi: यह कवर ७० साल की उम्र पर बंद हो जाता है।
+      no_account:
+        en: You need your own bank or post office account. Ask about opening a basic account.
+        hi: आपको अपना बैंक या डाकघर खाता चाहिए। साधारण खाता खोलने के बारे में पूछें।
+      unsure_account:
+        en: Ask your bank or post office whether you have an individual account and whether a ₹20 debit is active.
+        hi: बैंक या डाकघर से पूछें कि आपका व्यक्तिगत खाता है या नहीं और ₹२० की कटौती चालू है या नहीं।
+
+  - id: pmjjby
+    # The claim check's type of insurance for a rejected claim under this scheme (4 Nov; Parth to confirm).
+    claim_product_line: life
+    priority: 30
+    name:
+      en: PMJJBY (Pradhan Mantri Jeevan Jyoti Bima Yojana)
+      hi: पीएमजेजेबीवाई (प्रधानमंत्री जीवन ज्योति बीमा योजना)
+    short:
+      en: ₹436 a year for ₹2 lakh life cover through your bank account
+      hi: बैंक खाते से सालाना ₹४३६ में ₹२ लाख का जीवन बीमा
+    what:
+      en: A one year term life insurance attached to a bank or post office account. It pays your nominee if you die.
+      hi: बैंक या डाकघर खाते से जुड़ा एक साल का जीवन बीमा। आपकी मृत्यु पर नामांकित व्यक्ति को राशि मिलती है।
+    cover:
+      en: ₹2 lakh on death from any cause. The premium is ₹436 per year.
+      hi: किसी भी कारण से मृत्यु पर ₹२ लाख। प्रीमियम सालाना ₹४३६ है।
+    eligibility:
+      en: Any individual bank or post office account holder aged 18 to 50 can join. Cover can continue on renewal up to age 55.
+      hi: बैंक या डाकघर का व्यक्तिगत खाताधारक, उम्र १८ से ५० साल, जुड़ सकता है। नवीनीकरण पर कवर ५५ साल तक चल सकता है।
+    steps:
+      - en: Ask your bank or post office for the PMJJBY form and consent for the yearly auto debit.
+        hi: बैंक या डाकघर से पीएमजेजेबीवाई का फ़ॉर्म और सालाना कटौती की सहमति माँगें।
+      - en: Keep ₹436 in the account for the yearly debit, and name a nominee.
+        hi: सालाना कटौती के लिए खाते में ₹४३६ रखें, और नामांकित व्यक्ति का नाम दें।
+      - en: The nominee files the claim with the bank, with the death certificate.
+        hi: नामांकित व्यक्ति मृत्यु प्रमाण पत्र के साथ बैंक में दावा करे।
+    fails:
+      - en: "Death from a cause other than an accident in the first 30 days: no claim."
+        hi: "पहले ३० दिनों में दुर्घटना के अलावा किसी कारण से मृत्यु: दावा नहीं।"
+      - en: The account has too little money on the debit date, so the cover lapses.
+        hi: कटौती की तारीख़ पर खाते में पैसे कम हैं, तो कवर बंद हो जाता है।
+      - en: No nominee is named, or the claim is filed without the death certificate.
+        hi: नामांकित व्यक्ति नहीं है, या दावा मृत्यु प्रमाण पत्र के बिना किया गया।
+    official_url: https://jansuraksha.in/
+    source:
+      name:
+        en: PMJJBY official FAQ, Jan Suraksha
+        hi: पीएमजेजेबीवाई आधिकारिक सामान्य प्रश्न, जन सुरक्षा
+      url: https://jansuraksha.gov.in/Files/PMJJBY/ENGLISH/FAQ.pdf
+      note:
+        en: Benefits, premium, age and the 30 day wait read on 2 November 2026.
+        hi: लाभ, प्रीमियम, उम्र और ३० दिन की प्रतीक्षा २ नवंबर २०२६ को पढ़ी गई।
+    reasons:
+      ok:
+        en: You have your own account and your age is within 18 to 50.
+        hi: आपका अपना खाता है और आपकी उम्र १८ से ५० साल के बीच है।
+      age_minor:
+        en: This cover starts at age 18.
+        hi: यह कवर १८ साल की उम्र से शुरू होता है।
+      age_senior:
+        en: You can join only up to age 50. If you joined earlier, cover can continue to 55.
+        hi: आप ५० साल तक ही जुड़ सकते हैं। पहले जुड़े थे तो कवर ५५ साल तक चल सकता है।
+      no_account:
+        en: You need your own bank or post office account. Ask about opening a basic account.
+        hi: आपको अपना बैंक या डाकघर खाता चाहिए। साधारण खाता खोलने के बारे में पूछें।
+      unsure_account:
+        en: Ask your bank or post office whether you have an individual account and whether a ₹436 debit is active.
+        hi: बैंक या डाकघर से पूछें कि आपका व्यक्तिगत खाता है या नहीं और ₹४३६ की कटौती चालू है या नहीं।
+
+  - id: pmfby
+    # The claim check's type of insurance for a rejected claim under this scheme (4 Nov; Parth to confirm).
+    claim_product_line: crop
+    priority: 40
+    name:
+      en: PMFBY (Pradhan Mantri Fasal Bima Yojana)
+      hi: पीएमएफबीवाई (प्रधानमंत्री फ़सल बीमा योजना)
+    short:
+      en: Crop insurance for a notified crop in a notified area
+      hi: अधिसूचित फ़सल और क्षेत्र के लिए फ़सल बीमा
+    what:
+      en: Crop insurance for farmers growing a notified crop. If the crop fails, the insurer pays for the loss.
+      hi: अधिसूचित फ़सल उगाने वाले किसान के लिए फ़सल बीमा। फ़सल ख़राब होने पर बीमाकर्ता नुकसान की राशि देता है।
+    cover:
+      en: Compensation for prevented sowing, standing crop loss, post harvest loss and localised damage. The sum insured and indemnity level are set for your crop and area.
+      hi: बुआई न हो पाने, खड़ी फ़सल के नुकसान, कटाई के बाद के नुकसान और स्थानीय नुकसान की राशि। बीमित राशि और क्षतिपूर्ति स्तर आपकी फ़सल और क्षेत्र के लिए तय होते हैं।
+    premium:
+      en: "Kharif food and oilseed crops: 2% of the sum insured. Rabi: 1.5%. Commercial and horticulture crops: 5%."
+      hi: "खरीफ़ के अनाज और तिलहन: बीमित राशि का २%. रबी: १.५%. व्यापारिक और बागवानी फ़सल: ५%."
+    deadline:
+      en: Enrolment closes on the State's cut-off date. It is normally 31 July for Kharif and 31 December for Rabi. A late application gets no cover for that season.
+      hi: नामांकन राज्य की अंतिम तारीख़ पर बंद होता है। खरीफ़ के लिए सामान्यतः ३१ जुलाई और रबी के लिए ३१ दिसंबर। देर से आवेदन पर उस मौसम का कवर नहीं मिलता।
+    eligibility:
+      en: All farmers growing a notified crop in a notified area, including sharecroppers and tenant farmers. You need proof that you farm the land, such as a 7/12 or land record, or your tenancy agreement.
+      hi: अधिसूचित क्षेत्र में अधिसूचित फ़सल उगाने वाले सभी किसान, बटाईदार और किरायेदार किसान भी। ज़मीन पर खेती का सबूत चाहिए, जैसे ७/१२ या भूमि रिकॉर्ड, या किरायेदारी का समझौता।
+    steps:
+      - en: Check that your crop is notified in your district for this season.
+        hi: देखें कि इस मौसम में आपकी फ़सल आपके ज़िले में अधिसूचित है।
+      - en: Apply before the cut-off date. Loanee farmers are covered through the bank. Non loanee farmers apply on pmfby.gov.in, at a CSC, or through an insurance agent.
+        hi: अंतिम तारीख़ से पहले आवेदन करें। कर्ज़ लेने वाले किसान बैंक से जुड़ते हैं। कर्ज़ न लेने वाले किसान pmfby.gov.in, सीएससी, या बीमा एजेंट से आवेदन करें।
+      - en: Keep the acknowledgement receipt with the policy number and the crop and area insured.
+        hi: पॉलिसी संख्या और बीमित फ़सल व क्षेत्र के साथ पावती रसीद रखें।
+    fails:
+      - en: "Applying after the cut-off date: no cover for that season."
+        hi: "अंतिम तारीख़ के बाद आवेदन: उस मौसम का कवर नहीं।"
+      - en: "Wrong crop, area or land details: the claim can be forfeited and the premium is not returned."
+        hi: "फ़सल, क्षेत्र या ज़मीन की ग़लत जानकारी: दावा ख़त्म हो सकता है और प्रीमियम वापस नहीं मिलता।"
+      - en: "Your data not uploaded on the National Crop Insurance Portal: no valid cover."
+        hi: "राष्ट्रीय फ़सल बीमा पोर्टल पर आपका डेटा अपलोड नहीं: वैध कवर नहीं।"
+    official_url: https://pmfby.gov.in/
+    source:
+      name:
+        en: Revised Operational Guidelines of PMFBY (official)
+        hi: पीएमएफबीवाई के संशोधित परिचालन दिशानिर्देश (आधिकारिक)
+      url: https://pmfby.gov.in/pdf/Revised_Operational_Guidelines.pdf
+      note:
+        en: Coverage page 3, premium page 13, forfeiture page 23. Read on 2 November 2026.
+        hi: कवर पृष्ठ ३, प्रीमियम पृष्ठ १३, दावा ख़त्म होने की बात पृष्ठ २३। २ नवंबर २०२६ को पढ़ा गया।
+    reasons:
+      farm:
+        en: You work on a farm. Your crop must be notified for your area and you must apply before the season's cut-off date.
+        hi: आप खेत पर काम करते हैं। आपकी फ़सल आपके क्षेत्र में अधिसूचित होनी चाहिए और मौसम की अंतिम तारीख़ से पहले आवेदन करना होगा।
+      not_farm:
+        en: This scheme is for farmers growing a notified crop. Your answer says farming is not your work.
+        hi: यह योजना अधिसूचित फ़सल उगाने वाले किसान के लिए है। आपके उत्तर के अनुसार खेती आपका काम नहीं है।
+
+  - id: pmjay
+    priority: 50
+    name:
+      en: Ayushman Bharat PM-JAY
+      hi: आयुष्मान भारत पीएम-जय
+    short:
+      en: Free hospital treatment for low income families
+      hi: कम आय वाले परिवारों के लिए मुफ़्त अस्पताल इलाज
+    what:
+      en: Government health assurance for low income families at empanelled hospitals.
+      hi: सूचीबद्ध अस्पतालों में कम आय वाले परिवारों के लिए सरकारी स्वास्थ्य बीमा।
+    cover:
+      en: Up to ₹5 lakh per family per year for secondary and tertiary hospital treatment. Cashless at empanelled hospitals. No cap on family size, age or gender.
+      hi: अस्पताल के दूसरे और तीसरे स्तर के इलाज पर प्रति परिवार सालाना ₹५ लाख तक। सूचीबद्ध अस्पतालों में कैशलेस। परिवार के आकार, उम्र या लिंग की कोई सीमा नहीं।
+    eligibility:
+      en: Families identified from the 2011 SECC list, including landless households that earn most of their income from manual casual labour. Get an Ayushman card at a Common Service Centre or an empanelled hospital.
+      hi: २०११ की एसईसीसी सूची में चिह्नित परिवार, जिनमें वे भूमिहीन परिवार भी हैं जो अपनी अधिकतर आय मज़दूरी से कमाते हैं। कॉमन सर्विस सेंटर या सूचीबद्ध अस्पताल से आयुष्मान कार्ड बनवाएँ।
+    steps:
+      - en: Ask at a Common Service Centre or an empanelled hospital whether your family is on the list.
+        hi: कॉमन सर्विस सेंटर या सूचीबद्ध अस्पताल में पूछें कि आपका परिवार सूची में है या नहीं।
+      - en: Carry Aadhaar and a ration card if you have one. Get the Ayushman card made.
+        hi: आधार और राशन कार्ड, अगर हो, साथ ले जाएँ। आयुष्मान कार्ड बनवाएँ।
+      - en: Show the card at an empanelled hospital before treatment.
+        hi: इलाज से पहले सूचीबद्ध अस्पताल में कार्ड दिखाएँ।
+    fails:
+      - en: The hospital is not empanelled.
+        hi: अस्पताल सूची में शामिल नहीं है।
+      - en: The treatment is not in the covered package list.
+        hi: इलाज शामिल पैकेज सूची में नहीं है।
+      - en: The family is not on the SECC list and the State has not expanded cover to it.
+        hi: परिवार एसईसीसी सूची में नहीं है और राज्य ने उसका कवर नहीं बढ़ाया।
+    official_url: https://pmjay.gov.in/
+    source:
+      name:
+        en: PIB release, Ministry of Health and Family Welfare, 23 July 2021
+        hi: पीआईबी विज्ञप्ति, स्वास्थ्य और परिवार कल्याण मंत्रालय, २३ जुलाई २०२१
+      url: https://www.pib.gov.in/PressReleasePage.aspx?PRID=1738169
+      note:
+        en: Cover, eligibility list and card process read on 2 November 2026.
+        hi: कवर, पात्रता सूची और कार्ड की प्रक्रिया २ नवंबर २०२६ को पढ़ी गई।
+    reasons:
+      check:
+        en: Health cover depends on your family being on the 2011 SECC list. Ask at a Common Service Centre or an empanelled hospital, and carry Aadhaar.
+        hi: स्वास्थ्य कवर इस बात पर है कि आपका परिवार २०११ की एसईसीसी सूची में है। कॉमन सर्विस सेंटर या सूचीबद्ध अस्पताल में पूछें, और आधार साथ ले जाएँ।
+      no_ration:
+        en: Even without a ration card, landless households that earn most of their income from manual labour can be on the SECC list. Ask at a Common Service Centre or an empanelled hospital.
+        hi: राशन कार्ड के बिना भी, वे भूमिहीन परिवार जो अधिकतर आय मज़दूरी से कमाते हैं, एसईसीसी सूची में हो सकते हैं। कॉमन सर्विस सेंटर या सूचीबद्ध अस्पताल में पूछें।
+
+  - id: pmkisan
+    priority: 35
+    verified_on: 2026-11-03
+    name:
+      en: PM-KISAN (Pradhan Mantri Kisan Samman Nidhi)
+      hi: पीएम-किसान (प्रधानमंत्री किसान सम्मान निधि)
+    short:
+      en: ₹6,000 a year for landholding farmer families
+      hi: भूमि वाले किसान परिवारों के लिए सालाना ₹६,०००
+    what:
+      en: Income support paid to landholding farmer families to buy farm inputs and meet household needs.
+      hi: भूमि वाले किसान परिवारों को खेती का सामान और घर की ज़रूरतों के लिए दी जाने वाली आय सहायता।
+    cover:
+      en: ₹6,000 per year per family, in three equal instalments of ₹2,000 every four months. The money is credited directly to the beneficiary's bank account.
+      hi: प्रति परिवार सालाना ₹६,०००, चार-चार महीने पर ₹२,००० की तीन बराबर किस्तों में। राशि सीधे लाभार्थी के बैंक खाते में आती है।
+    eligibility:
+      en: A family of husband, wife and minor children that owns cultivable land in its own name, as shown in the State land record. Tenant farmers, sharecroppers and people cultivating land that is not in their name do not qualify.
+      hi: पति, पत्नी और नाबालिग बच्चों का परिवार, जिसके नाम राज्य के भूमि रिकॉर्ड में खेती योग्य ज़मीन हो। किरायेदार किसान, बटाईदार और जिनके नाम ज़मीन नहीं है, पात्र नहीं हैं।
+    steps:
+      - en: Check that the cultivable land is recorded in your or your family's name in the State land record.
+        hi: देखें कि खेती योग्य ज़मीन राज्य के भूमि रिकॉर्ड में आपके या आपके परिवार के नाम है।
+      - en: Apply through the village Patwari or revenue official, or through the Farmers' Corner on pmkisan.gov.in, with Aadhaar, bank account number, IFSC code and mobile number.
+        hi: गाँव के पटवारी या राजस्व अधिकारी के पास आवेदन करें, या pmkisan.gov.in के फ़ार्मर्स कॉर्नर से आधार, बैंक खाता संख्या, आईएफ़एससी कोड और मोबाइल नंबर के साथ आवेदन करें।
+      - en: Check your name in the beneficiary list at the Panchayat or under Beneficiary Status on the portal. If it is missing, approach the District Level Grievance Redressal Monitoring Committee.
+        hi: पंचायत की लाभार्थी सूची में या पोर्टल के बेनिफ़िशियरी स्टेटस में अपना नाम देखें। नाम न हो तो ज़िला स्तरीय शिकायत निवारण समिति से मिलें।
+    fails:
+      - en: "The land is not in your family's name: tenants, sharecroppers and people farming ancestral land without a transfer in their name do not qualify."
+        hi: "ज़मीन आपके परिवार के नाम नहीं है: किरायेदार, बटाईदार और बिना नामांतरण के पैतृक ज़मीन जोतने वाले पात्र नहीं हैं।"
+      - en: "A family member is in an excluded category, such as an income-tax payer, a government officer or employee, a pensioner with a pension of ₹10,000 or more, or a practising doctor, engineer, lawyer, chartered accountant or architect."
+        hi: "परिवार का कोई सदस्य वर्जित श्रेणी में है, जैसे आयकर दाता, सरकारी अधिकारी या कर्मचारी, ₹१०,००० या अधिक पेंशन वाला पेंशनभोगी, या अभ्यास करने वाला डॉक्टर, इंजीनियर, वकील, चार्टर्ड अकाउंटेंट या आर्किटेक्ट।"
+      - en: "The bank account or Aadhaar details are wrong or not linked, so the instalment cannot be credited."
+        hi: "बैंक खाता या आधार की जानकारी ग़लत है या जुड़ी नहीं है, इसलिए किस्त जमा नहीं हो पाती।"
+      - en: "An incorrect declaration makes the family liable to recover the money and to penal action."
+        hi: "ग़लत घोषणा पर परिवार से राशि वसूली जा सकती है और कानूनी कार्रवाई हो सकती है।"
+    official_url: https://pmkisan.gov.in/
+    source:
+      name:
+        en: PM-KISAN Frequently Asked Questions, Ministry of Agriculture and Farmers Welfare (official)
+        hi: पीएम-किसान अक्सर पूछे जाने वाले प्रश्न, कृषि और किसान कल्याण मंत्रालय (आधिकारिक)
+      url: https://static.pib.gov.in/WriteReadData/specificdocs/documents/2021/nov/doc2021112361.pdf
+      note:
+        en: Benefit, eligibility, exclusions and documents, pages 1 to 5. Read on 3 November 2026.
+        hi: लाभ, पात्रता, वर्जित श्रेणियाँ और दस्तावेज़, पृष्ठ १ से ५। ३ नवंबर २०२६ को पढ़ा गया।
+    reasons:
+      land_ok:
+        en: Your family owns cultivable land, which is the main condition. The land must be recorded in the family's name.
+        hi: आपके परिवार के पास खेती योग्य ज़मीन है, यही मुख्य शर्त है। ज़मीन परिवार के नाम दर्ज होनी चाहिए।
+      land_check:
+        en: PM-KISAN needs cultivable land in your family's name. Your answer does not say whether your family owns land, so check the land record or ask at the Patwari's office.
+        hi: पीएम-किसान के लिए आपके परिवार के नाम खेती योग्य ज़मीन ज़रूरी है। आपके उत्तर से यह नहीं पता चलता कि परिवार के पास ज़मीन है या नहीं, इसलिए भूमि रिकॉर्ड देखें या पटवारी के कार्यालय में पूछें।
+      no_account:
+        en: The money is paid into a bank account. The person applying needs an account in their own name.
+        hi: राशि बैंक खाते में आती है। आवेदन करने वाले के अपने नाम का खाता होना चाहिए।
+      unsure_account:
+        en: Check whether the person applying has a bank account in their own name; the instalment is paid there.
+        hi: देखें कि आवेदन करने वाले के अपने नाम का बैंक खाता है या नहीं; किस्त वहीं आती है।
+      minor_family:
+        en: PM-KISAN pays the landholding family, not one person. A parent or guardian can apply if the land is in the family's name.
+        hi: पीएम-किसान भूमि वाले परिवार को मिलता है, किसी एक व्यक्ति को नहीं। अगर ज़मीन परिवार के नाम है तो माता-पिता या अभिभावक आवेदन कर सकते हैं।
+
+  - id: mgnrega
+    priority: 45
+    verified_on: 2026-11-03
+    name:
+      en: MGNREGA (Mahatma Gandhi National Rural Employment Guarantee Act)
+      hi: मनरेगा (महात्मा गांधी राष्ट्रीय ग्रामीण रोज़गार गारंटी अधिनियम)
+    short:
+      en: Up to 100 days of paid work for a rural household
+      hi: ग्रामीण परिवार के लिए १०० दिन तक की सशुल्क मज़दूरी
+    what:
+      en: A legal guarantee of unskilled manual work for adult members of a rural household, at the notified wage.
+      hi: ग्रामीण परिवार के वयस्क सदस्यों को अधिसूचित मज़दूरी पर अकुशल शारीरिक काम की कानूनी गारंटी।
+    cover:
+      en: Up to 100 days of paid work per rural household in a financial year, at the State's notified wage. Wages are paid into the worker's bank or post office account.
+      hi: एक वित्त वर्ष में प्रति ग्रामीण परिवार १०० दिन तक का सशुल्क काम, राज्य की अधिसूचित मज़दूरी पर। मज़दूरी कामगार के बैंक या डाकघर खाते में आती है।
+    eligibility:
+      en: Adult members of a rural household who are willing to do unskilled manual work. The household must be registered at the Gram Panchayat and hold a job card with the adult members' names and photographs.
+      hi: ग्रामीण परिवार के वयस्क सदस्य जो अकुशल शारीरिक काम करने को तैयार हैं। परिवार ग्राम पंचायत में पंजीकृत होना चाहिए और जॉब कार्ड पर वयस्क सदस्यों के नाम और फ़ोटो होने चाहिए।
+    steps:
+      - en: Apply for registration at your Gram Panchayat and get a job card with the names and photographs of the adult members who want work.
+        hi: अपनी ग्राम पंचायत में पंजीकरण के लिए आवेदन करें और उन वयस्क सदस्यों के नाम और फ़ोटो वाला जॉब कार्ड लें जो काम करना चाहते हैं।
+      - en: Apply for work in writing and keep the dated receipt. Work should be provided within 15 days, usually within 5 km of your village.
+        hi: लिखित में काम के लिए आवेदन करें और तारीख़ वाली रसीद रखें। काम १५ दिन के भीतर, आमतौर पर गाँव से ५ किलोमीटर के भीतर मिलना चाहिए।
+      - en: Check the muster roll at the worksite and the entries in your job card. Wages go to your bank or post office account.
+        hi: काम की जगह पर मस्टर रोल और अपने जॉब कार्ड की प्रविष्टियाँ देखें। मज़दूरी आपके बैंक या डाकघर खाते में आती है।
+      - en: If work is not provided within 15 days, apply for the unemployment allowance with your dated receipt.
+        hi: १५ दिन में काम न मिले तो तारीख़ वाली रसीद के साथ बेरोज़गारी भत्ते के लिए आवेदन करें।
+    fails:
+      - en: "No job card, or your name is not on it: you cannot apply for work until the household is registered."
+        hi: "जॉब कार्ड नहीं है, या उसमें आपका नाम नहीं है: परिवार पंजीकृत होने तक काम के लिए आवेदन नहीं कर सकते।"
+      - en: "No dated receipt for your work application: it is harder to prove when you asked for work or claim the unemployment allowance."
+        hi: "काम के आवेदन की तारीख़ वाली रसीद नहीं है: काम कब माँगा था, यह साबित करना या बेरोज़गारी भत्ता माँगना कठिन हो जाता है।"
+      - en: "Work not provided within 15 days: you are entitled to the unemployment allowance."
+        hi: "१५ दिन में काम नहीं मिला: आप बेरोज़गारी भत्ते के हक़दार हैं।"
+      - en: "Wages paid late: compensation is payable under the Payment of Wages Act, 1936."
+        hi: "मज़दूरी देर से मिली: मज़दूरी अधिनियम, १९३६ के तहत मुआवज़ा मिल सकता है।"
+    official_url: https://nrega.dord.gov.in/
+    source:
+      name:
+        en: Mahatma Gandhi NREGA Act, 2005, Ministry of Rural Development (official)
+        hi: महात्मा गांधी मनरेगा अधिनियम, २००५, ग्रामीण विकास मंत्रालय (आधिकारिक)
+      url: https://nregaplus.nic.in/Netnrega/Data/Library/Books/1_MGNREGA_Act.pdf
+      note:
+        en: Mandate, job card, work within 15 days, unemployment allowance and worksite distance, sections 3 to 12 and Schedule II. Read on 3 November 2026.
+        hi: उद्देश्य, जॉब कार्ड, १५ दिन में काम, बेरोज़गारी भत्ता और काम की दूरी, धारा ३ से १२ और अनुसूची २। ३ नवंबर २०२६ को पढ़ा गया।
+    reasons:
+      job_card:
+        en: MGNREGA is for rural households. The first step is a job card from your Gram Panchayat; the app cannot see whether your household has one.
+        hi: मनरेगा ग्रामीण परिवारों के लिए है। पहला कदम ग्राम पंचायत से जॉब कार्ड लेना है; ऐप यह नहीं देख सकता कि आपके परिवार के पास जॉब कार्ड है या नहीं।

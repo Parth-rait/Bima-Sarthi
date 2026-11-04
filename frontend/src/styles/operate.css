@@ -64,7 +64,7 @@
   inset-block-end: -1px;
   height: 2px;
   border-radius: var(--radius-tab);
-  background: linear-gradient(90deg, var(--color-ink) var(--step-progress, 0%), transparent var(--step-progress, 0%));
+  background: linear-gradient(90deg, var(--color-action) var(--step-progress, 0%), transparent var(--step-progress, 0%));
   opacity: 0;
   transition: opacity var(--dur-2) var(--ease-out);
 }
@@ -296,9 +296,9 @@
   min-width: 0;
   min-block-size: 2.75rem;
   padding: calc(var(--spacing) * 2) calc(var(--spacing) * 5);
-  border: 1px solid var(--color-ink);
+  border: 1px solid var(--color-action);
   border-radius: var(--radius-ctl);
-  background-color: var(--color-ink);
+  background-color: var(--color-action);
   color: var(--color-on-ink);
   font-family: inherit;
   font-size: var(--text-body);
@@ -685,9 +685,9 @@
   margin-inline-end: calc(var(--spacing) * 3);
   min-block-size: 2.25rem;
   padding: calc(var(--spacing) * 1) calc(var(--spacing) * 4);
-  border: 1px solid var(--color-ink);
+  border: 1px solid var(--color-action);
   border-radius: var(--radius-ctl);
-  background-color: var(--color-ink);
+  background-color: var(--color-action);
   color: var(--color-on-ink);
   font-family: inherit;
   font-size: var(--text-control);
@@ -1020,7 +1020,7 @@
   width: 1.75rem;
   height: 1.75rem;
   border-radius: 50%;
-  background-color: var(--color-ink);
+  background-color: var(--color-action);
   color: var(--color-on-ink);
   font-size: var(--text-control);
   font-variant-numeric: tabular-nums;

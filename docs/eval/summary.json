@@ -1,0 +1,28 @@
+{
+  "run_id": "eval-20261104-143527",
+  "generated_on": "2026-11-04",
+  "repeats": 3,
+  "n_cases": 13,
+  "n_skipped_no_facts": 6,
+  "n_eligible": 5,
+  "n_skipped_unresolved": 2,
+  "n_out_of_scope": 1,
+  "n_no_usable": 5,
+  "methods": {
+    "rules": {
+      "scorable_findings": 0,
+      "agreement": null,
+      "false_hope_rate": null,
+      "abstained_findings": 15,
+      "excluded_findings": 0,
+      "quote_coverage": 1.0,
+      "stability": 1.0,
+      "safe_abstention": {
+        "safe": 18,
+        "of": 18
+      },
+      "cost_usd": 0.0
+    }
+  },
+  "limitation": "Courts weigh evidence that rules don't see, so agreement under 100% is expected. Disagreements are reported case by case."
+}

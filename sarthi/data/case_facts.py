@@ -330,6 +330,79 @@ def review(case_id: str, decisions: dict[str, ReviewDecision], reviewer: str, st
             [status, value, note, clear_quote, clear_quote, case_id, field])
 
 
+# ---------- delegated bulk acceptance (exact quote only) ----------
+
+YES_NO_FIELDS = frozenset({"fraud_alleged", "crc_approval_mentioned", "reasons_cite_terms",
+                           "cited_clause_found", "continuity_confirmed", "nonpayable_listed"})
+BULK_NOTE = "bulk-accepted on Parth's delegation (exact quote only)"
+
+
+class AcceptReport(BaseModel):
+    accepted: list[str] = []
+    unresolved: list[tuple[str, str]] = []  # (field, why it stays unresolved)
+    quote_lacks_value: list[str] = []  # accepted dates whose quote does not itself state the date
+
+
+def _bulk_blocker(field: str, raw_value: str | None, quote: str | None, haystack: str) -> str | None:
+    """Why this extracted fact may NOT be bulk-accepted, or None."""
+    if field in YES_NO_FIELDS:
+        return "yes/no fact"
+    try:
+        value = json.loads(raw_value) if raw_value is not None else None
+    except ValueError:
+        return "undecodable value"
+    if value is None:
+        return "no value"
+    if field == "deductions" and isinstance(value, list) and any(
+            isinstance(i, dict) and isinstance(i.get("nonpayable_listed"), bool) for i in value):
+        return "contains a yes/no nonpayable_listed judgement"
+    if field in DATE_FIELDS:
+        try:
+            date.fromisoformat(value)
+        except (TypeError, ValueError):
+            return "not an ISO date"
+    if field in DATETIME_FIELDS:
+        try:
+            datetime.fromisoformat(value)
+        except (TypeError, ValueError):
+            return "not an ISO datetime"
+    nq = normalise_ws(quote or "")
+    if not nq:
+        return "no quote"
+    if nq not in haystack:
+        return "quote not verbatim in the judgment"
+    return None
+
+
+def accept_exact_quote_facts(store: Store, case_ids: list[str],
+                             note: str = BULK_NOTE) -> dict[str, AcceptReport]:
+    """Delegated by the reviewer for the NAMED cases only: set `extracted` facts to `reviewed` when
+    the quote is non-empty and found verbatim (whitespace-normalised) in the stored judgment, the
+    field is not a yes/no fact, and dates are ISO. needs_review / reviewed / corrected / rejected
+    facts and every case_issue row are left untouched. Idempotent."""
+    from sarthi.app.extract import _dates_in  # lazy: app.extract imports this module
+    out: dict[str, AcceptReport] = {}
+    for cid in case_ids:
+        pages = _pages(cid, store)
+        hay = normalise_ws(" ".join(t for _, t in pages))
+        rep = AcceptReport()
+        rows = store.con.execute(
+            "SELECT field, value, quote FROM case_fact WHERE case_id=? AND status='extracted' "
+            "ORDER BY field", [cid]).fetchall()
+        for field, value, quote in rows:
+            why = _bulk_blocker(field, value, quote, hay)
+            if why:
+                rep.unresolved.append((field, why))
+                continue
+            store.con.execute("UPDATE case_fact SET status='reviewed', reviewer_note=? "
+                              "WHERE case_id=? AND field=? AND status='extracted'", [note, cid, field])
+            rep.accepted.append(field)
+            if field in DATE_FIELDS and date.fromisoformat(json.loads(value)) not in _dates_in(quote):
+                rep.quote_lacks_value.append(field)
+        out[cid] = rep
+    return out
+
+
 def build_review_form(case_id: str, store: Store) -> dict | None:
     """Review form for one case: EVERY extracted field (extracted and needs_review, and any
     already decided), or None when the case has no facts. Fields with status `extracted` carry a

@@ -28,7 +28,7 @@ describe("upload screen", () => {
     expect(screen.getByRole("button", { name: "Read my documents" })).toHaveProperty("disabled", true);
     chooseFile();
     fireEvent.click(screen.getByRole("button", { name: "Read my documents" }));
-    expect(await screen.findByText("Reading your documents...")).toBeTruthy();
+    expect(await screen.findByText("Reading your documents…")).toBeTruthy();
     release();
     const h = await screen.findByRole("heading", { name: "Confirm what we read" });
     await waitFor(() => expect(document.activeElement).toBe(h));
@@ -155,7 +155,7 @@ describe("confirm screen", () => {
   it("lists the insurance types and only those", async () => {
     await start();
     const opts = [...(screen.getByLabelText("Type of insurance") as HTMLSelectElement).options].map((o) => o.text);
-    expect(opts).toEqual(["Choose the type of insurance...", "Health", "Life", "Accident", "Motor", "Crop (agriculture)", "Loan-linked or credit-life", "Other"]);
+    expect(opts).toEqual(["Choose the type of insurance…", "Health", "Life", "Accident", "Motor", "Crop (agriculture)", "Loan-linked or credit-life", "Other"]);
   });
 
   it("the full happy path: PUT facts, POST check, POST explain, then the Result screen", async () => {

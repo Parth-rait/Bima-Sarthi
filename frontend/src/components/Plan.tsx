@@ -6,6 +6,8 @@ import { useSession } from "../state/store";
 import { ErrorBox } from "./ErrorBox";
 import { IconDownload } from "./icons";
 import { Quote, RuleChip } from "./evidence";
+import { RouteMap, stepAnchor } from "./plan/RouteMap";
+import { DeadlineTimeline } from "./charts/DeadlineTimeline";
 
 /** The grievance-letter download. A 409 (no challengeable finding, rule card missing) is shown, not navigated to. */
 export function LetterButton({ className = "" }: { className?: string }) {
@@ -32,7 +34,7 @@ export function LetterButton({ className = "" }: { className?: string }) {
   );
 }
 
-function PlanItemView({ item }: { item: PlanItem }) {
+export function PlanItemView({ item }: { item: PlanItem }) {
   const { state, t } = useSession();
   const lang = state.lang;
   const text = item.text ? pick(item.text, lang) : "";
@@ -73,10 +75,11 @@ export function PlanSection({ plan }: { plan: Plan }) {
     <section className="block" aria-labelledby="plan-h" id="plan">
       <h3 id="plan-h">{general ? t("plan_gen_h") : t("plan_h")}</h3>
       {general ? <p className="lede">{pick(plan.title, state.lang)}</p> : null}
-      <ol className="plan">
-        {plan.steps.map((s) => (
-          <li key={s.id}>
-            <h4>{pick(s.title, state.lang)}</h4>
+      {plan.steps.length > 1 ? <RouteMap plan={plan} /> : null}
+      <ol className="plan plan-rail">
+        {plan.steps.map((s, n) => (
+          <li key={s.id} id={stepAnchor(s.id)} data-n={n + 1}>
+            <h4 tabIndex={-1}>{pick(s.title, state.lang)}</h4>
             <ul>
               {s.items.map((it, i) => (
                 <PlanItemView key={`${s.id}-${i}`} item={it} />
@@ -120,6 +123,7 @@ export function DeadlinesBox({ d, complaintEntered }: { d: Deadlines; complaintE
   return (
     <section className="block" aria-labelledby="dl-h" id="deadlines">
       <h3 id="dl-h">{t("dl")}</h3>
+      {showDates ? <DeadlineTimeline d={d} /> : null}
       {showDates ? (
         <ul className="deadlines">
           {keys.map((k, n) => {

@@ -4,20 +4,29 @@ Privacy: session state lives in memory and the session folder only. Logs carry r
 paths (session ids) and counts, never document content or fact values.
 """
 import asyncio
+import json
 import logging
+import math
 import os
 import time
 from contextlib import asynccontextmanager
 from datetime import date, datetime
 from pathlib import Path
+from typing import Literal
 
 import duckdb
 from fastapi import FastAPI, File, HTTPException, Query, Request, Response, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.gzip import DEFAULT_EXCLUDED_CONTENT_TYPES, GZipMiddleware
 
+from sarthi.app import checklist as checklist_mod
 from sarthi.app import gallery as gallery_mod
+from sarthi.app import policy as policy_mod
+from sarthi.app import schemes as schemes_mod
 from sarthi.app.explain import explain
 from sarthi.app.extract import extract_user_facts, ready_for_rules
 from sarthi.app.labels import label, labels_json
@@ -86,6 +95,11 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Bima Sarthi", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
+app.add_middleware(
+    GZipMiddleware,
+    minimum_size=1024,
+    exclude_content_types=DEFAULT_EXCLUDED_CONTENT_TYPES + ("application/pdf", "application/octet-stream"),
+)
 
 
 # ---------- data access ----------
@@ -122,10 +136,78 @@ def footer_html() -> str:
     return (f"<p>{NOTICE}</p><p>{INDEPENDENT}</p>{spark}")
 
 
+def frontend_dist() -> Path:
+    """Where the built React app lives (override with SARTHI_FRONTEND_DIST)."""
+    raw = os.environ.get("SARTHI_FRONTEND_DIST", "").strip()
+    return Path(raw) if raw else Path(__file__).resolve().parents[2] / "frontend" / "dist"
+
+
+def _react_index() -> Path | None:
+    """The React shell, unless SARTHI_UI=legacy forces the old page or no build exists."""
+    if os.environ.get("SARTHI_UI", "").strip().lower() == "legacy":
+        return None
+    p = frontend_dist() / "index.html"
+    return p if p.is_file() else None
+
+
+def _legacy_page() -> HTMLResponse:
+    page = (STATIC / "index.html").read_text(encoding="utf-8")
+    return HTMLResponse(page.replace("<!--FOOTER-->", footer_html()), headers={"Cache-Control": "no-cache"})
+
+
 @app.get("/", response_class=HTMLResponse)
 def index() -> HTMLResponse:
-    page = (STATIC / "index.html").read_text(encoding="utf-8")
-    return HTMLResponse(page.replace("<!--FOOTER-->", footer_html()))
+    react = _react_index()
+    if react is not None:
+        return HTMLResponse(react.read_text(encoding="utf-8"), headers={"Cache-Control": "no-cache"})
+    return _legacy_page()
+
+
+# Client-side (React Router) pages: a browser refresh or deep link must get the app shell.
+CLIENT_ROUTES = ("about", "how-it-works", "check-claim", "action-plan", "cases", "privacy",
+                 "help", "schemes", "evidence", "dev/components")
+
+
+def _client_page() -> HTMLResponse:
+    react = _react_index()
+    if react is None:
+        return _legacy_page()
+    return HTMLResponse(react.read_text(encoding="utf-8"), headers={"Cache-Control": "no-cache"})
+
+
+def _register_client_routes() -> None:
+    for name in CLIENT_ROUTES:
+        app.add_api_route(f"/{name}", lambda: _client_page(), methods=["GET"],
+                          response_class=HTMLResponse, include_in_schema=False)
+    app.add_api_route("/results/{report_id}", lambda report_id: _client_page(), methods=["GET"],
+                      response_class=HTMLResponse, include_in_schema=False)
+
+
+_register_client_routes()
+
+
+@app.get("/legacy", response_class=HTMLResponse)
+def legacy_index() -> HTMLResponse:
+    """The previous single-file page, kept as the rollback."""
+    return _legacy_page()
+
+
+@app.get("/assets/{path:path}")
+def frontend_asset(path: str):
+    root = (frontend_dist() / "assets").resolve()
+    target = (root / path).resolve()
+    if root not in target.parents or not target.is_file():
+        raise HTTPException(404, "Not found.")
+    return FileResponse(target, headers={"Cache-Control": "public, max-age=31536000, immutable"})
+
+
+@app.get("/favicon.svg", include_in_schema=False)
+def favicon():
+    target = frontend_dist() / "favicon.svg"
+    if not target.is_file():
+        raise HTTPException(404, "Not found.")
+    return FileResponse(target, media_type="image/svg+xml",
+                        headers={"Cache-Control": "public, max-age=86400"})
 
 
 @app.exception_handler(StarletteHTTPException)
@@ -139,6 +221,29 @@ async def http_error(request: Request, exc: StarletteHTTPException):
                 f"<footer>{footer_html()}</footer></body></html>")
         return HTMLResponse(body, status_code=exc.status_code)
     return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    return response
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error(request: Request, exc: RequestValidationError):
+    # Python parses NaN and Infinity, but JSON cannot serialise them back in the error echo.
+    def finite(v):
+        if isinstance(v, float) and not math.isfinite(v):
+            return repr(v)
+        if isinstance(v, dict):
+            return {k: finite(x) for k, x in v.items()}
+        if isinstance(v, list):
+            return [finite(x) for x in v]
+        return v
+    return JSONResponse({"detail": finite(jsonable_encoder(exc.errors()))}, status_code=422)
 
 
 def _esc(s: str) -> str:
@@ -177,7 +282,8 @@ def create_session() -> dict:
     s = Session.create()
     sid = s.path.name
     _SESSIONS[sid] = {"session": s, "facts": {}, "findings": None, "created": time.time(),
-                      "insurer_reply_date": None, "purged": False, "reader_backend": None}
+                      "insurer_reply_date": None, "purged": False, "reader_backend": None,
+                      "policy": None}
     return {"session_id": sid}
 
 
@@ -367,12 +473,8 @@ def put_facts(sid: str, body: FactsBody) -> dict:
     return {"facts": facts_json(facts), "needs_confirmation": pending(facts)}
 
 
-@app.post("/session/{sid}/extract")
-def extract(sid: str, files: list[UploadFile] = File(...)) -> dict:
-    st = _state(sid)
-    if st["purged"]:  # files were deleted after the previous result; start a fresh folder
-        st["session"], st["purged"] = Session.create(), False
-    session: Session = st["session"]
+def _add_uploads(session: Session, files: list[UploadFile]) -> None:
+    """Read the uploaded files into the session folder, enforcing the size and page limits."""
     total = 0
     try:
         for f in files:
@@ -387,6 +489,15 @@ def extract(sid: str, files: list[UploadFile] = File(...)) -> dict:
         raise HTTPException(413, str(e))
     except UnsupportedUpload as e:
         raise HTTPException(415, str(e))
+
+
+@app.post("/session/{sid}/extract")
+def extract(sid: str, files: list[UploadFile] = File(...)) -> dict:
+    st = _state(sid)
+    if st["purged"]:  # files were deleted after the previous result; start a fresh folder
+        st["session"], st["purged"] = Session.create(), False
+    session: Session = st["session"]
+    _add_uploads(session, files)
     try:
         extracted = extract_user_facts(session)
     except Exception as e:
@@ -403,6 +514,90 @@ def extract(sid: str, files: list[UploadFile] = File(...)) -> dict:
     return {"facts": facts_json(st["facts"]), "needs_confirmation": pending(st["facts"]),
             "pages": len(session.pages()), "reader_backend": st["reader_backend"],
             "product_line_hint": product_line_hint(st["facts"])}
+
+
+# ---------- policy key terms (display only: never facts, never findings) ----------
+
+class PolicyBody(BaseModel):
+    terms: dict[str, FactEdit] = {}
+
+
+def policy_view(st: dict) -> dict | None:
+    return None if st["policy"] is None else policy_mod.policy_json(st["policy"])
+
+
+@app.post("/session/{sid}/policy/extract")
+def policy_extract(sid: str, files: list[UploadFile] = File(...)) -> dict:
+    """Read the policy document in its own temporary folder, which is deleted as soon as the
+    reading is done. The terms live in memory only and never enter the case facts."""
+    st = _state(sid)
+    folder = Session.create()
+    try:
+        _add_uploads(folder, files)
+        pages = len(folder.pages())
+        try:
+            read = policy_mod.extract_policy_terms(folder)
+        except Exception as e:
+            log.error("policy reading failed session=%s type=%s", sid, type(e).__name__)
+            raise HTTPException(502, "We could not read this policy right now. Please try again.")
+    finally:
+        folder.delete()
+    kept = {k: v for k, v in (st["policy"] or {}).items() if v.status == "user_confirmed"}
+    st["policy"] = {**read, **kept}
+    log.info("policy read session=%s pages=%d terms=%d", sid, pages, len(read))
+    return {"policy": policy_view(st), "pages": pages, "reader_backend": read.backend}
+
+
+@app.get("/session/{sid}/policy")
+def policy_get(sid: str) -> dict:
+    return {"policy": policy_view(_state(sid))}
+
+
+@app.put("/session/{sid}/policy")
+def policy_put(sid: str, body: PolicyBody) -> dict:
+    st = _state(sid)
+    terms: dict = dict(st["policy"] or {})
+    errors: dict[str, str] = {}
+    updates: dict[str, policy_mod.PolicyTerm | None] = {}
+    for key, edit in body.terms.items():
+        old = terms.get(key)
+        if key not in policy_mod.TERM_KEYS:
+            errors[key] = "Unknown policy term."
+        elif edit.clear:
+            updates[key] = None
+        elif "value" in edit.model_fields_set and edit.value is not None:
+            try:
+                value = policy_mod.parse_term_input(key, edit.value)
+            except ValueError as e:
+                errors[key] = str(e)
+                continue
+            same = old is not None and old.status != "needs_confirmation" and old.value == value
+            updates[key] = policy_mod.PolicyTerm(
+                value=value, quote=old.quote if same else None, page_no=old.page_no if same else None,
+                confidence="high", status="user_confirmed")
+        elif edit.confirm:
+            if old is None or old.status == "needs_confirmation":
+                errors[key] = "There is no value read from your document to confirm. Enter the value instead."
+                continue
+            updates[key] = old.model_copy(update={"status": "user_confirmed"})
+        else:
+            errors[key] = "Send a value, or confirm."
+    if errors:
+        raise HTTPException(422, {"message": "Some entries could not be read.", "errors": errors})
+    for k, v in updates.items():
+        if v is None:
+            terms.pop(k, None)
+        else:
+            terms[k] = v
+    st["policy"] = terms   # st["findings"] is deliberately untouched: the policy view never feeds a check
+    log.info("policy terms updated session=%s n=%d", sid, len(updates))
+    return {"policy": policy_view(st)}
+
+
+@app.delete("/session/{sid}/policy")
+def policy_delete(sid: str) -> dict:
+    _state(sid)["policy"] = None
+    return {"deleted": True}
 
 
 # ---------- check / explain / letter ----------
@@ -433,7 +628,7 @@ def grievance_params(cards: list[RuleCard]) -> dict | None:
 
 def deadlines_json(st: dict, cards: list[RuleCard]) -> dict:
     if not any(f.verdict == "CHALLENGEABLE" for f in st["findings"]):
-        return {"available": False, "note": "Deadlines apply when a finding is challengeable."}
+        return {"available": False, "note": "Deadlines apply when a finding shows a possible inconsistency to raise."}
     card = grievance_card(cards)
     if card is None:
         return {"available": False, "note": GRIEVANCE_MSG}
@@ -476,7 +671,7 @@ def health_plan_json(st: dict, cards: list[RuleCard]) -> dict | None:
     card = grievance_card(cards)
     plan, extras = health_plan(st["findings"], params=card.params if card else None,
                                complaint_date=_complaint_date(st), reply_date=st["insurer_reply_date"],
-                               claim_amount=_claim_amount(st))
+                               claim_amount=_claim_amount(st), facts=st["facts"])
     return finalize(plan, extras, st["findings"])
 
 
@@ -488,12 +683,14 @@ def _general_check(st: dict, line: str) -> dict:
         cards = []
     card = grievance_card(cards)
     plan, extras = general_plan(line, params=card.params if card else None,
-                                complaint_date=_complaint_date(st), reply_date=st["insurer_reply_date"])
+                                complaint_date=_complaint_date(st), reply_date=st["insurer_reply_date"],
+                                facts=st["facts"])
     st["findings"] = None
     st["session"].delete()  # page images are no longer needed; results live in memory only
     st["purged"] = True
     return {"supported": False, "product_line": line, "findings": [],
             "plan": finalize(plan, extras, []), "labels": labels_json(),
+            "request_checklist": checklist_mod.build([], st["facts"]),
             "deadlines": {"available": False, "note": "Dates, where the sources apply, are shown in your plan."},
             "reader_backend": st["reader_backend"]}
 
@@ -524,6 +721,7 @@ def check(sid: str) -> dict:
     return {"supported": True, "product_line": "health",
             "findings": [f.model_dump(mode="json") for f in st["findings"]],
             "deadlines": deadlines_json(st, cards), "plan": health_plan_json(st, cards),
+            "request_checklist": checklist_mod.build(st["findings"], st["facts"]),
             "labels": labels_json(), "reader_backend": st["reader_backend"]}
 
 
@@ -538,6 +736,7 @@ def explain_route(sid: str, lang: str = Query("en", pattern="^(en|hi)$"),
     return {"text": out.text, "used_model": out.used_model,
             "findings": [f.model_dump(mode="json") for f in st["findings"]],
             "deadlines": deadlines_json(st, cards), "plan": health_plan_json(st, cards),
+            "request_checklist": checklist_mod.build(st["findings"], st["facts"]),
             "labels": labels_json(), "reader_backend": st["reader_backend"]}
 
 
@@ -560,6 +759,43 @@ def letter_pdf(sid: str, lang: str = Query("en", pattern="^(en|hi)$")) -> Respon
         raise HTTPException(409, "There is no challengeable finding, so there is no letter to write.")
     return Response(to_pdf(text), media_type="application/pdf",
                     headers={"Content-Disposition": 'attachment; filename="grievance-letter.pdf"'})
+
+
+# ---------- scheme finder (stateless: four answers in, a ranked list out) ----------
+
+class SchemeAnswers(BaseModel):
+    work: Literal["own_land", "both", "farm_labour", "other"]
+    age: Literal["under_18", "18_50", "51_70", "over_70"]
+    bank: Literal["yes", "no", "unsure"] = "unsure"
+    ration: Literal["yes", "no", "unsure"] = "unsure"
+
+
+@app.get("/api/schemes")
+def schemes_catalogue() -> dict:
+    return schemes_mod.public_catalogue()
+
+
+@app.post("/api/schemes/match")
+def schemes_match(body: SchemeAnswers) -> dict:
+    try:
+        return schemes_mod.match_schemes(body.model_dump())
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+
+
+# ---------- evidence (the published evaluation summary; no DB, no model) ----------
+
+def evidence_file() -> Path:
+    raw = os.environ.get("SARTHI_EVIDENCE_FILE", "").strip()
+    return Path(raw) if raw else Path(__file__).resolve().parents[2] / "docs" / "eval" / "summary.json"
+
+
+@app.get("/api/evidence")
+def evidence() -> dict:
+    p = evidence_file()
+    if not p.is_file():
+        raise HTTPException(404, "No evaluation has been published yet.")
+    return json.loads(p.read_text(encoding="utf-8"))
 
 
 # ---------- gallery (reads precomputed JSON only) ----------

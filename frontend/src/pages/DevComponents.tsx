@@ -8,6 +8,13 @@ import { SkyBackdrop, SkyToggle } from "@/components/landing/SkyBackdrop";
 import { ART } from "@/content/art";
 import { SCENARIOS } from "@/content/scenarios";
 import { STAGES } from "@/content/stages";
+import { WorkStage, type StageStep } from "@/components/stage/WorkStage";
+import { PlanSection } from "@/components/Plan";
+import { DeadlineTimeline } from "@/components/charts/DeadlineTimeline";
+import { Spark } from "@/components/ds/Spark";
+import type { Plan, PlanItem } from "@/api";
+import { Tumble } from "@/components/flow/Tumble";
+import { motion, useReducedMotion } from "motion/react";
 import { usePrefersReducedMotion } from "@/hooks/useMedia";
 import { isLowPower, useSkyAnimation } from "@/hooks/useSkyPreference";
 
@@ -43,6 +50,97 @@ function Panel({ id, title, children, check, tone = "ivory" }: { id: string; tit
 
 const Fallback = ({ what }: { what: string }) => <p className="m-0 rounded-card bg-peach p-4 text-ink">{what} failed to load. This message is its designed fallback.</p>;
 const Wait = () => <Loader label="Loading" />;
+
+const DEMO_STEPS: StageStep[] = [
+  { id: "session", label: "stage_session", mode: "arrive" },
+  { id: "extract", label: "stage_reading", mode: "reading" },
+  { id: "facts", label: "stage_saving", mode: "saving" },
+  { id: "check", label: "stage_checking", mode: "checking" },
+];
+
+/** The claim flow's work stage, with a picker for the request in flight (in the app the real request decides). */
+
+/* A plan shaped like the API's health plan (decoration-free sample text), for the route demo. */
+const B = (en: string) => ({ en, hi: en });
+const pi = (p: Partial<PlanItem> = {}): PlanItem => ({
+  key: null, rule_id: null, text: B("What to do at this step."), quote: null, page_no: null, source_id: null,
+  source_title: null, source_label: null, date: null, date_label: null, link: null, ...p,
+});
+const DEMO_PLAN: Plan = {
+  kind: "health", supported: true, product_line: "health", unverified: null, title: B("Your plan"), text: B(""), verified: true,
+  steps: [
+    { id: "case", title: B("Your case"), items: [pi()] },
+    { id: "findings", title: B("What the check found"), items: [pi({ rule_id: "MORATORIUM_60M", quote: "Sample quoted rule.", page_no: 8 })] },
+    { id: "ask", title: B("What to ask your insurer for"), items: [pi({ quote: "Sample quoted rule.", page_no: 4 }), pi()] },
+    { id: "letter", title: B("Send your grievance letter"), items: [pi({ date: { iso: "2026-11-16", display: "16/11/2026" }, date_label: B("Reply due by") })] },
+    { id: "ombudsman", title: B("If there is no reply, or it does not settle the matter: Insurance Ombudsman"), items: [pi({ quote: "Sample quoted rule.", page_no: 3 })] },
+    { id: "commission", title: B("If your claim is larger than the Ombudsman's limit"), items: [pi()] },
+  ],
+};
+const DEMO_DL = {
+  available: true,
+  letter_date: { iso: "2026-11-02", display: "02/11/2026" },
+  insurer_reply_by: { iso: "2026-11-16", display: "16/11/2026" },
+  ombudsman_earliest: { iso: "2026-12-02", display: "02/12/2026" },
+  ombudsman_latest: { iso: "2027-11-02", display: "02/11/2027" },
+};
+
+/* The claim flow's page change on two sample sheets (the real one is in CheckClaim.tsx). */
+function TumbleDemo() {
+  const [i, setI] = useState(0);
+  const [dir, setDir] = useState<1 | -1>(1);
+  const reduce = useReducedMotion();
+  const pages = ["1. Upload your documents", "2. Confirm what we read", "3. Your result"];
+  const move = (d: 1 | -1) => {
+    setDir(d);
+    setI((n) => Math.min(2, Math.max(0, n + d)));
+  };
+  return (
+    <div className="wf">
+      <div className="mb-6 flex gap-3">
+        <button type="button" className="secondary" onClick={() => move(-1)} disabled={i === 0}>Back</button>
+        <button type="button" onClick={() => move(1)} disabled={i === 2}>Next</button>
+      </div>
+      <div className="desk mt-6">
+        <Tumble view={String(i)} dir={dir} reduce={!!reduce}>
+          <motion.div
+            key={i}
+            className="sheet"
+            {...(reduce ? {} : dir === 1
+              ? { initial: { opacity: 0, y: -22, scale: 0.95 }, animate: { opacity: 1, y: 0, scale: 1 }, transition: { duration: 0.6, delay: 0.16 } }
+              : { initial: { opacity: 0, rotateX: -70 }, animate: { opacity: 1, rotateX: 0 }, transition: { type: "spring", stiffness: 140, damping: 16 }, style: { transformPerspective: 1600, originY: 1 } })}
+          >
+            <div className="p-8">
+              <h3 className="m-0 font-display text-h2">{pages[i]}</h3>
+              <p className="mt-3">Sample sheet. Next: it tips over its bottom edge and the next slides up. Back: the earlier one stands up again.</p>
+              <div className="mt-6 h-40 rounded-card bg-peach" />
+            </div>
+          </motion.div>
+        </Tumble>
+      </div>
+    </div>
+  );
+}
+
+function StageDemo() {
+  const [current, setCurrent] = useState("extract");
+  const [slow, setSlow] = useState(false);
+  return (
+    <div className="wf mx-auto max-w-[60rem]">
+      <div className="mb-4 flex flex-wrap gap-2">
+        {DEMO_STEPS.map((s) => (
+          <button key={s.id} type="button" aria-pressed={current === s.id} onClick={() => setCurrent(s.id)} className="min-h-11 cursor-pointer rounded-full border border-line-strong bg-paper px-4 text-control text-ink aria-pressed:border-action aria-pressed:bg-action aria-pressed:text-on-ink">
+            {s.mode}
+          </button>
+        ))}
+        <button type="button" aria-pressed={slow} onClick={() => setSlow((v) => !v)} className="min-h-11 cursor-pointer rounded-full border border-line-strong bg-paper px-4 text-control text-ink aria-pressed:border-action aria-pressed:bg-action aria-pressed:text-on-ink">
+          slow server
+        </button>
+      </div>
+      <WorkStage steps={DEMO_STEPS} current={current} slow={slow} />
+    </div>
+  );
+}
 
 /** Dev-only: every installed Aceternity component (all nine), rendered with real Bima Sarthi content, so it can be checked by eye. */
 export default function DevComponents() {
@@ -190,6 +288,45 @@ export default function DevComponents() {
           </Boundary>
           <p className="mt-3 text-control">onChange received: {picked.length ? picked.join(", ") : "nothing yet"}</p>
         </div>
+      </Panel>
+
+      <Panel
+        id="d-route"
+        title="Plan: the route map, the deadline chart, the noticeable action"
+        check={[
+          "the ink plate shows Parth's ring shader in violet, saffron and periwinkle, top right; the words never sit on a ring",
+          "stops rise in one by one; a decision card sits in front of the Ombudsman and the larger-claim steps",
+          "press a stop: the porcelain marker slides to it and the page scrolls to that step's detail; arrow keys walk the stops",
+          "the deadline bars grow from their start dates and today's marker drops in; the button glows, a light runs round its edge, it leans to the pointer",
+          "reduced motion: still rings, no rise, no growth, no glow movement",
+        ]}
+      >
+        <div className="wf">
+          <p className="mb-6">
+            <Spark>
+              <button type="button">Run the check</button>
+            </Spark>
+          </p>
+          <DeadlineTimeline d={DEMO_DL} />
+          <PlanSection plan={DEMO_PLAN} />
+        </div>
+        <div className="mt-12" id="d-tumble">
+          <TumbleDemo />
+        </div>
+      </Panel>
+
+      <Panel
+        id="d-stage"
+        title="Claim flow: the work stage"
+        check={[
+          "reading: a saffron scan line passes down the front glass sheet and each line glows as it is read",
+          "saving: the fan closes into a stack; checking: a glass lens steps line by line and passed lines turn indigo",
+          "drag the sheets (mouse) to turn the file; it springs back; the pointer anywhere on the panel tilts it a little",
+          "the CSS 3D version shows first and the WebGL canvas fades in over it; with WebGL off only the CSS version shows",
+          "reduced motion: one still frame, no scan, no drag, no aurora drift",
+        ]}
+      >
+        <StageDemo />
       </Panel>
 
       <Band tone="ink" pad="none" labelledBy="d-lamp" as="section">

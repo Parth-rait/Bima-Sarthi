@@ -1,0 +1,39 @@
+# Which APPROVED rule cards may decide which legal-issue family. Version-controlled.
+# A family is the WHAT (the legal issue a dispute raises); a card is the WHICH (a regulation that
+# can decide it). A candidate is NOT automatically applicable: product, approval, quote check,
+# in-force date and fact completeness are resolved per case in sarthi/core/context.py.
+# Families with `cards: []` have no approved regulation card yet. They are never mapped to a card
+# that merely looks close (EXCLUSION_LISTED is DRAFT and must not be a candidate). No card or legal
+# proposition is invented here; `research_needed` marks families a human still has to source.
+version: 1
+families:
+  NON_DISCLOSURE:           {cards: [MORATORIUM_60M]}
+  PED_DEFINITION:           {cards: [PED_WAIT_36M]}
+  WAITING_PERIOD:           {cards: [INITIAL_30D, PED_WAIT_36M, SPECIFIC_WAIT]}
+  PORTABILITY:              {cards: [PORTABILITY_CREDIT]}
+  CASHLESS_PROCESS:         {cards: [CASHLESS_1H]}
+  DISCHARGE_PROCESS:        {cards: [DISCHARGE_3H]}
+  REJECTION_PROCESS:        {cards: [REJECTION_PROCESS]}
+  EXCLUSION:                {cards: [], research_needed: true}
+  POLICY_WORDING_DELIVERY:  {cards: []}
+  CLAIM_SETTLEMENT_DELAY:   {cards: [], research_needed: true}
+  CLAIM_NOTIFICATION_DELAY: {cards: []}
+  DEDUCTION:                {cards: []}
+  OTHER:                    {cards: []}
+# The insurer's stated rejection_ground (a reviewed fact) -> family, used only when a case has no
+# human-reviewed issue family. Keeps the legacy ground-driven behaviour; the engine still fires a
+# card only when the ground is in that card's `triggers`.
+grounds:
+  non_disclosure: NON_DISCLOSURE
+  pre_existing_disease: PED_DEFINITION
+  specific_waiting_period: WAITING_PERIOD
+  initial_waiting_period: WAITING_PERIOD
+  portability: PORTABILITY
+  exclusion: EXCLUSION
+  deduction: DEDUCTION
+  room_rent: DEDUCTION
+  sub_limit: DEDUCTION
+  cashless_delay: CASHLESS_PROCESS
+  discharge_delay: DISCHARGE_PROCESS
+  process_defect: REJECTION_PROCESS
+  other: OTHER

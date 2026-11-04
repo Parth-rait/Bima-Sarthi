@@ -1,3 +1,4 @@
+import { Spark } from "@/components/ds/Spark";
 import { Suspense, lazy, useRef } from "react";
 import { Link } from "react-router";
 import { Accordion } from "@/components/ds/Accordion";
@@ -31,7 +32,7 @@ function ChipPlate({ className }: { className?: string }) {
   );
 }
 
-const ivory = (a: number) => `rgba(251, 246, 238, ${a})`;
+const ivory = (a: number) => `rgba(248, 246, 242, ${a})`;
 
 /** Hero: the sky (CloudShader or the static sunset) fills the band edge to edge; message left, art composition right. */
 function Hero() {
@@ -62,9 +63,11 @@ function Hero() {
               Understand why your health-insurance claim was rejected, examine the relevant rules and discover what you can do next.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <Button to="/check-claim" variant="primary" size="lg">
-                {t("nav_check")}
-              </Button>
+              <Spark>
+                <Button to="/check-claim" variant="primary" size="lg">
+                  {t("nav_check")}
+                </Button>
+              </Spark>
               <Button to="/how-it-works" variant="secondary" size="lg">
                 {t("nav_how")}
               </Button>
@@ -413,9 +416,11 @@ function FinalCta() {
           <h2 id="cta-h" className="m-0 max-w-[22ch] font-display text-h1 font-medium text-ink">
             Start with the letter in your hand.
           </h2>
-          <Button to="/check-claim" variant="primary" size="lg">
-            {t("nav_check")}
-          </Button>
+          <Spark>
+            <Button to="/check-claim" variant="primary" size="lg">
+              {t("nav_check")}
+            </Button>
+          </Spark>
         </div>
       </Wrap>
     </Band>

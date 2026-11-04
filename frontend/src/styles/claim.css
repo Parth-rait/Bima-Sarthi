@@ -1,0 +1,329 @@
+/*
+ * The claim flow, Indigo dusk (4 Nov 2026). Loaded after operate.css, in the same layer, so it re-draws the flow's
+ * surfaces without touching the vocabulary operate.css and print.css share. Remove this one import to get the
+ * previous look back.
+ *
+ *   - the stepper is one glass capsule with an indigo pill that slides to the current step (no folder tabs)
+ *   - the sheet is a single liquid-glass surface over a soft light, not a bordered box
+ *   - the drop area is one well with a small 3D stack of pages, not a box inside a box
+ *   - chosen files are glass chips; fact rows are open rows, not nested cards
+ *   - a step change crosses in the direction of travel (CheckClaim.tsx)
+ * Every word stays on >= 80% porcelain or on a solid fill (measured: "Claim flow" rows of the contrast suite).
+ */
+
+@property --ring-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* ---- the light behind the flow ---- */
+.desk-light {
+  position: absolute;
+  inset: 4rem -6% -4rem;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(30% 40% at 8% 20%, color-mix(in srgb, var(--color-lavender) 90%, transparent), transparent 70%),
+    radial-gradient(28% 36% at 96% 40%, color-mix(in srgb, var(--color-sky-blue) 75%, transparent), transparent 70%),
+    radial-gradient(26% 30% at 70% 98%, color-mix(in srgb, var(--color-apricot-soft) 45%, transparent), transparent 70%);
+  filter: blur(24px);
+}
+.wf .flow {
+  position: relative;
+  z-index: 1;
+}
+.wf .frame {
+  gap: calc(var(--spacing) * 5);
+}
+
+/* ---- the stepper: a glass capsule with a sliding indigo pill ---- */
+.wf .stepper {
+  --pad: 0.3125rem;
+}
+.wf .stepper::before,
+.wf .stepper::after {
+  display: none;
+}
+.wf .stepper ol {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(var(--step-n, 3), minmax(0, 1fr));
+  gap: 0;
+  padding: var(--pad);
+  border: 1px solid rgb(255 255 255 / 0.85);
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--color-paper) 82%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    0 1px 2px rgb(27 26 51 / 0.05),
+    0 14px 30px -18px rgb(52 49 138 / 0.4);
+}
+/* the pill: one element that slides; labels sit on top of it */
+.wf .stepper ol::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset-block: var(--pad);
+  inset-inline-start: calc(var(--pad) + (100% - 2 * var(--pad)) / var(--step-n, 3) * var(--step-i, 0));
+  inline-size: calc((100% - 2 * var(--pad)) / var(--step-n, 3));
+  border-radius: 999px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-action) 86%, white), var(--color-action) 60%, var(--color-action-deep));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 8px 18px -8px rgb(52 49 138 / 0.75);
+}
+.wf .step {
+  position: relative;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-ink-soft);
+  min-block-size: 2.75rem;
+  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2);
+  transition: color var(--dur-2) var(--ease-out);
+}
+.wf .step[data-state="done"] {
+  color: var(--color-ink);
+}
+.wf .step[data-state="done"] svg {
+  color: var(--color-action);
+}
+.wf .step[data-state="current"] {
+  color: var(--color-on-ink);
+}
+.wf .stepper[data-stuck] .step {
+  min-block-size: 2.5rem;
+  padding-block: calc(var(--spacing) * 1);
+}
+
+/* ---- the sheet: one liquid-glass surface ---- */
+.wf .sheet {
+  position: relative;
+  overflow-x: clip;
+  border: 1px solid rgb(255 255 255 / 0.85);
+  border-radius: 1.75rem;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-paper) 94%, transparent), color-mix(in srgb, var(--color-paper) 86%, transparent));
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    0 1px 2px rgb(27 26 51 / 0.04),
+    0 36px 70px -40px rgb(52 49 138 / 0.45);
+}
+
+/* ---- the drop well ---- */
+.wf .picker {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+.wf .dropzone {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  justify-items: center;
+  gap: calc(var(--spacing) * 4);
+  padding: clamp(1.75rem, 5vw, 2.75rem) clamp(1rem, 4vw, 2.5rem);
+  text-align: center;
+  border: 1.5px solid transparent;
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(70% 90% at 50% 0%, color-mix(in srgb, var(--color-lavender) 55%, var(--color-paper)), var(--color-paper) 70%) padding-box,
+    conic-gradient(from var(--ring-angle), var(--color-lavender), var(--color-sky-blue), var(--color-apricot-soft), var(--color-lavender)) border-box;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9);
+}
+.wf .dropzone:hover {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    0 18px 36px -24px rgb(52 49 138 / 0.45);
+}
+.wf .dropzone[data-drop="drag"] {
+  border-color: transparent;
+  background:
+    radial-gradient(80% 100% at 50% 0%, color-mix(in srgb, var(--color-apricot-soft) 40%, var(--color-paper)), var(--color-paper) 75%) padding-box,
+    conic-gradient(from var(--ring-angle), var(--color-action), var(--color-apricot), var(--color-dusty-rose), var(--color-action)) border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    0 24px 48px -24px rgb(52 49 138 / 0.55);
+}
+.wf .drop-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  line-height: var(--text-h3--line-height);
+  font-weight: 500;
+  color: var(--color-ink);
+  text-wrap: balance;
+}
+.wf .drop-rules {
+  max-inline-size: 52ch;
+}
+.wf .drop-actions label {
+  border-radius: 999px;
+}
+
+/* the stack of pages: three glass sheets in perspective */
+.drop-orb {
+  position: relative;
+  display: block;
+  inline-size: 5.5rem;
+  block-size: 4.75rem;
+  perspective: 500px;
+}
+.drop-page {
+  position: absolute;
+  inset-block-start: 0.25rem;
+  inset-inline-start: 50%;
+  display: grid;
+  place-items: center;
+  inline-size: 3.25rem;
+  block-size: 4.1rem;
+  margin-inline-start: -1.625rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgb(255 255 255 / 0.9);
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.95), color-mix(in srgb, var(--color-lavender) 70%, white));
+  box-shadow: 0 10px 20px -12px rgb(52 49 138 / 0.6);
+  color: var(--color-action);
+  transform-style: preserve-3d;
+  transition: transform 520ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.drop-page[data-p="0"] {
+  transform: rotateY(-18deg) rotateZ(-12deg) translate3d(-0.9rem, 0.2rem, -20px);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-sky-blue) 70%, white), var(--color-sky-pale));
+}
+.drop-page[data-p="1"] {
+  transform: rotateY(-8deg) rotateZ(7deg) translate3d(0.8rem, 0.1rem, -10px);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-apricot-soft) 60%, white), var(--color-paper));
+}
+.drop-page[data-p="2"] {
+  transform: rotateX(8deg) translate3d(0, 0, 0);
+}
+.wf .dropzone[data-drop="drag"] .drop-page[data-p="0"] {
+  transform: rotateY(-24deg) rotateZ(-22deg) translate3d(-1.9rem, -0.5rem, -20px);
+}
+.wf .dropzone[data-drop="drag"] .drop-page[data-p="1"] {
+  transform: rotateY(-4deg) rotateZ(18deg) translate3d(1.9rem, -0.4rem, -10px);
+}
+.wf .dropzone[data-drop="drag"] .drop-page[data-p="2"] {
+  transform: rotateX(0deg) translate3d(0, -0.6rem, 20px) scale(1.06);
+}
+.wf .dropzone:hover .drop-page[data-p="2"] {
+  transform: rotateX(0deg) translate3d(0, -0.25rem, 10px);
+}
+
+/* ---- chosen files: glass chips ---- */
+.wf .picked-list,
+.wf .picked ul {
+  gap: calc(var(--spacing) * 2);
+  border-block: 0;
+}
+.wf .picked li,
+.wf .picked-file {
+  padding: calc(var(--spacing) * 2) calc(var(--spacing) * 3);
+  border: 1px solid var(--color-line);
+  border-radius: 1.125rem;
+  background-color: var(--color-paper);
+  box-shadow: 0 1px 2px rgb(27 26 51 / 0.04);
+  transition:
+    box-shadow var(--dur-2) var(--ease-out),
+    transform var(--dur-2) var(--ease-out);
+}
+.wf .picked li + li,
+.wf .picked-file + .picked-file {
+  border-block-start: 1px solid var(--color-line);
+}
+.wf .picked li:hover {
+  box-shadow: 0 10px 22px -14px rgb(52 49 138 / 0.45);
+}
+
+/* ---- the confirm step: open rows, not nested cards ---- */
+.wf .facts {
+  gap: calc(var(--spacing) * 1);
+}
+.wf .fact {
+  border-color: transparent;
+  border-radius: 1.25rem;
+  background-color: transparent;
+  box-shadow: inset 0 -1px 0 var(--color-line);
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out);
+}
+.wf .fact:hover {
+  background-color: color-mix(in srgb, var(--color-peach) 55%, transparent);
+  box-shadow: none;
+}
+.wf .fact.pending {
+  border-color: transparent;
+  background-color: var(--color-amber-wash);
+  box-shadow: none;
+}
+.wf .fact.answered {
+  border-color: transparent;
+  background-color: transparent;
+}
+.wf .fact.has-error {
+  border-color: var(--color-terracotta);
+}
+.wf .gate {
+  border-color: transparent;
+  border-radius: 1.5rem;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.7);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wf .stepper ol::before {
+    transition: inset-inline-start 620ms cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  .wf .dropzone {
+    transition:
+      box-shadow var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-out),
+      --ring-angle 1.2s linear;
+  }
+  .wf .dropzone[data-drop="drag"] {
+    transform: scale(1.01);
+    animation: ring-spin 2.4s linear infinite;
+  }
+  .drop-orb {
+    animation: orb-float 5s ease-in-out infinite;
+  }
+  .wf .picked li:hover {
+    transform: translateY(-1px);
+  }
+  .desk-light {
+    animation: desk-drift 20s ease-in-out infinite alternate;
+  }
+}
+@keyframes ring-spin {
+  to {
+    --ring-angle: 360deg;
+  }
+}
+@keyframes orb-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -5px;
+  }
+}
+@keyframes desk-drift {
+  from {
+    transform: translate3d(-2%, 0, 0);
+  }
+  to {
+    transform: translate3d(2%, -3%, 0);
+  }
+}
+@media print {
+  .desk-light,
+  .drop-orb {
+    display: none;
+  }
+}

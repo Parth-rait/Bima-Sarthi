@@ -1,0 +1,33 @@
+# Issue families named by the reviewer (Parth, 1 Nov) in the reviewer_note of the 14 reviewed cases.
+# Applied with: uv run python -m sarthi.data.cli cases issues apply-families sarthi/data/family_relabel_1nov.yaml
+# Only issue_family / family_status (reviewed) and a note suffix are written. Holding, quote and
+# status of every row are untouched (a rejected rule-label stays rejected and is never scored).
+reviewer: Parth
+relabel:
+  - {case_id: ik_79121837, issue: REJECTION_PROCESS, family: REJECTION_PROCESS, note: "NO_NEW_GROUNDS_IN_DEFENCE"}
+  # ik_79121837 PORTABILITY_CREDIT stays needs-review: no family change
+  - {case_id: ik_31366034, issue: MORATORIUM_60M, family: NON_DISCLOSURE, note: "NON_DISCLOSURE_EVIDENCE (case excluded as probable duplicate)"}
+  - {case_id: ik_31366034, issue: PED_WAIT_36M, family: PED_DEFINITION, note: "PED_NOT_PREEXISTING_AT_INCEPTION"}
+  - {case_id: ik_31366034, issue: REJECTION_PROCESS, family: REJECTION_PROCESS, note: "POLICY_CANCELLATION_NOTICE"}
+  - {case_id: ik_55284993, issue: PED_WAIT_36M, family: PORTABILITY, note: "WAITING_PERIOD_CREDIT_FROM_ORIGINAL_INCEPTION"}
+  - {case_id: ik_55284993, issue: PORTABILITY_CREDIT, family: PORTABILITY, note: "historical continuity holding"}
+  - {case_id: ik_98838150, issue: EXCLUSION_LISTED, family: EXCLUSION, note: "FIRST_HEART_ATTACK_COVERAGE_AND_NO_PRIOR_HEART_DISEASE_EVIDENCE"}
+  - {case_id: ik_98838150, issue: REJECTION_PROCESS, family: REJECTION_PROCESS, note: "COVID_CRC_REVIEW"}
+  - {case_id: ik_61348487, issue: EXCLUSION_LISTED, family: EXCLUSION, note: "ALCOHOL_EXCLUSION_CAUSAL_NEXUS"}
+  - {case_id: ik_61348487, issue: PORTABILITY_CREDIT, family: PORTABILITY, note: "historical portability/eligibility holding"}
+  - {case_id: ik_93195318, issue: EXCLUSION_LISTED, family: NON_DISCLOSURE, note: "NON_DISCLOSURE_MATERIALITY_AND_CAUSAL_NEXUS"}
+  - {case_id: ik_93195318, issue: MORATORIUM_60M, family: NON_DISCLOSURE, note: "consolidated into non-disclosure issue"}
+  - {case_id: ik_93195318, issue: PED_WAIT_36M, family: NON_DISCLOSURE, note: "consolidated into non-disclosure issue"}
+  - {case_id: ik_62769190, issue: SPECIFIC_WAIT, family: WAITING_PERIOD, note: "24-month specific waiting clause"}
+  - {case_id: ik_62769190, issue: EXCLUSION_LISTED, family: OTHER, note: "not an exclusion-list issue"}
+  - {case_id: ik_54612895, issue: EXCLUSION_LISTED, family: POLICY_WORDING_DELIVERY, note: "POLICY_WORDING_DELIVERY"}
+  - {case_id: ik_54612895, issue: SPECIFIC_WAIT, family: POLICY_WORDING_DELIVERY, note: "POLICY_WORDING_DELIVERY"}
+  - {case_id: ik_185595546, issue: PED_WAIT_36M, family: PED_DEFINITION, note: "PED_DEFINITION_AND_PROOF"}
+  - {case_id: ik_185595546, issue: EXCLUSION_LISTED, family: PED_DEFINITION, note: "merged: PED_DEFINITION_AND_PROOF"}
+  - {case_id: ik_185595546, issue: MORATORIUM_60M, family: OTHER, note: "not a moratorium holding"}
+  - {case_id: ik_149919666, issue: MORATORIUM_60M, family: NON_DISCLOSURE, note: "NON_DISCLOSURE_MATERIALITY_AND_INTENT"}
+  - {case_id: ik_149919666, issue: PED_WAIT_36M, family: PED_DEFINITION, note: "48-month clause defines PED"}
+  - {case_id: ik_140785688, issue: SPECIFIC_WAIT, family: OTHER, note: "life policy reinstatement wait (LIFE_POLICY_REINSTATEMENT_WAIT_180D); not health"}
+  - {case_id: ik_75424763, issue: MORATORIUM_60M, family: OTHER, note: "FRAUDULENT_CLAIM_DOCUMENTS_AND_NOTIFICATION_DELAY"}
+  - {case_id: ik_191559903, issue: MORATORIUM_60M, family: CLAIM_NOTIFICATION_DELAY, note: "CLAIM_NOTIFICATION_DELAY_AND_FRAUD"}
+  - {case_id: ik_133560673, issue: MORATORIUM_60M, family: NON_DISCLOSURE, note: "NON_DISCLOSURE_MATERIALITY_AND_EVIDENCE"}

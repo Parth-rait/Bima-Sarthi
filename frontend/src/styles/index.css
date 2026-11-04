@@ -13,5 +13,8 @@
 @import "./base.css" layer(base);
 @import "./layout.css" layer(components);
 @import "./operate.css" layer(components);
+@import "./claim.css" layer(components);
+@import "./route.css" layer(components);
+@import "./stage.css" layer(components);
 @import "tailwindcss/utilities.css" layer(utilities);
 @import "./print.css";

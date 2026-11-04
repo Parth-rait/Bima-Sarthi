@@ -1,0 +1,55 @@
+{
+  "case_id": "ik_76647766",
+  "citation": {
+    "forum": "State Consumer Disputes Redressal Commission",
+    "case_number": null,
+    "decided_on": "2026-05-19",
+    "source_url": "https://indiankanoon.org/doc/76647766/"
+  },
+  "insurer": "Care Health",
+  "outcome": "dismissed",
+  "policyholder_prevailed": true,
+  "relief_amount": null,
+  "rejection_ground": "non_disclosure",
+  "days_to_decision": 663,
+  "policy_years_at_claim": 6.8,
+  "licence_note": "Judgment text via Indian Kanoon API; display attribution: powered by IKanoon",
+  "findings": [
+    {
+      "rule_id": "MORATORIUM_60M",
+      "rule_version": 0,
+      "verdict": "NEED_INFO",
+      "reason": "missing_inputs: continuous_cover_months, fraud_alleged",
+      "rule_quote": "This period of eight years is called as moratorium period. The moratorium would be applicable for the sums insured of the first policy and subsequently completion of 8 continuous years would be applicable from date of enhancement of sums insured only on the enhanced limits. After the expiry of Moratorium Period no health insurance policy shall be contestable except for proven fraud and permanent exclusions specified in the policy contract.",
+      "source_sha256": "cdde737a8f562db8ce4749d9a4d34841cf382e813f48546a752cba45902cf2ee",
+      "page_no": 107,
+      "facts_used": {
+        "claim_date": {
+          "value": "2024-09-26",
+          "quote": "he submitted a reimbursement claim on 26.09.2024",
+          "page_no": 1
+        },
+        "inception_date": {
+          "value": "2017-10-23",
+          "quote": "first policy was obtained by the complainant from it with date of inception as 23.10.2017",
+          "page_no": 1
+        },
+        "policy_renewal_date": {
+          "value": "2023-10-23",
+          "quote": "valid from 23.10.2023 to 22.10.2024",
+          "page_no": 1
+        },
+        "ported_from_date": {
+          "value": "2019-10-23",
+          "quote": "wherein the first date of enrolment of Maulik Tuli was 23.10.2019 (Annexure OP-1/1)",
+          "page_no": 1
+        }
+      },
+      "question_en": "For how many continuous months has this policyholder been covered, and does the insurer allege fraud?",
+      "question_hi": null,
+      "action_en": "Ask the insurer to withdraw the rejection and cite the moratorium; escalate to the grievance route if refused.",
+      "action_hi": null
+    }
+  ],
+  "attribution": "powered by IKanoon"
+}

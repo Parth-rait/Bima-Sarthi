@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 import { Loader } from "./Loader";
 
 /**
- * One button for the whole product. The ONE primary action colour is deep ink with ivory text (13.8:1); on hover/press
- * it turns apricot with ink text (7.3:1), which is apricot's only job besides key highlights. States: hover,
+ * One button for the whole product. The ONE primary action colour is indigo (--color-action) with porcelain text; on hover/press
+ * it turns saffron (the apricot token) with ink text, which is apricot's only job besides key highlights. States: hover,
  * focus-visible (3px ink ring, ivory on ink bands), pressed (1px down), disabled (receded surface + not-allowed
  * cursor, never a smudge pattern), loading (spinner + aria-busy). 44px minimum height on every size.
  */
@@ -23,7 +23,7 @@ export const buttonStyles = cva(
   {
     variants: {
       variant: {
-        primary: "border-ink bg-ink text-on-ink hover:border-apricot hover:bg-apricot hover:text-ink active:bg-apricot-soft",
+        primary: "border-action bg-action text-on-ink shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_8px_20px_-10px_rgb(52_49_138/0.7)] hover:border-apricot hover:bg-apricot hover:text-ink active:bg-apricot-soft",
         secondary: "border-ink bg-transparent text-ink hover:bg-peach-deep",
         quiet: "border-transparent bg-transparent px-2 text-ink underline decoration-gold decoration-2 underline-offset-4 hover:bg-peach",
         danger: "border-terracotta bg-transparent text-terracotta-ink hover:bg-terracotta-wash",

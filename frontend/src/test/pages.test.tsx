@@ -79,7 +79,7 @@ describe("landing page", () => {
 });
 
 describe("navbar", () => {
-  it("marks the current page with aria-current and offers the Explore disclosure with the five links", async () => {
+  it("marks the current page with aria-current and offers the Explore disclosure with the six links (Evidence restored)", async () => {
     await renderApp({}, "/about");
     const nav = screen.getByRole("navigation", { name: "Main navigation" });
     expect(within(nav).getByRole("link", { name: "About" }).getAttribute("aria-current")).toBe("page");
@@ -89,7 +89,7 @@ describe("navbar", () => {
     fireEvent.click(explore);
     expect(explore.getAttribute("aria-expanded")).toBe("true");
     const list = document.getElementById(explore.getAttribute("aria-controls")!)!;
-    expect([...list.querySelectorAll("a")].map((a) => a.textContent!.split(/(?=[A-Z][a-z]+ [a-z])/)[0]).length).toBe(5);
+    expect([...list.querySelectorAll("a")].map((a) => a.textContent!.split(/(?=[A-Z][a-z]+ [a-z])/)[0]).length).toBe(6);
     expect(within(list).getByRole("link", { name: /Frequently asked questions/ }).getAttribute("href")).toBe("/help#faq");
   });
 

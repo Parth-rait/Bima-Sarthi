@@ -66,7 +66,9 @@ def test_consistent_wording_no_endorsement():
 
 def test_challengeable_wording_hedged():
     t = templated(FS, "en", False)
-    assert "may be challengeable under MORATORIUM_60M" in t
+    assert "documented possible inconsistency between this decision and the rule quoted below" in t
+    assert "(MORATORIUM_60M" in t  # the id stays as the citation beside the quote
+    assert "does not predict any outcome" in t
 
 
 @pytest.mark.parametrize("lang", ["en", "hi"])

@@ -1,0 +1,459 @@
+/*
+ * Motion that explains (4 Nov 2026, second pass): the claim flow's card deck and its tumble (components/flow/Tumble.tsx),
+ * the one noticeable action (components/ds/Spark.tsx, motion-primitives), the plan drawn as a route
+ * (components/plan/RouteMap.tsx, on Parth's ring shader) and the deadline chart (components/charts/DeadlineTimeline.tsx).
+ * Every animation sits in the no-preference block at the end; with reduced motion all of it is still and complete.
+ */
+
+/* ---- the deck: the sheet stands in front of the ones still to come ---- */
+.wf .desk {
+  position: relative;
+  isolation: isolate;
+  /* room above the sheet for the two waiting behind it to show under the stepper */
+  margin-block-start: 1.75rem;
+}
+.wf .desk::before,
+.wf .desk::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block: 0 auto;
+  block-size: 5rem;
+  z-index: -1;
+  border: 1px solid rgb(255 255 255 / 0.9);
+  border-radius: 1.75rem 1.75rem 0 0;
+  border-block-end: 0;
+  background: linear-gradient(color-mix(in srgb, var(--color-lavender) 70%, var(--color-paper)), var(--color-paper));
+  box-shadow:
+    0 -10px 24px -14px rgb(52 49 138 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.9);
+  pointer-events: none;
+}
+.wf .desk::before {
+  translate: 0 -0.85rem;
+  scale: 0.95 1;
+}
+.wf .desk::after {
+  translate: 0 -1.7rem;
+  scale: 0.9 1;
+  background: linear-gradient(color-mix(in srgb, var(--color-sky-blue) 55%, var(--color-paper)), var(--color-paper));
+  opacity: 0.85;
+}
+.tumble-host {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 0;
+}
+.tumble-stage {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 3;
+  pointer-events: none;
+}
+.tumble-ghost {
+  position: absolute;
+  inset: 0 0 auto;
+  overflow: clip;
+  border-radius: 1.75rem;
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+  box-shadow: 0 30px 60px -30px rgb(27 26 51 / 0.5);
+}
+.tumble-ghost > .sheet {
+  min-block-size: 100%;
+}
+
+/* ---- the one action that should be noticed ---- */
+.spark {
+  display: inline-flex;
+}
+.spark-body {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  border-radius: var(--radius-ctl);
+}
+.spark-body > button,
+.spark-body > a,
+.spark-body > label {
+  position: relative;
+  z-index: 1;
+}
+.spark-glow {
+  z-index: -1;
+  opacity: 0.9;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.spark:hover .spark-glow,
+.spark:focus-within .spark-glow {
+  opacity: 1;
+}
+.spark-body > [aria-hidden="true"]:last-child {
+  z-index: 2;
+}
+.spark-trail {
+  background: radial-gradient(circle, var(--color-paper) 0%, var(--color-apricot-soft) 30%, var(--color-apricot) 48%, transparent 70%);
+}
+/* a light never invites a click that cannot happen */
+.spark:has(:disabled, [aria-busy="true"], [aria-disabled="true"]) .spark-body > [aria-hidden="true"] {
+  opacity: 0;
+}
+
+/* pill-shaped actions (the header's Check my claim) keep a pill-shaped glow; the header's is smaller and quieter */
+.spark-pill .spark-body {
+  border-radius: 999px;
+}
+.spark-sm {
+  --spark-spread: -5px;
+}
+.spark-sm .spark-glow {
+  opacity: 0.7;
+}
+/* the first thing to do on the upload sheet: Choose files glows until something is chosen, then the light moves on
+   to "Read my documents" (which wakes up the moment it can be pressed) */
+.wf .dropzone[data-has-files] .drop-spark .spark-body > [aria-hidden="true"] {
+  opacity: 0;
+}
+.drop-trail {
+  background: radial-gradient(circle, var(--color-paper) 0%, var(--color-action) 35%, var(--color-dusty-rose) 55%, transparent 72%);
+}
+.wf .dropzone > span[aria-hidden="true"]:has(> .drop-trail) {
+  z-index: 0;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.wf .dropzone[data-has-files] > span[aria-hidden="true"]:has(> .drop-trail) {
+  opacity: 0;
+}
+/* a screen's heading takes focus when the screen changes (so screen readers announce it). It is not a control and
+   Tab never lands on it (tabindex -1), so the ring box round the title only ever came from that programmatic move. */
+.wf [data-screen-heading][tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* ---- the plan as a route ---- */
+.route-plate {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  display: grid;
+  gap: calc(var(--spacing) * 5);
+  margin-block: calc(var(--spacing) * 2) calc(var(--spacing) * 8);
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border-radius: 1.5rem;
+  color: var(--color-on-ink);
+  background:
+    radial-gradient(60% 90% at 90% 0%, color-mix(in srgb, var(--color-dusty-rose) 28%, transparent), transparent 70%),
+    radial-gradient(40% 60% at 70% 110%, color-mix(in srgb, var(--color-apricot) 18%, transparent), transparent 70%),
+    var(--color-ink);
+  box-shadow: 0 30px 60px -36px rgb(27 26 51 / 0.7);
+}
+.route-rings {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  -webkit-mask-image: radial-gradient(75% 110% at 92% 10%, #000 25%, transparent 78%);
+  mask-image: radial-gradient(75% 110% at 92% 10%, #000 25%, transparent 78%);
+}
+.route-head {
+  display: grid;
+  gap: calc(var(--spacing) * 2);
+  max-inline-size: 64ch;
+}
+.route-sum {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing) * 2) calc(var(--spacing) * 5);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  line-height: 1.2;
+  color: var(--color-on-ink);
+}
+.route-stat > span {
+  color: var(--color-apricot-soft);
+}
+.route-hint {
+  margin: 0;
+  font-size: var(--text-meta);
+  color: var(--color-on-ink-soft);
+}
+.route-map {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 0;
+  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 1) calc(var(--spacing) * 3);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-raised) transparent;
+}
+.route-map > li {
+  display: flex;
+  align-items: center;
+  flex: none;
+  scroll-snap-align: start;
+}
+/* the line between two stops: dashes that run toward the next stop */
+.route-link {
+  flex: none;
+  inline-size: 1.75rem;
+  block-size: 2px;
+  background: repeating-linear-gradient(90deg, var(--color-on-ink-soft) 0 6px, transparent 6px 10px);
+  opacity: 0.7;
+}
+.wf .route-node {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-content: start;
+  align-items: start;
+  justify-content: stretch;
+  justify-items: start;
+  gap: calc(var(--spacing) * 2);
+  inline-size: 11.5rem;
+  block-size: 100%;
+  min-block-size: 8.5rem;
+  padding: calc(var(--spacing) * 3) calc(var(--spacing) * 3.5);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 1rem;
+  background-color: var(--color-ink-raised);
+  color: var(--color-on-ink);
+  font-size: var(--text-control);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: start;
+  transition:
+    color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    translate var(--dur-2) var(--ease-out);
+}
+.wf .route-node:hover {
+  border-color: var(--color-apricot-soft);
+  background-color: var(--color-ink-raised);
+  color: var(--color-on-ink);
+}
+.wf .route-node:active {
+  background-color: var(--color-ink-raised);
+}
+.wf .route-node:focus-visible {
+  outline: 3px solid var(--color-apricot-soft);
+  outline-offset: 2px;
+}
+/* the marker: one porcelain plate that slides from stop to stop (motion layoutId) */
+.route-on {
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--color-on-ink);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-apricot) 70%, transparent),
+    0 14px 30px -12px rgb(232 135 58 / 0.55);
+}
+.wf .route-stop[data-on] .route-node,
+.wf .route-stop[data-on] .route-node:hover {
+  color: var(--color-ink);
+  border-color: transparent;
+}
+.route-n {
+  display: grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  font-variant-numeric: tabular-nums;
+}
+.route-stop[data-on] .route-n {
+  border-color: var(--color-action);
+  background: var(--color-action);
+  color: var(--color-on-ink);
+}
+.route-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.route-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--spacing) * 1);
+}
+.route-chip {
+  padding: 0.0625rem calc(var(--spacing) * 2);
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+/* a decision: a dashed saffron card with the way out written on it */
+.route-decision {
+  display: grid;
+  align-content: start;
+  gap: calc(var(--spacing) * 2);
+  inline-size: 11rem;
+  block-size: 100%;
+  min-block-size: 8.5rem;
+  padding: calc(var(--spacing) * 3);
+  border: 1.5px dashed color-mix(in srgb, var(--color-apricot) 80%, transparent);
+  border-radius: 1rem;
+  font-size: var(--text-control);
+  line-height: 1.3;
+}
+.route-diamond {
+  display: grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  rotate: 45deg;
+  border-radius: 0.3rem;
+  background: var(--color-apricot);
+  color: var(--color-ink);
+  font-weight: 700;
+}
+.route-diamond > span {
+  rotate: -45deg;
+}
+.route-decision .route-q {
+  font-weight: 600;
+  color: var(--color-on-ink);
+}
+.route-decision .route-branch,
+.route-decision .route-no {
+  font-size: 0.8125rem;
+  color: var(--color-on-ink-soft);
+}
+.route-yes {
+  display: inline-block;
+  padding: 0 calc(var(--spacing) * 1.5);
+  border-radius: 999px;
+  background: var(--color-apricot-soft);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* the detailed steps below the map: one rail joins the numbers, so the list reads as the same route */
+.wf .plan-rail > li {
+  position: relative;
+  scroll-margin-block-start: calc(var(--nav-h) + 6rem);
+}
+.wf .plan-rail > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: calc(0.875rem - 1px);
+  inset-block: 2.25rem calc(var(--spacing) * -5.5);
+  inline-size: 2px;
+  border-radius: 2px;
+  background: linear-gradient(var(--color-action), color-mix(in srgb, var(--color-action) 20%, var(--color-line)));
+}
+.wf .plan-rail > li > ul {
+  padding-inline-start: 2.75rem;
+}
+.wf .plan-rail > li > h4:focus {
+  outline: none;
+}
+.wf .plan-rail > li > h4:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 3px;
+  border-radius: var(--radius-ctl);
+}
+
+/* ---- the deadline chart ---- */
+.dl-chart {
+  margin: calc(var(--spacing) * 2) 0 calc(var(--spacing) * 5);
+  padding: calc(var(--spacing) * 4) calc(var(--spacing) * 4) calc(var(--spacing) * 3);
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--color-paper) 80%, transparent);
+  box-shadow: inset 0 0 0 1px var(--color-line);
+}
+.dl-rows {
+  display: grid;
+  gap: calc(var(--spacing) * 5);
+}
+.dl-row-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(var(--spacing) * 1) calc(var(--spacing) * 3);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.dl-track {
+  position: relative;
+  margin-block-start: calc(var(--spacing) * 2);
+  block-size: 0.75rem;
+  border-radius: 999px;
+  background: var(--color-peach-deep);
+}
+.dl-bar {
+  position: absolute;
+  inset-block: 0;
+  border-radius: 999px;
+  background: var(--color-ink-soft);
+}
+.dl-bar[data-row="ombudsman"] {
+  background: linear-gradient(90deg, var(--color-action), var(--color-action-deep));
+}
+.dl-now {
+  position: absolute;
+  inset-block: -0.4rem;
+  inline-size: 3px;
+  border-radius: 3px;
+  background: var(--color-ink);
+  box-shadow: 0 0 0 2px var(--color-paper);
+}
+.dl-ends {
+  display: flex;
+  margin-block-start: calc(var(--spacing) * 1);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-soft);
+}
+.dl-cap {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+  margin-block-start: calc(var(--spacing) * 3);
+  font-size: 0.8125rem;
+  color: var(--color-ink-soft);
+}
+.dl-cap-mark {
+  display: inline-block;
+  inline-size: 3px;
+  block-size: 0.875rem;
+  border-radius: 3px;
+  background: var(--color-ink);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .route-link {
+    animation: route-flow 1.4s linear infinite;
+  }
+  .wf .route-node:hover {
+    translate: 0 -2px;
+  }
+}
+@keyframes route-flow {
+  to {
+    background-position: 10px 0;
+  }
+}
+@media print {
+  .route-plate,
+  .dl-chart,
+  .tumble-stage,
+  .wf .desk::before,
+  .wf .desk::after {
+    display: none;
+  }
+}

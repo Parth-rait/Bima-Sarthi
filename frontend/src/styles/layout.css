@@ -69,3 +69,97 @@
 .grid-12 > * {
   grid-column: span 12 / span 12;
 }
+
+/* ---------------------------------------------------------------------------------------------------------------
+ * The navbar. At the top of a page it is a full-width bar. Once the page scrolls it lifts into a floating
+ * liquid-glass capsule: the header keeps its total height (--nav-h), the bar inside shrinks and gains the glass.
+ * Every word on it is ink on >= 72% porcelain (measured: "Floating navbar" rows of the contrast suite).
+ * ------------------------------------------------------------------------------------------------------------- */
+.navbar {
+  transition: background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
+}
+.navbar-shell {
+  transition: padding var(--dur-3) var(--ease-out);
+}
+.navbar-shell > .wrap {
+  border: 1px solid transparent;
+  border-radius: 0;
+  overflow: hidden;
+  transition:
+    min-height var(--dur-3) var(--ease-out),
+    padding var(--dur-3) var(--ease-out),
+    border-radius var(--dur-3) var(--ease-out),
+    background-color var(--dur-3) var(--ease-out),
+    border-color var(--dur-3) var(--ease-out),
+    box-shadow var(--dur-3) var(--ease-out);
+}
+.navbar[data-floating] {
+  --nav-bar-h: 3.5rem;
+}
+.navbar[data-floating] .navbar-shell {
+  padding-block: 0.5rem 0.25rem;
+}
+.navbar[data-floating] .navbar-shell > .wrap {
+  padding-inline: 0.5rem 0.5rem;
+  border-color: rgb(255 255 255 / 0.75);
+  border-radius: 1.25rem;
+  background-color: color-mix(in srgb, var(--color-ivory) 74%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(1.7);
+  backdrop-filter: blur(20px) saturate(1.7);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    0 1px 2px rgb(27 26 51 / 0.05),
+    0 18px 40px -22px rgb(52 49 138 / 0.45);
+}
+@media (min-width: 64rem) {
+  .navbar[data-floating] .navbar-shell > .wrap {
+    padding-inline: 0.75rem 0.5rem;
+  }
+}
+
+/* the mark: a glass tile with depth, leaning toward the pointer; a band of light crosses it on each page change */
+.brand-tile {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  position: relative;
+  display: inline-grid;
+  border-radius: 0.7rem;
+  overflow: hidden;
+  transform: perspective(240px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transition: transform 260ms var(--ease-out), box-shadow 260ms var(--ease-out);
+  box-shadow: 0 6px 14px -8px rgb(52 49 138 / 0.65);
+}
+.brand-link:hover .brand-tile {
+  box-shadow: 0 10px 22px -10px rgb(52 49 138 / 0.75);
+}
+.brand-sheen {
+  position: absolute;
+  inset: -40%;
+  background: linear-gradient(115deg, transparent 40%, rgb(255 255 255 / 0.65) 50%, transparent 60%);
+  transform: translateX(-70%);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .brand-sheen {
+    animation: brand-sheen 1.1s var(--ease-out) 0.15s both;
+  }
+  .brand-link:hover .brand-sheen {
+    animation: brand-sheen 0.9s var(--ease-out) both;
+  }
+}
+@keyframes brand-sheen {
+  from {
+    transform: translateX(-70%);
+  }
+  to {
+    transform: translateX(70%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .navbar,
+  .navbar-shell,
+  .navbar-shell > .wrap,
+  .brand-tile {
+    transition: none;
+  }
+}

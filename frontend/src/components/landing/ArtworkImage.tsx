@@ -24,7 +24,7 @@ export function hasWebGL(): boolean {
  * chromatic shift, tilt), loaded as a separate chunk. Otherwise, and while that chunk loads or if it fails, it is the same
  * artwork as a plain <img> (also whenever `plain` is set, e.g. on low-power devices). The alt text is on the image in every case.
  */
-export function ArtworkImage({ src, alt, className, background = "#f2d5c2", width, height, plain: forcePlain = false }: { src: string; alt: string; className?: string; background?: string; width?: number; height?: number; plain?: boolean }) {
+export function ArtworkImage({ src, alt, className, background = "#e4dcf1", width, height, plain: forcePlain = false }: { src: string; alt: string; className?: string; background?: string; width?: number; height?: number; plain?: boolean }) {
   const reduce = usePrefersReducedMotion();
   const plain = <img src={src} alt={alt} width={width} height={height} className="size-full object-cover" />;
   if (reduce || forcePlain || !hasWebGL()) return <div className={cn("relative overflow-hidden", className)}>{plain}</div>;

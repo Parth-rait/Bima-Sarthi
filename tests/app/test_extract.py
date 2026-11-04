@@ -49,11 +49,12 @@ class Stub:
     """Reader stub: `facts` are CaseFactsOut per page call, `transcripts` per transcription call."""
     def __init__(self, monkeypatch, facts, transcripts=(), needs_review=False):
         self.facts, self.transcripts = iter(facts), iter(transcripts)
-        self.needs_review, self.calls = needs_review, []
+        self.needs_review, self.calls, self.msgs = needs_review, [], []
         monkeypatch.setattr(extract, "chat", self)
 
     def __call__(self, role, messages, **kw):
         self.calls.append((role, kw))
+        self.msgs.append(messages)
         if kw.get("schema") is not None:
             return res(next(self.facts), needs_review=self.needs_review)
         return res(text=next(self.transcripts))
@@ -76,6 +77,15 @@ def test_text_layer_exact_quote_is_verified(monkeypatch):
     Stub(monkeypatch, [CaseFactsOut(rejection_ground=ef("non_disclosure", QUOTE))])
     f = extract_user_facts(s)["rejection_ground"]
     assert (f.status, f.confidence, f.value, f.page_no) == ("verified", "high", "non_disclosure", 1)
+
+
+def test_pdf_page_is_read_from_its_text_layer(monkeypatch):
+    s = pdf_session(QUOTE)
+    stub = Stub(monkeypatch, [CaseFactsOut(rejection_ground=ef("non_disclosure", QUOTE))])
+    extract_user_facts(s)
+    parts = stub.msgs[0][1]["content"]
+    assert [p["type"] for p in parts] == ["text"]
+    assert QUOTE in parts[0]["text"]
 
 
 def test_photo_transcription_fuzzy_match_verified_medium_or_high(monkeypatch):

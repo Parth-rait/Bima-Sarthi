@@ -1,25 +1,27 @@
 ---
 name: Bima Sarthi
-description: Late-afternoon sky with sunlight through soft clouds. Warm ivory and pale peach carry the page, deep charcoal ink carries every word, one calm action colour, and the atmosphere (sky blue, lavender, dusty rose, apricot, champagne) lives in backgrounds and hairlines only.
+description: Indigo dusk. Porcelain and lilac-mist surfaces, indigo-night ink for every word, one indigo action that turns saffron under the hand, and a sky-violet light (periwinkle, lavender, violet, saffron ember) that lives behind liquid glass.
 colors:
-  ivory: "#FBF6EE"
-  peach: "#F7E6D6"
-  peach-deep: "#F0D8C2"
-  paper: "#FFFCF7"
-  sky-blue: "#BFD3E6"
-  sky-pale: "#DCE6F0"
-  lavender: "#D9D2E6"
-  dusty-rose: "#D9A9A6"
-  apricot: "#E9A87F"
-  apricot-soft: "#F2C6A0"
-  gold: "#D9BE8A"
-  ink: "#2A2630"
-  ink-soft: "#5B5560"
-  ink-raised: "#3A3541"
-  on-ink: "#FBF6EE"
-  on-ink-soft: "#D8CFC6"
-  line: "#E2D8CC"
-  line-strong: "#857A6D"
+  ivory: "#F8F6F2"
+  peach: "#EEEAF4"
+  peach-deep: "#E2DCEE"
+  paper: "#FDFCFA"
+  sky-blue: "#C9D4F2"
+  sky-pale: "#E3E8F8"
+  lavender: "#E6D9F5"
+  dusty-rose: "#C6A3DB"
+  apricot: "#E8873A"
+  apricot-soft: "#F5C08E"
+  gold: "#E0B36A"
+  ink: "#1B1A33"
+  ink-soft: "#4E4B66"
+  ink-raised: "#2C2A52"
+  action: "#34318A"
+  action-deep: "#26246B"
+  on-ink: "#F8F6F2"
+  on-ink-soft: "#CFCBE3"
+  line: "#E1DDEA"
+  line-strong: "#77738F"
   terracotta: "#B5553F"
   terracotta-ink: "#8B3F2C"
   terracotta-wash: "#F6DFD6"
@@ -69,7 +71,7 @@ spacing:
   grid-gap: "clamp(1rem, 2.5vw, 2.5rem)"
 components:
   button-primary:
-    backgroundColor: "{colors.ink}"
+    backgroundColor: "{colors.action}"
     textColor: "{colors.on-ink}"
     rounded: "{rounded.control}"
     padding: "8px 24px"
@@ -104,6 +106,41 @@ components:
 # Design System: Bima Sarthi
 
 Source of truth in code: `frontend/src/styles/tokens.css` (a `@theme static` block for Tailwind utilities, layout tokens, temporary aliases, and the legacy variables the claim workflow still reads), `frontend/src/styles/layout.css` (bands, wraps, grid), and `frontend/src/design/atmosphere.ts` (every cloud, sky and lamp colour, in one file). Contrast is checked by `npm run contrast` and `src/test/contrast.test.ts`; the table below is that script's output (phase 3a).
+
+## Indigo dusk (4 Nov 2026): what changed and why
+
+Parth asked for a more dynamic, 3D, Apple-liquid-glass feel in the claim flow, a better logo and better colour combinations, and chose **Indigo dusk** and the **b/s glass monogram** from two short option sets. Token NAMES are unchanged (so every component kept working); their VALUES moved:
+
+| Token | Was (sunset) | Now (indigo dusk) | Role |
+|---|---|---|---|
+| ivory | #FBF6EE | #F8F6F2 porcelain | the ground |
+| peach | #F7E6D6 | #EEEAF4 lilac mist | second surface, header bands |
+| ink | #2A2630 | #1B1A33 indigo night | every word, the ink band |
+| action (new) | (ink) | #34318A indigo | the ONE primary fill: buttons, pressed toggles, step numbers, progress |
+| apricot | #E9A87F | #E8873A saffron | primary hover/press, key highlights, the scan line |
+| gold | #D9BE8A | #E0B36A marigold | hairlines and underlines |
+| dusty-rose | #D9A9A6 | #C6A3DB violet | emphasis marks, gradients' far end |
+| sky-blue / lavender | #BFD3E6 / #D9D2E6 | #C9D4F2 / #E6D9F5 | atmosphere only |
+
+Verdict families (terracotta, amber, sage) are unchanged. The artwork SVGs were recoloured with the same map. The logo (`assets/art/mark.svg`, also the favicon) is a lowercase **b** with an **s** tucked behind it on a glass indigo tile with a saffron ember: original, no wheel or emblem.
+
+**Where 3D and glass now live (this supersedes "no WebGL on Operate" below):**
+- **The work stage** (`components/stage/`): while the claim flow is really waiting on the server (opening a session, reading the documents, saving answers, running the check), a liquid-glass panel shows a React Three Fiber scene of three glass sheets beside the steps of that request in words, the current one marked, and the real seconds elapsed. Reading = a saffron scan line lights each line; saving = the fan closes; checking = a glass lens steps down the lines, turning them indigo. Drag turns the file (fine pointers), the pointer tilts it. The canvas is aria-hidden decoration; the screen's own `role=status` line stays the announcement. three.js is a lazy chunk (about 270 KB gzipped) fetched when a file is chosen or the confirm screen opens; a CSS 3D version shows first and replaces it where WebGL is missing or the device is low-power; reduced motion gets one still frame. Colours and quality knobs: `STAGE` in `design/atmosphere.ts`. Nothing on it estimates progress.
+- **The navbar**: a full-width bar at the top of a page; once scrolled it lifts into a floating glass capsule (header height unchanged, `--nav-h`), with a saffron-to-violet scroll hairline. A glass pill glides between links under the pointer (motion `layoutId`), a saffron bead marks the current page, and the mark leans toward the pointer with a band of light crossing it on each page change.
+- **The claim page header**: the lilac band carries a slow violet/periwinkle/saffron light and one sheen on arrival.
+- The sticky stepper and result summary plates are unchanged.
+
+All new text pairs are in the contrast suite (glass capsule, stage column, header light); `npm run contrast` passes.
+
+**Claim flow surfaces (`styles/claim.css`, loaded after operate.css; remove the import to undo):** the stepper is one glass capsule with an indigo pill that springs to the current step (no folder tabs); the sheet is a single liquid-glass surface over a slow lavender/periwinkle/saffron light (`.desk-light`); the drop area is one well with a 3D stack of pages that fans out on drag and a gradient ring that turns while something is over it; chosen files are chips; fact rows are open rows (hairline, hover wash, amber wash when pending), not cards inside a card. A step change crosses in the direction of travel (forward from the right, back from the left, 44px with an 8px blur; instant under reduced motion).
+
+**Restored from the 4 Nov iteration (backup branch `backup/claude-frontend-2026-11-04`):** the backend (schemes, policy, evidence, corrected real-case winners, nine gallery cases) applied as a patch, and the Schemes ("Find schemes") and Evidence pages as new files, in this look. The rest of that iteration's UI was not brought back.
+
+**Motion that explains (4 Nov, second pass; `styles/route.css`).** Four additions, each still and complete under reduced motion:
+- *The deck and the tumble* (`components/flow/Tumble.tsx`): the claim sheet stands in front of two plates (the steps still to come). Going forward, a decorative copy of the outgoing sheet (cloned DOM, aria-hidden, inert, ids and names stripped) tips over its bottom edge and falls flat while the next sheet slides up to the line; going back, the copy recedes and the earlier sheet stands up from the floor. After Parth's "tumble deck" reference, without GSAP. No Web Animations API or reduced motion: no copy.
+- *The one noticeable action* (`components/ds/Spark.tsx`): motion-primitives Magnetic + GlowEffect + BorderTrail (vendored in `components/ui/motion-primitives.tsx`, MIT) around the step's single primary button (upload, run the check, the landing CTAs). Glow and trail go dark while the button is disabled or busy. Colours are tokens.
+- *The plan as a route* (`components/plan/RouteMap.tsx`): an ink plate over Parth's ring shader (ported to raw WebGL in `components/ui/shader-rings.tsx`, colours in `atmosphere.ts` RINGS) with one stop per plan step, a dashed saffron decision card in front of each step whose title is a condition (Ombudsman, larger claim), counted steps/decisions/quoted rules, and a porcelain marker (layoutId) that both follows the reader's scroll and jumps the page to a step's detail. The detailed steps below are joined by one rail. The map adds no information the plan does not hold.
+- *The deadline chart* (`components/charts/DeadlineTimeline.tsx`, restored from the 4 Nov iteration): both windows on one date scale, dates written under each bar, today marked; bars grow in. Only drawn when the user entered their complaint date, like the dates themselves.
 
 ## Overview
 
@@ -157,55 +194,74 @@ Two candidates were measured. **Ink fill with ivory text: 13.76:1**, and a clear
 
 | Text / element | on | Colours | Ratio | Needs | Result |
 |---|---|---|---|---|---|
-| Body text and headings on the page (`color-ink`) | `color-ivory` | #2a2630 on #fbf6ee | 13.76:1 | 4.5:1 | pass |
-| Text on a peach band (`color-ink`) | `color-peach` | #2a2630 on #f7e6d6 | 12.16:1 | 4.5:1 | pass |
-| Text on a card, typed input text (`color-ink`) | `color-paper` | #2a2630 on #fffcf7 | 14.47:1 | 4.5:1 | pass |
-| Hover on peach (accordion header, secondary button) (`color-ink`) | `color-peach-deep` | #2a2630 on #f0d8c2 | 10.79:1 | 4.5:1 | pass |
-| Text on the sky band (pale blue end) (`color-ink`) | `color-sky-pale` | #2a2630 on #dce6f0 | 11.72:1 | 4.5:1 | pass |
-| Text on the sky band (deepest blue) (`color-ink`) | `color-sky-blue` | #2a2630 on #bfd3e6 | 9.64:1 | 4.5:1 | pass |
-| Text on the sky band's lavender breath (`color-ink`) | `color-lavender` | #2a2630 on #d9d2e6 | 10.09:1 | 4.5:1 | pass |
-| Primary button on hover (`color-ink`) | `color-apricot` | #2a2630 on #e9a87f | 7.31:1 | 4.5:1 | pass |
-| Primary button pressed; selected text (`color-ink`) | `color-apricot-soft` | #2a2630 on #f2c6a0 | 9.42:1 | 4.5:1 | pass |
-| Button on the ink band (ivory fill) (`color-ink`) | `color-on-ink` | #2a2630 on #fbf6ee | 13.76:1 | 4.5:1 | pass |
-| Secondary text on the page (`color-ink-soft`) | `color-ivory` | #5b5560 on #fbf6ee | 6.70:1 | 4.5:1 | pass |
-| Secondary text on a peach band (`color-ink-soft`) | `color-peach` | #5b5560 on #f7e6d6 | 5.92:1 | 4.5:1 | pass |
-| Hints, placeholders, captions on a card or field (`color-ink-soft`) | `color-paper` | #5b5560 on #fffcf7 | 7.04:1 | 4.5:1 | pass |
-| Secondary text on the sky band (`color-ink-soft`) | `color-sky-pale` | #5b5560 on #dce6f0 | 5.71:1 | 4.5:1 | pass |
-| Text on the ink band; primary button label (`color-on-ink`) | `color-ink` | #fbf6ee on #2a2630 | 13.76:1 | 4.5:1 | pass |
-| Secondary text on the ink band (`color-on-ink-soft`) | `color-ink` | #d8cfc6 on #2a2630 | 9.63:1 | 4.5:1 | pass |
-| Text on a raised ink surface (`color-on-ink`) | `color-ink-raised` | #fbf6ee on #3a3541 | 11.06:1 | 4.5:1 | pass |
-| Secondary text on a raised ink surface (`color-on-ink-soft`) | `color-ink-raised` | #d8cfc6 on #3a3541 | 7.74:1 | 4.5:1 | pass |
-| Field error text on the page (`color-terracotta-ink`) | `color-ivory` | #8b3f2c on #fbf6ee | 6.86:1 | 4.5:1 | pass |
-| Field error text on a card (`color-terracotta-ink`) | `color-paper` | #8b3f2c on #fffcf7 | 7.21:1 | 4.5:1 | pass |
-| Error text on a peach band (`color-terracotta-ink`) | `color-peach` | #8b3f2c on #f7e6d6 | 6.06:1 | 4.5:1 | pass |
+| Body text and headings on the page (`color-ink`) | `color-ivory` | #1b1a33 on #f8f6f2 | 15.66:1 | 4.5:1 | pass |
+| Text on a peach band (`color-ink`) | `color-peach` | #1b1a33 on #eeeaf4 | 14.26:1 | 4.5:1 | pass |
+| Text on a card, typed input text (`color-ink`) | `color-paper` | #1b1a33 on #fdfcfa | 16.49:1 | 4.5:1 | pass |
+| Hover on peach (accordion header, secondary button) (`color-ink`) | `color-peach-deep` | #1b1a33 on #e2dcee | 12.64:1 | 4.5:1 | pass |
+| Text on the sky band (pale blue end) (`color-ink`) | `color-sky-pale` | #1b1a33 on #e3e8f8 | 13.82:1 | 4.5:1 | pass |
+| Text on the sky band (deepest blue) (`color-ink`) | `color-sky-blue` | #1b1a33 on #c9d4f2 | 11.42:1 | 4.5:1 | pass |
+| Text on the sky band's lavender breath (`color-ink`) | `color-lavender` | #1b1a33 on #e6d9f5 | 12.57:1 | 4.5:1 | pass |
+| Primary button on hover (`color-ink`) | `color-apricot` | #1b1a33 on #e8873a | 6.41:1 | 4.5:1 | pass |
+| Primary button pressed; selected text (`color-ink`) | `color-apricot-soft` | #1b1a33 on #f5c08e | 10.32:1 | 4.5:1 | pass |
+| Button on the ink band (ivory fill) (`color-ink`) | `color-on-ink` | #1b1a33 on #f8f6f2 | 15.66:1 | 4.5:1 | pass |
+| Primary button label (porcelain on indigo) (`color-on-ink`) | `color-action` | #f8f6f2 on #34318a | 9.97:1 | 4.5:1 | pass |
+| Primary button label on its pressed edge (`color-on-ink`) | `color-action-deep` | #f8f6f2 on #26246b | 12.58:1 | 4.5:1 | pass |
+| Secondary text on the page (`color-ink-soft`) | `color-ivory` | #4e4b66 on #f8f6f2 | 7.71:1 | 4.5:1 | pass |
+| Secondary text on a peach band (`color-ink-soft`) | `color-peach` | #4e4b66 on #eeeaf4 | 7.02:1 | 4.5:1 | pass |
+| Hints, placeholders, captions on a card or field (`color-ink-soft`) | `color-paper` | #4e4b66 on #fdfcfa | 8.12:1 | 4.5:1 | pass |
+| Secondary text on the sky band (`color-ink-soft`) | `color-sky-pale` | #4e4b66 on #e3e8f8 | 6.81:1 | 4.5:1 | pass |
+| Text on the ink band; primary button label (`color-on-ink`) | `color-ink` | #f8f6f2 on #1b1a33 | 15.66:1 | 4.5:1 | pass |
+| Secondary text on the ink band (`color-on-ink-soft`) | `color-ink` | #cfcbe3 on #1b1a33 | 10.71:1 | 4.5:1 | pass |
+| Text on a raised ink surface (`color-on-ink`) | `color-ink-raised` | #f8f6f2 on #2c2a52 | 12.47:1 | 4.5:1 | pass |
+| Secondary text on a raised ink surface (`color-on-ink-soft`) | `color-ink-raised` | #cfcbe3 on #2c2a52 | 8.53:1 | 4.5:1 | pass |
+| Field error text on the page (`color-terracotta-ink`) | `color-ivory` | #8b3f2c on #f8f6f2 | 6.84:1 | 4.5:1 | pass |
+| Field error text on a card (`color-terracotta-ink`) | `color-paper` | #8b3f2c on #fdfcfa | 7.20:1 | 4.5:1 | pass |
+| Error text on a peach band (`color-terracotta-ink`) | `color-peach` | #8b3f2c on #eeeaf4 | 6.22:1 | 4.5:1 | pass |
 | CHALLENGEABLE stamp; error box (`color-terracotta-ink`) | `color-terracotta-wash` | #8b3f2c on #f6dfd6 | 5.78:1 | 4.5:1 | pass |
 | NEED_INFO stamp; Please-confirm tag (`color-amber-ink`) | `color-amber-wash` | #6e4a0c on #f6e4bd | 6.33:1 | 4.5:1 | pass |
-| Warm tag text on the page (`color-amber-ink`) | `color-ivory` | #6e4a0c on #fbf6ee | 7.37:1 | 4.5:1 | pass |
-| CONSISTENT stamp (`color-sage-ink`) | `color-sage-wash` | #35553f on #dde9de | 6.65:1 | 4.5:1 | pass |
-| Body text inside an error box (`color-ink`) | `color-terracotta-wash` | #2a2630 on #f6dfd6 | 11.59:1 | 4.5:1 | pass |
-| Control borders on the page (`color-line-strong`) | `color-ivory` | #857a6d on #fbf6ee | 3.90:1 | 3:1 | pass |
-| Input borders on a card (`color-line-strong`) | `color-paper` | #857a6d on #fffcf7 | 4.10:1 | 3:1 | pass |
-| Control borders on a peach band (`color-line-strong`) | `color-peach` | #857a6d on #f7e6d6 | 3.45:1 | 3:1 | pass |
-| Focus ring on the page (`color-focus-ring`) | `color-ivory` | #2a2630 on #fbf6ee | 13.76:1 | 3:1 | pass |
-| Focus ring on a card (`color-focus-ring`) | `color-paper` | #2a2630 on #fffcf7 | 14.47:1 | 3:1 | pass |
-| Focus ring on a peach band (`color-focus-ring`) | `color-peach` | #2a2630 on #f7e6d6 | 12.16:1 | 3:1 | pass |
-| Focus ring on the sky band (`color-focus-ring`) | `color-sky-pale` | #2a2630 on #dce6f0 | 11.72:1 | 3:1 | pass |
-| Focus ring over the deepest sky blue (`color-focus-ring`) | `color-sky-blue` | #2a2630 on #bfd3e6 | 9.64:1 | 3:1 | pass |
-| Focus ring on the ink band (`color-focus-ring-on-ink`) | `color-ink` | #fbf6ee on #2a2630 | 13.76:1 | 3:1 | pass |
-| Error border and CHALLENGEABLE mark on the page (`color-terracotta`) | `color-ivory` | #b5553f on #fbf6ee | 4.50:1 | 3:1 | pass |
-| Error border on an input (`color-terracotta`) | `color-paper` | #b5553f on #fffcf7 | 4.73:1 | 3:1 | pass |
-| Error border on a peach band (`color-terracotta`) | `color-peach` | #b5553f on #f7e6d6 | 3.98:1 | 3:1 | pass |
-| Success mark on the page (`color-sage`) | `color-ivory` | #6f8f76 on #fbf6ee | 3.33:1 | 3:1 | pass |
-| Champagne hairline on the ink band (`color-gold`) | `color-ink` | #d9be8a on #2a2630 | 8.24:1 | 3:1 | pass |
-| Primary button edge on the sky band (`color-ink`) | `color-sky-pale` | #2a2630 on #dce6f0 | 11.72:1 | 3:1 | pass |
-| Primary button edge over the deepest sky blue (`color-ink`) | `color-sky-blue` | #2a2630 on #bfd3e6 | 9.64:1 | 3:1 | pass |
-| Ink directly on the darkest cloud shadow (#b0aaa9): reference only, the hero never relies on it (`color-ink`) | `#b0aaa9` | #2a2630 on #b0aaa9 | 6.46:1 | 3:1 | pass |
-| Hero headline, lead and links: ink on the ivory scrim over the darkest cloud (`color-ink`) | `color-ivory@0.72` | #2a2630 on #e6e1db | 11.39:1 | 4.5:1 | pass |
-| Transparent navbar over the sky: ink on the top ivory wash over the darkest cloud (`color-ink`) | `color-ivory@0.8` | #2a2630 on #ece7e0 | 12.04:1 | 4.5:1 | pass |
-| Dev page captions: ink on an ivory/80 plate over the darkest cloud (`color-ink`) | `color-ivory@0.8` | #2a2630 on #ece7e0 | 12.04:1 | 4.5:1 | pass |
-| Lamp heading: ivory over the lamp's widest glow at its set opacity (`color-on-ink`) | `#e9a87f@0.35` | #fbf6ee on #6d544c | 6.46:1 | 4.5:1 | pass |
-| Lamp lead text: secondary ivory over the lamp's glow (`color-on-ink-soft`) | `#e9a87f@0.35` | #d8cfc6 on #6d544c | 4.52:1 | 4.5:1 | pass |
-| Glass chip text: ink plate at 90% over the lightest artwork (`color-on-ink`) | `color-ink@0.9` | #fbf6ee on #3f3b43 | 10.18:1 | 4.5:1 | pass |
+| Warm tag text on the page (`color-amber-ink`) | `color-ivory` | #6e4a0c on #f8f6f2 | 7.35:1 | 4.5:1 | pass |
+| CONSISTENT stamp; the gate when it is clear (`color-sage-ink`) | `color-sage-wash` | #35553f on #dde9de | 6.65:1 | 4.5:1 | pass |
+| Gate heading and count on the cleared band (`color-ink`) | `color-sage-wash` | #1b1a33 on #dde9de | 13.51:1 | 4.5:1 | pass |
+| Gate caption on the cleared band (`color-ink-soft`) | `color-sage-wash` | #4e4b66 on #dde9de | 6.65:1 | 4.5:1 | pass |
+| Body text inside an error box (`color-ink`) | `color-terracotta-wash` | #1b1a33 on #f6dfd6 | 13.24:1 | 4.5:1 | pass |
+| Ink on the glass plate over a peach band (`color-ink`) | `color-ivory@0.74` | #1b1a33 on #f5f3f3 | 15.29:1 | 4.5:1 | pass |
+| Ink on the glass plate over the paper sheet (`color-ink`) | `color-ivory@0.74` | #1b1a33 on #f9f8f4 | 15.91:1 | 4.5:1 | pass |
+| Secondary ink on the glass plate over the paper sheet (`color-ink-soft`) | `color-ivory@0.74` | #4e4b66 on #f9f8f4 | 7.83:1 | 4.5:1 | pass |
+| Floating navbar: ink on the capsule over the deepest sky (`color-ink`) | `color-ivory@0.74` | #1b1a33 on #ecedf2 | 14.46:1 | 4.5:1 | pass |
+| Floating navbar: ink on the capsule over the ink band (`color-ink`) | `color-ivory@0.74` | #1b1a33 on #bfbdc0 | 9.06:1 | 4.5:1 | pass |
+| Work stage: ink on the glass text column over the aurora (`color-ink`) | `color-paper@0.7` | #1b1a33 on #f6f2f9 | 15.29:1 | 4.5:1 | pass |
+| Work stage: secondary ink on the glass text column (`color-ink-soft`) | `color-paper@0.7` | #4e4b66 on #f6f2f9 | 7.53:1 | 4.5:1 | pass |
+| Work stage: secondary ink over the saffron bloom (`color-ink-soft`) | `color-paper@0.7` | #4e4b66 on #fbeada | 7.09:1 | 4.5:1 | pass |
+| Claim page heading over the strongest violet of the header light (`color-ink`) | `color-lavender` | #1b1a33 on #e6d9f5 | 12.57:1 | 4.5:1 | pass |
+| Claim page lead over the violet header light (`color-ink-soft`) | `color-lavender` | #4e4b66 on #e6d9f5 | 6.19:1 | 4.5:1 | pass |
+| Claim page lead over the periwinkle header light (`color-ink-soft`) | `color-sky-blue@0.8` | #4e4b66 on #d0d8f2 | 5.86:1 | 4.5:1 | pass |
+| Control borders on the page (`color-line-strong`) | `color-ivory` | #77738f on #f8f6f2 | 4.20:1 | 3:1 | pass |
+| Input borders on a card (`color-line-strong`) | `color-paper` | #77738f on #fdfcfa | 4.42:1 | 3:1 | pass |
+| Control borders on a peach band (`color-line-strong`) | `color-peach` | #77738f on #eeeaf4 | 3.82:1 | 3:1 | pass |
+| Gate chip borders on the cleared band (`color-line-strong`) | `color-sage-wash` | #77738f on #dde9de | 3.62:1 | 3:1 | pass |
+| Focus ring on the page (`color-focus-ring`) | `color-ivory` | #1b1a33 on #f8f6f2 | 15.66:1 | 3:1 | pass |
+| Focus ring on a card (`color-focus-ring`) | `color-paper` | #1b1a33 on #fdfcfa | 16.49:1 | 3:1 | pass |
+| Focus ring on a peach band (`color-focus-ring`) | `color-peach` | #1b1a33 on #eeeaf4 | 14.26:1 | 3:1 | pass |
+| Focus ring on the sky band (`color-focus-ring`) | `color-sky-pale` | #1b1a33 on #e3e8f8 | 13.82:1 | 3:1 | pass |
+| Focus ring over the deepest sky blue (`color-focus-ring`) | `color-sky-blue` | #1b1a33 on #c9d4f2 | 11.42:1 | 3:1 | pass |
+| Focus ring on the ink band (`color-focus-ring-on-ink`) | `color-ink` | #f8f6f2 on #1b1a33 | 15.66:1 | 3:1 | pass |
+| Error border and CHALLENGEABLE mark on the page (`color-terracotta`) | `color-ivory` | #b5553f on #f8f6f2 | 4.49:1 | 3:1 | pass |
+| Error border on an input (`color-terracotta`) | `color-paper` | #b5553f on #fdfcfa | 4.72:1 | 3:1 | pass |
+| Error border on a peach band (`color-terracotta`) | `color-peach` | #b5553f on #eeeaf4 | 4.08:1 | 3:1 | pass |
+| Success mark on the page (`color-sage`) | `color-ivory` | #6f8f76 on #f8f6f2 | 3.32:1 | 3:1 | pass |
+| Champagne hairline on the ink band (`color-gold`) | `color-ink` | #e0b36a on #1b1a33 | 8.72:1 | 3:1 | pass |
+| Primary button edge on the page (`color-action`) | `color-ivory` | #34318a on #f8f6f2 | 9.97:1 | 3:1 | pass |
+| Primary button edge on a mist band (`color-action`) | `color-peach` | #34318a on #eeeaf4 | 9.07:1 | 3:1 | pass |
+| Primary button edge on a card (`color-action`) | `color-paper` | #34318a on #fdfcfa | 10.49:1 | 3:1 | pass |
+| Primary button edge on the sky band (`color-ink`) | `color-sky-pale` | #1b1a33 on #e3e8f8 | 13.82:1 | 3:1 | pass |
+| Primary button edge over the deepest sky blue (`color-ink`) | `color-sky-blue` | #1b1a33 on #c9d4f2 | 11.42:1 | 3:1 | pass |
+| Ink directly on the darkest cloud shadow (#abadc1): reference only, the hero never relies on it (`color-ink`) | `#abadc1` | #1b1a33 on #abadc1 | 7.63:1 | 3:1 | pass |
+| Hero headline, lead and links: ink on the ivory scrim over the darkest cloud (`color-ink`) | `color-ivory@0.72` | #1b1a33 on #e2e2e4 | 13.07:1 | 4.5:1 | pass |
+| Transparent navbar over the sky: ink on the top ivory wash over the darkest cloud (`color-ink`) | `color-ivory@0.8` | #1b1a33 on #e9e7e8 | 13.73:1 | 4.5:1 | pass |
+| Dev page captions: ink on an ivory/80 plate over the darkest cloud (`color-ink`) | `color-ivory@0.8` | #1b1a33 on #e9e7e8 | 13.73:1 | 4.5:1 | pass |
+| Lamp heading: ivory over the lamp's widest glow at its set opacity (`color-on-ink`) | `#e8873a@0.3` | #f8f6f2 on #593b35 | 9.26:1 | 4.5:1 | pass |
+| Lamp lead text: secondary ivory over the lamp's glow (`color-on-ink-soft`) | `#e8873a@0.3` | #cfcbe3 on #593b35 | 6.33:1 | 4.5:1 | pass |
+| Glass chip text: ink plate at 90% over the lightest artwork (`color-on-ink`) | `color-ink@0.9` | #f8f6f2 on #313046 | 11.85:1 | 4.5:1 | pass |
 
 ## Typography
 

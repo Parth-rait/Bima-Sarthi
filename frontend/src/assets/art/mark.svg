@@ -1,7 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<!-- Bima Sarthi mark: a lowercase b with an s tucked behind it, on a glass indigo tile. Original artwork; no emblem, no wheel. -->
 <defs>
-<radialGradient id="brass" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#F2E6C8"/><stop offset=".45" stop-color="#D9BE8A"/><stop offset="1" stop-color="#B39762"/></radialGradient>
-<radialGradient id="brassIn" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#EAD8AA"/><stop offset=".6" stop-color="#D9BE8A"/><stop offset="1" stop-color="#C7AA70"/></radialGradient>
+<linearGradient id="bs-tile" x1="8" y1="2" x2="58" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#5A55D0"/><stop offset=".5" stop-color="#34318A"/><stop offset="1" stop-color="#1E1C45"/></linearGradient>
+<radialGradient id="bs-glow" cx="54" cy="58" r="34" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#E8873A" stop-opacity=".5"/><stop offset="1" stop-color="#E8873A" stop-opacity="0"/></radialGradient>
+<radialGradient id="bs-light" cx="16" cy="6" r="40" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".38"/><stop offset=".6" stop-color="#FFFFFF" stop-opacity=".06"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+<linearGradient id="bs-rim" x1="32" y1="0" x2="32" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".55"/><stop offset=".45" stop-color="#FFFFFF" stop-opacity=".08"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".22"/></linearGradient>
+<linearGradient id="bs-b" x1="18" y1="12" x2="34" y2="48" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E4DCF6"/></linearGradient>
+<linearGradient id="bs-s" x1="36" y1="16" x2="40" y2="48" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FAD3A0"/><stop offset="1" stop-color="#E8873A"/></linearGradient>
+<!-- the s tucks behind the b: the s is cut away along the b, with a gap either side -->
+<mask id="bs-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+<rect width="64" height="64" fill="#FFFFFF"/>
+<g fill="none" stroke="#000000" stroke-width="10" stroke-linecap="round"><path d="M18 12.5v26"/><circle cx="26.2" cy="38" r="8.2"/></g>
+</mask>
 </defs>
-<rect width="64" height="64" rx="14" fill="#2A2630"/><circle cx="32" cy="32" r="22" fill="url(#brass)"/><circle cx="32" cy="32" r="15" fill="none" stroke="#B39762" stroke-width="2"/><path d="M24 33 l6 7 l11 -14" fill="none" stroke="#2A2630" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect width="64" height="64" rx="17" fill="url(#bs-tile)"/>
+<rect width="64" height="64" rx="17" fill="url(#bs-glow)"/>
+<rect width="64" height="64" rx="17" fill="url(#bs-light)"/>
+<rect x=".6" y=".6" width="62.8" height="62.8" rx="16.4" fill="none" stroke="url(#bs-rim)" stroke-width="1.2"/>
+<g fill="none" stroke="url(#bs-b)" stroke-width="5.4" stroke-linecap="round">
+<path d="M18 12.5v26"/>
+<circle cx="26.2" cy="38" r="8.2"/>
+</g>
+<path mask="url(#bs-cut)" d="M46.5 21.5C44.5 18.3 40.6 17 37.4 17.7c-4 .9-5.6 4.6-4.1 7.6 1.5 3 5.4 4.1 8.4 5.6 3.5 1.8 5.6 4.6 4.9 8.6-.8 4.6-5.3 7.6-10.3 7-1.6-.2-2.9-.7-3.9-1.4" fill="none" stroke="url(#bs-s)" stroke-width="5.4" stroke-linecap="round"/>
 </svg>

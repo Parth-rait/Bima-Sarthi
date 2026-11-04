@@ -9,6 +9,19 @@ PRODUCT_LINES = ("health", "life", "credit_life", "crop", "accident", "motor", "
 ProductLine = Literal["health", "life", "credit_life", "crop", "accident", "motor", "other", "unknown"]
 
 
+# What legal issue a dispute raises. Not a verdict and not a rule id: which approved card(s) may
+# decide it is a separate mapping (sarthi/data/rule_families.yaml, resolved in sarthi/core/context.py).
+ISSUE_FAMILIES = ("NON_DISCLOSURE", "PED_DEFINITION", "WAITING_PERIOD", "PORTABILITY",
+                  "POLICY_WORDING_DELIVERY", "EXCLUSION", "CLAIM_SETTLEMENT_DELAY",
+                  "CLAIM_NOTIFICATION_DELAY", "REJECTION_PROCESS", "DEDUCTION", "CASHLESS_PROCESS",
+                  "DISCHARGE_PROCESS", "OTHER")
+IssueFamily = Literal["NON_DISCLOSURE", "PED_DEFINITION", "WAITING_PERIOD", "PORTABILITY",
+                      "POLICY_WORDING_DELIVERY", "EXCLUSION", "CLAIM_SETTLEMENT_DELAY",
+                      "CLAIM_NOTIFICATION_DELAY", "REJECTION_PROCESS", "DEDUCTION",
+                      "CASHLESS_PROCESS", "DISCHARGE_PROCESS", "OTHER"]
+FamilyStatus = Literal["drafted", "reviewed"]
+
+
 class Source(BaseModel):
     source_id: str
     url: str
@@ -126,6 +139,9 @@ class CaseIssue(BaseModel):
     page_no: int | None = None
     status: Literal["drafted", "needs_review", "reviewed", "corrected", "rejected"] = "drafted"
     reviewer_note: str | None = None
+    # the real legal issue (independent of `status`, which is about the rule-label holding)
+    issue_family: IssueFamily | None = None
+    family_status: FamilyStatus | None = None
 
 
 class CaseFact(BaseModel):

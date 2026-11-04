@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { rowOrder } from "@/lib/motion";
 import { buttonStyles } from "./Button";
 import { ProgressIndicator } from "./ProgressIndicator";
+import { Spark } from "./Spark";
+import { BorderTrail } from "@/components/ui/motion-primitives";
 
 /** What the backend accepts (sarthi/app/session.py): JPG, PNG, PDF; 25 MB in total; 20 pages in total. */
 export const MAX_TOTAL_BYTES = 25 * 1024 * 1024;
@@ -113,9 +115,22 @@ export function FileUploader({
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         data-drop={dragging ? "drag" : "idle"}
-        className="dropzone rounded-ctl border-2 p-4 md:p-5"
+        data-has-files={files.length ? "true" : undefined}
+        className="dropzone"
       >
-        <div className="flex flex-wrap items-center gap-3">
+        {/* a small stack of pages that rises and fans out when something is dragged over the well (decoration) */}
+        <span className="drop-orb" aria-hidden="true">
+          <span className="drop-page" data-p="0" />
+          <span className="drop-page" data-p="1" />
+          <span className="drop-page" data-p="2">
+            <IconUpload size={22} />
+          </span>
+        </span>
+        <p className="drop-title m-0">{dragging ? t("drop_release") : t("drop_title")}</p>
+        {/* a light runs round the empty well, so the first thing to do is the first thing seen (goes once files are in) */}
+        <BorderTrail className="drop-trail" size={110} thickness={2} transition={{ repeat: Infinity, duration: 7, ease: "linear" }} />
+        <div className="drop-actions flex flex-wrap items-center justify-center gap-3">
+          <Spark className="drop-spark">
           <input
             ref={pick}
             id={id}
@@ -134,6 +149,7 @@ export function FileUploader({
             <IconUpload size={20} />
             {t("choose_files")}
           </label>
+          </Spark>
           <input
             ref={cam}
             id={`${id}-cam`}
@@ -153,7 +169,7 @@ export function FileUploader({
           </label>
           <span className="hidden text-ink-soft md:inline">{t("drop_here")}</span>
         </div>
-        <p id={describedBy} className="mb-0 mt-3 text-control text-ink-soft">
+        <p id={describedBy} className="drop-rules mb-0 text-control text-ink-soft">
           {t("up_rules")}
         </p>
       </div>

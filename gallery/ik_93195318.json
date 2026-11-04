@@ -1,0 +1,45 @@
+{
+  "case_id": "ik_93195318",
+  "citation": {
+    "forum": "Bombay High Court",
+    "case_number": null,
+    "decided_on": "2025-05-09",
+    "source_url": "https://indiankanoon.org/doc/93195318/"
+  },
+  "insurer": "Care Health",
+  "outcome": "allowed",
+  "policyholder_prevailed": true,
+  "relief_amount": null,
+  "rejection_ground": "non_disclosure",
+  "days_to_decision": 1022,
+  "policy_years_at_claim": 18.9,
+  "licence_note": "Judgment text via Indian Kanoon API; display attribution: powered by IKanoon",
+  "findings": [
+    {
+      "rule_id": "MORATORIUM_60M",
+      "rule_version": 1,
+      "verdict": "NEED_INFO",
+      "reason": "rule_not_in_force",
+      "rule_quote": "No policy and claim of health insurance shall be contestable on any grounds of non-disclosure and/or misrepresentation except for established fraud, after the completion of the Moratorium Period, i.e. 60 months of continuous coverage",
+      "source_sha256": "fdc70264ce307e0c0ead2de442881c907a03a638477c03a7aaf473d3cc139134",
+      "page_no": 8,
+      "facts_used": {
+        "claim_date": {
+          "value": "2022-08-18",
+          "quote": "Petitioner submitted a Claim Form on 18 August 2022.",
+          "page_no": 1
+        },
+        "inception_date": {
+          "value": "2003-09-03",
+          "quote": "Policy was renewed every year till 2020 and with no-claim bonus, the insurance cover had gone up to Rs. 4,50,000/- over the period of years.",
+          "page_no": 1
+        }
+      },
+      "question_en": "For how many continuous months has this policyholder been covered, and does the insurer allege fraud?",
+      "question_hi": null,
+      "action_en": "Ask the insurer to withdraw the rejection and cite the moratorium; escalate to the grievance route if refused.",
+      "action_hi": null
+    }
+  ],
+  "attribution": "powered by IKanoon"
+}

@@ -9,7 +9,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from sarthi.core.hashing import sha256_file
-from sarthi.core.models import PRODUCT_LINES
+from sarthi.core.models import ISSUE_FAMILIES, PRODUCT_LINES
 from sarthi.core.registry import load_registry
 from sarthi.core.store import Store
 from sarthi.data.parse_docs import parse_source
@@ -535,6 +535,52 @@ def cmd_issues_review(args) -> int:
     return 0
 
 
+def cmd_issues_set_family(args) -> int:
+    store = open_store()
+    try:
+        case_issues.set_family(store, args.case_id, args.issue, args.family, note=args.note)
+    except (KeyError, ValueError) as e:
+        raise CliError(str(e)) from e
+    print(f"OK   {args.case_id} {args.issue}: issue_family={args.family} (reviewed)")
+    return 0
+
+
+def cmd_issues_apply_families(args) -> int:
+    path = Path(args.file)
+    if not path.is_file():
+        raise CliError(f"no such file: {path}")
+    try:
+        n = case_issues.apply_family_relabels(open_store(), path)
+    except (KeyError, ValueError) as e:
+        raise CliError(str(e)) from e
+    print(f"OK   {n} issue row(s) given a reviewed issue family from {path}")
+    return 0
+
+
+def cmd_issues_families(args) -> int:
+    from sarthi.data import coverage
+    c = coverage.write_coverage(open_store(), args.out)
+    print(f"OK   coverage written to {args.out}: {c['reviewed_issue_rows']} reviewed issue rows of "
+          f"{c['issue_rows_total']}; {c['cases_in_universe']} cases in the resolver universe")
+    return 0
+
+
+def cmd_accept_exact_facts(args) -> int:
+    store = open_store()
+    try:
+        reports = case_facts.accept_exact_quote_facts(store, list(args.case_ids))
+    except KeyError as e:
+        raise CliError(str(e)) from e
+    for cid, r in reports.items():
+        left = store.con.execute("SELECT count(*) FROM case_fact WHERE case_id=? AND status IN "
+                                 "('extracted','needs_review')", [cid]).fetchone()[0]
+        print(f"OK   {cid}: accepted {len(r.accepted)} ({', '.join(r.accepted) or '-'}); "
+              f"unresolved {left} ({'; '.join(f'{f}: {w}' for f, w in r.unresolved) or '-'})"
+              + (f"; quote does not itself state the date: {', '.join(r.quote_lacks_value)}"
+                 if r.quote_lacks_value else ""))
+    return 0
+
+
 def cmd_issues_sheet(args) -> int:
     n = case_issues.write_review_sheet(open_store(), args.out)
     print(f"OK   {n} case(s) written to {args.out}")
@@ -600,6 +646,10 @@ def _add_cases(sub):
     a.set_defaults(func=cmd_cases_exclude)
     a = cs.add_parser("backfill-appellant", help="infer appellant / policyholder_prevailed from titles")
     a.set_defaults(func=cmd_cases_backfill_appellant)
+    a = cs.add_parser("accept-exact-facts", help="delegated: accept extracted facts whose quote is "
+                                                 "verbatim in the judgment, for the NAMED cases only")
+    a.add_argument("case_ids", nargs="+")
+    a.set_defaults(func=cmd_accept_exact_facts)
     ip = cs.add_parser("issues", help="per-issue holdings: draft with a model, review, sheet")
     isub = ip.add_subparsers(dest="issues_command", required=True)
     a = isub.add_parser("draft", help="draft issue holdings with a model (costs money)")
@@ -612,6 +662,18 @@ def _add_cases(sub):
     a.add_argument("--json", required=True)
     a.add_argument("--reviewer", default="cli")
     a.set_defaults(func=cmd_issues_review)
+    a = isub.add_parser("set-family", help="set the reviewed legal-issue family of one issue row")
+    a.add_argument("case_id")
+    a.add_argument("issue")
+    a.add_argument("family", choices=ISSUE_FAMILIES)
+    a.add_argument("--note", default="")
+    a.set_defaults(func=cmd_issues_set_family)
+    a = isub.add_parser("apply-families", help="apply a version-controlled family relabel file (reviewed)")
+    a.add_argument("file", type=Path)
+    a.set_defaults(func=cmd_issues_apply_families)
+    a = isub.add_parser("families", help="write the issue-family coverage report (not accuracy)")
+    a.add_argument("--out", type=Path, default=Path("data/review/coverage.md"))
+    a.set_defaults(func=cmd_issues_families)
     a = isub.add_parser("sheet", help="write the one-page review sheet")
     a.add_argument("--out", type=Path, default=Path("data/review/issues-review.md"))
     a.set_defaults(func=cmd_issues_sheet)
@@ -659,6 +721,7 @@ def cmd_eval(args) -> int:
     run_id = args.run_id or datetime.now().strftime("eval-%Y%m%d-%H%M%S")
     summary = evaluate.run_eval(run_id, args.methods, args.repeats, open_store())
     evaluate.write_report(summary, args.out)
+    evaluate.write_summary(summary, args.out.with_name("summary.json"), run_id=run_id)
     print(f"run {run_id}: {summary.n_cases} case(s), {summary.n_primary} primary, "
           f"{summary.n_abstention_set} abstention-set, {summary.n_case_level_excluded} excluded "
           f"from case level (winner unknown); report at {args.out}")

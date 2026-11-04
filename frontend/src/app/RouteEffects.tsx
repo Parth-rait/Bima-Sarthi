@@ -5,11 +5,13 @@ import { useSession } from "@/state/store";
 
 const TITLES: Array<[RegExp, Key]> = [
   [/^\/$/, "title_home"],
+  [/^\/schemes$/, "title_schemes"],
   [/^\/about$/, "title_about"],
   [/^\/how-it-works$/, "title_how"],
   [/^\/check-claim$/, "title_check"],
   [/^\/action-plan$/, "title_plan"],
   [/^\/cases$/, "title_cases"],
+  [/^\/evidence$/, "title_evidence"],
   [/^\/privacy$/, "title_privacy"],
   [/^\/help$/, "title_help"],
   [/^\/results\/[^/]+$/, "title_results"],

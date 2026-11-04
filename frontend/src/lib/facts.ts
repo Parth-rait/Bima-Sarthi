@@ -75,3 +75,26 @@ export function parseEdit(text: string, orig: FactValueData): unknown {
 export function isDeductionList(v: unknown): v is Array<Record<string, unknown>> {
   return Array.isArray(v) && v.length > 0 && v.every((x) => x && typeof x === "object");
 }
+
+function parseLooseDate(v: unknown): Date | null {
+  if (typeof v !== "string") return null;
+  let m = /^(\d{4})-(\d{2})-(\d{2})/.exec(v);
+  if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+  m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(v);
+  if (m) return new Date(+m[3], +m[2] - 1, +m[1]);
+  return null;
+}
+
+/** Whole years between two dates the app holds as ISO or DD/MM/YYYY strings; null when either is missing. */
+export function yearsBetween(a: unknown, b: unknown): number | null {
+  const da = parseLooseDate(a);
+  const db = parseLooseDate(b);
+  if (!da || !db) return null;
+  const years = (db.getTime() - da.getTime()) / (365.25 * 864e5);
+  return years >= 0 ? Math.round(years * 10) / 10 : null;
+}
+
+/** How old the policy was when the claim happened, for placing the user's case on the case-terrain chart. */
+export function policyYearsAtClaim(facts: FactMap): number | null {
+  return yearsBetween(facts.inception_date?.value, facts.admission_date?.value ?? facts.claim_date?.value);
+}

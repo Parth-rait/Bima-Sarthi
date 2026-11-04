@@ -1,8 +1,10 @@
 # Fallback rungs, referenced by name from <ROLE>_FALLBACKS. Ladder order (best first):
-#   READER_FALLBACKS=hpc48,hpc24,kaggle,baseten,nemotron_ultra,deepseek_v4_flash,kimi_k3,ollama_dev
+#   READER_FALLBACKS=hpc48,hpc24,kaggle,baseten,nemotron_ultra,deepseek_v4_flash,kimi_k3,ollama_vl,ollama_vl_fast,ollama_dev
+#   Free local fallback (no cloud, no key): ollama_vl / ollama_vl_fast need `ollama serve` running and the
+#   models pulled (`ollama pull qwen3-vl:4b-instruct`, `ollama pull qwen2.5vl:3b`).
 # Fields: base_url_env (env var holding the URL), default_base_url (optional literal used when the
 # env var is unset), model, key_env, vision (can the rung read images).
-# Optional: json_schema (default true; false = do not send response_format json_schema to this rung),
+# Optional: timeout_s (per-rung HTTP timeout; default 120), json_schema (default true; false = do not send response_format json_schema to this rung),
 # min_max_tokens (floor for max_tokens on this rung, for reasoning models that can return empty
 # content with finish_reason "length").
 #
@@ -54,6 +56,50 @@ kimi_k3:         # Baseten, reasoning model, text only
   key_env: KIMI_K3_KEY
   vision: false
   min_max_tokens: 4000
+muse_spark_13c:  # Meta Muse Spark 1.3 Contributor via OpenRouter; vision; prompts may be used by Meta -> synthetic/public documents only
+  base_url_env: OPENROUTER_BASE_URL
+  default_base_url: https://openrouter.ai/api/v1
+  model: meta/muse-spark-1.3-contributor
+  key_env: META_MUSE_1.3T
+  vision: true
+  min_max_tokens: 2500   # reasoning shares the output budget
+gemini_flash:    # Google AI Studio free tier, vision; synthetic/public documents only (free-tier inputs may be used by Google)
+  base_url_env: GEMINI_BASE_URL
+  default_base_url: https://generativelanguage.googleapis.com/v1beta/openai
+  model: gemini-3.1-flash-lite
+  key_env: GEMINI_API_KEY
+  vision: true
+  min_max_tokens: 4000
+groq_qwen_vl:    # Groq free tier, vision (Alibaba Qwen3.8 27B); synthetic/public documents only
+  base_url_env: GROQ_BASE_URL
+  default_base_url: https://api.groq.com/openai/v1
+  model: qwen/qwen3.8-27b
+  key_env: GROQ_API_KEY
+  vision: true
+  json_schema: false  # Groq's constrained decoding returns an empty object for our nested schema
+  min_max_tokens: 2000
+groq_gpt_oss:    # Groq free tier, text only (OpenAI gpt-oss 120B)
+  base_url_env: GROQ_BASE_URL
+  default_base_url: https://api.groq.com/openai/v1
+  model: openai/gpt-oss-120b
+  key_env: GROQ_API_KEY
+  vision: false
+  json_schema: false
+  min_max_tokens: 2000
+ollama_vl:       # local Ollama vision model, free; slower and weaker than Spark/Glimmer, so the confirm step matters
+  base_url_env: OLLAMA_BASE_URL
+  default_base_url: http://localhost:11434/v1
+  model: qwen3-vl:4b-instruct
+  key_env: OLLAMA_KEY
+  vision: true
+  timeout_s: 400   # local CPU/GPU inference is slow
+ollama_vl_fast:  # smaller/faster local vision model
+  base_url_env: OLLAMA_BASE_URL
+  default_base_url: http://localhost:11434/v1
+  model: qwen2.5vl:3b
+  key_env: OLLAMA_KEY
+  vision: true
+  timeout_s: 400
 ollama_dev:      # dev only, Mac, text only
   base_url_env: OLLAMA_BASE_URL
   default_base_url: http://localhost:11434/v1

@@ -205,6 +205,15 @@ def approved_cards(store: Store, as_of: date | None = None) -> list[RuleCard]:
     return out
 
 
+def unapproved_cards(store: Store, exclude=()) -> list[RuleCard]:
+    """Every stored card NOT in `exclude` ((rule_id, version) pairs): drafts, disabled cards and
+    approved cards whose quote no longer verifies. The resolver reports these (never runs them)."""
+    skip = set(exclude)
+    cur = store.con.execute("SELECT * FROM rule_card ORDER BY rule_id, version")
+    cols = [c[0] for c in cur.description]
+    return [c for c in (_from_row(cols, r) for r in cur.fetchall()) if (c.rule_id, c.version) not in skip]
+
+
 def verify_all(store: Store) -> list[tuple[RuleCard, QuoteCheck]]:
     cur = store.con.execute("SELECT * FROM rule_card ORDER BY rule_id, version")
     cols = [c[0] for c in cur.description]

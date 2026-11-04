@@ -198,9 +198,9 @@ def fs():
                     question="When did the cover start?")]
 
 
-def health(findings=None, *, params=PARAMS, complaint=date(2026, 9, 1), reply=None, amount=None):
+def health(findings=None, *, params=PARAMS, complaint=date(2026, 9, 1), reply=None, amount=None, facts=None):
     return plan.health_plan(findings or fs(), params=params, complaint_date=complaint,
-                            reply_date=reply, claim_amount=amount)
+                            reply_date=reply, claim_amount=amount, facts=facts)
 
 
 def by_id(p):
@@ -209,7 +209,7 @@ def by_id(p):
 
 def test_health_plan_steps_are_ordered_and_use_the_existing_pieces():
     p, _ = health(amount=6_000_000)
-    assert [s["id"] for s in p["steps"]] == ["findings", "ask", "letter", "ombudsman", "commission"]
+    assert [s["id"] for s in p["steps"]] == ["case", "findings", "ask", "letter", "ombudsman", "commission"]
     assert p["supported"] is True and p["kind"] == "health"
     s1 = by_id(p)["findings"]["items"]
     assert [i["rule_id"] for i in s1] == ["MORATORIUM_60M", "WAIT_SPECIFIC"]      # challengeable first
@@ -241,7 +241,7 @@ def test_health_plan_without_a_challengeable_finding_offers_no_letter_or_dates()
     p, _ = health([finding("CONSISTENT")])
     assert not any(i.get("link") for s in p["steps"] for i in s["items"])
     assert not any(i.get("date") for s in p["steps"] for i in s["items"])
-    assert "Deadlines apply when a finding is challengeable." in plan.plan_text(p, "en")
+    assert "Deadlines apply when a finding shows a possible inconsistency to raise." in plan.plan_text(p, "en")
 
 
 def test_health_plan_without_the_approved_grievance_card_says_so():
@@ -285,12 +285,73 @@ def test_verify_without_extras_is_unchanged():
     assert not verify("Send it by 05/05/2030.", []).ok
 
 
+# ---------- personalisation from the user's own facts ----------
+
+def test_case_step_names_product_and_recorded_reason_in_both_languages():
+    facts = fvs(rejection_ground="non_disclosure")
+    g, _ = plan.general_plan("life", params=None, complaint_date=None, reply_date=None, facts=facts)
+    case = by_id(g)["case"]["items"]
+    assert [i["key"] for i in case] == ["case_product_line", "case_rejection_ground"]
+    assert case[0]["text"] == {"en": "Type of insurance: Life.", "hi": "बीमा का प्रकार: जीवन।"}
+    assert case[1]["text"]["en"] == ("Reason recorded for the insurer's decision: "
+                                     "Non-disclosure of information.")
+    assert "जानकारी न बताना" in case[1]["text"]["hi"]
+
+    p, _ = health(facts=facts)
+    assert by_id(p)["case"]["items"][0]["text"]["en"] == "Type of insurance: Health."
+
+
+def test_case_step_without_a_recorded_reason_names_only_the_product_line():
+    p, _ = plan.general_plan("crop", params=None, complaint_date=None, reply_date=None)
+    assert [i["key"] for i in by_id(p)["case"]["items"]] == ["case_product_line"]
+    assert "Reason recorded" not in plan.plan_text(p, "en")
+
+
+def test_unreviewed_reason_text_is_ignored():
+    facts = fvs(rejection_ground="Something 99 the user typed")
+    p, _ = plan.general_plan("life", params=None, complaint_date=None, reply_date=None, facts=facts)
+    assert [i["key"] for i in by_id(p)["case"]["items"]] == ["case_product_line"]
+    assert "Reason recorded" not in plan.plan_text(p, "en")
+
+
+def test_an_unconfirmed_reason_is_not_presented_as_recorded():
+    facts = {"rejection_ground": FactValue(value="non_disclosure", quote="q", page_no=1,
+                                           status="needs_confirmation")}
+    p, _ = plan.general_plan("life", params=None, complaint_date=None, reply_date=None, facts=facts)
+    assert [i["key"] for i in by_id(p)["case"]["items"]] == ["case_product_line"]
+    assert "Reason recorded" not in plan.plan_text(p, "en")
+    assert "Ask the insurer in writing for the reasons" in plan.plan_text(p, "en")
+
+
+def test_personalised_ask_names_the_recorded_reason_and_replaces_the_generic_ask():
+    facts = fvs(rejection_ground="room_rent")
+    p, _ = health(facts=facts)
+    first = by_id(p)["ask"]["items"][0]["text"]
+    assert "Room-rent limit" in first["en"] and "कमरे के किराये की सीमा" in first["hi"]
+    assert "Ask the insurer in writing for the reasons" not in plan.plan_text(p, "en")
+
+    g, _ = plan.general_plan("motor", params=None, complaint_date=None, reply_date=None, facts=facts)
+    assert "Room-rent limit" in by_id(g)["insurer"]["items"][0]["text"]["en"]
+
+
+@pytest.mark.parametrize("ground", sorted(plan.GROUND_LABELS))
+@pytest.mark.parametrize("lang", ["en", "hi"])
+def test_every_recorded_reason_keeps_the_verify_gate(ground, lang):
+    facts = fvs(rejection_ground=ground)
+    fl = fs()
+    p, extras = plan.health_plan(fl, params=PARAMS, complaint_date=None, reply_date=None,
+                                 claim_amount=None, facts=facts)
+    assert verify(plan.plan_text(p, lang), fl, **extras).ok
+    g, gextras = plan.general_plan("life", params=PARAMS, complaint_date=None, reply_date=None, facts=facts)
+    assert verify(plan.plan_text(g, lang), [], **gextras).ok
+
+
 def test_finalize_drops_a_plan_whose_text_fails_verify():
     fl = fs()
     p, extras = health(fl)
     assert plan.finalize(p, extras, fl) is p and p["verified"] is True
     p2, extras2 = health(fl)
-    p2["steps"][0]["items"][0]["text"]["en"] = "You will win this claim."
+    p2["steps"][1]["items"][0]["text"]["en"] = "You will win this claim."
     assert plan.finalize(p2, extras2, fl) is None
 
 
@@ -341,10 +402,18 @@ def test_ui_script_parses():
 
 def test_building_a_plan_never_shares_mutable_text_between_plans():
     a, _ = health()
-    a["steps"][0]["items"][0]["text"]["en"] = "changed"
+    a["steps"][1]["items"][0]["text"]["en"] = "changed"
     b, _ = health()
-    assert b["steps"][0]["items"][0]["text"]["en"] != "changed"
+    assert b["steps"][1]["items"][0]["text"]["en"] != "changed"
     g1, _ = plan.general_plan("life", params=None, complaint_date=None, reply_date=None)
-    g1["steps"][0]["items"][0]["text"]["en"] = "changed"
+    g1["steps"][1]["items"][0]["text"]["en"] = "changed"
     g2, _ = plan.general_plan("life", params=None, complaint_date=None, reply_date=None)
-    assert g2["steps"][0]["items"][0]["text"]["en"] != "changed"
+    assert g2["steps"][1]["items"][0]["text"]["en"] != "changed"
+
+
+def test_health_plan_says_a_shared_route_message_once():
+    # Nothing challengeable: the letter and the Ombudsman get the same message, so it appears once.
+    p, _ = health([finding("CONSISTENT")])
+    ids = [s["id"] for s in p["steps"]]
+    assert "grievance" in ids and "letter" not in ids and "ombudsman" not in ids
+    assert plan.plan_text(p, "en").count("Deadlines apply when a finding shows a possible inconsistency to raise.") == 1

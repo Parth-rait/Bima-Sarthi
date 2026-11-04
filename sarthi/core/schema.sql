@@ -97,6 +97,8 @@ CREATE TABLE IF NOT EXISTS case_issue (
     reviewer_note VARCHAR,
     PRIMARY KEY (case_id, issue)
 );
+ALTER TABLE case_issue ADD COLUMN IF NOT EXISTS issue_family VARCHAR;
+ALTER TABLE case_issue ADD COLUMN IF NOT EXISTS family_status VARCHAR;
 
 CREATE TABLE IF NOT EXISTS case_fact (
     case_id VARCHAR,

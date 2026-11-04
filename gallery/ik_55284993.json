@@ -1,0 +1,34 @@
+{
+  "case_id": "ik_55284993",
+  "citation": {
+    "forum": "Punjab-Haryana High Court",
+    "case_number": null,
+    "decided_on": "2026-03-20",
+    "source_url": "https://indiankanoon.org/doc/55284993/"
+  },
+  "insurer": "Star Health",
+  "outcome": "dismissed",
+  "policyholder_prevailed": true,
+  "relief_amount": null,
+  "rejection_ground": "pre_existing_disease",
+  "days_to_decision": null,
+  "policy_years_at_claim": null,
+  "licence_note": "Judgment text via Indian Kanoon API; display attribution: powered by IKanoon",
+  "findings": [
+    {
+      "rule_id": "PED_WAIT_36M",
+      "rule_version": 1,
+      "verdict": "NEED_INFO",
+      "reason": "missing_claim_date",
+      "rule_quote": "Waiting period for pre-existing diseases disclosed by the persons to be insured, shall be maximum up to 36 months of continuous coverage under the Health Insurance policy.",
+      "source_sha256": "7127b069a5468ef8333f6ecaae6b77149026a7322feb2b1bdbc5c7ebce69ecbb",
+      "page_no": 37,
+      "facts_used": {},
+      "question_en": "For how many continuous months has this policyholder been covered?",
+      "question_hi": null,
+      "action_en": "Point out that the waiting period cannot exceed the cap; ask the insurer to reconsider.",
+      "action_hi": null
+    }
+  ],
+  "attribution": "powered by IKanoon"
+}

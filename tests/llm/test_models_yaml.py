@@ -7,7 +7,7 @@ from sarthi.llm import client
 
 YAML = Path(__file__).resolve().parents[2] / "models.yaml"
 LADDER = ["hpc48", "hpc24", "kaggle", "baseten", "nemotron_ultra", "deepseek_v4_flash", "kimi_k3",
-          "ollama_dev"]
+          "muse_spark_13c", "gemini_flash", "groq_qwen_vl", "groq_gpt_oss", "ollama_vl", "ollama_vl_fast", "ollama_dev"]
 
 
 def test_rung_order_matches_fallback_ladder():

@@ -1,0 +1,60 @@
+{
+  "case_id": "ik_185595546",
+  "citation": {
+    "forum": "State Consumer Disputes Redressal Commission",
+    "case_number": null,
+    "decided_on": "2026-08-26",
+    "source_url": "https://indiankanoon.org/doc/185595546/"
+  },
+  "insurer": "Star Health",
+  "outcome": "dismissed",
+  "policyholder_prevailed": true,
+  "relief_amount": null,
+  "rejection_ground": "pre_existing_disease",
+  "days_to_decision": 693,
+  "policy_years_at_claim": 0.4,
+  "licence_note": "Judgment text via Indian Kanoon API; display attribution: powered by IKanoon",
+  "findings": [
+    {
+      "rule_id": "PED_WAIT_36M",
+      "rule_version": 1,
+      "verdict": "NEED_INFO",
+      "reason": "missing_inputs: continuous_cover_months, ped_disclosed",
+      "rule_quote": "Waiting period for pre-existing diseases disclosed by the persons to be insured, shall be maximum up to 36 months of continuous coverage under the Health Insurance policy.",
+      "source_sha256": "7127b069a5468ef8333f6ecaae6b77149026a7322feb2b1bdbc5c7ebce69ecbb",
+      "page_no": 37,
+      "facts_used": {
+        "admission_date": {
+          "value": "2024-10-02",
+          "quote": "The complainant was firstly admitted in Sohana Hospital, Sector 77, Mohali from 02.10.2024 to 06.10.2024 for his left knee surgery",
+          "page_no": 1
+        },
+        "inception_date": {
+          "value": "2024-04-21",
+          "quote": "which was valid w.e.f. 21.04.2024 to 20.04.2025 covering himself and his wife Smt. Asha Rani for cashless treatment upto Rs.10 lakhs",
+          "page_no": 1
+        },
+        "policy_renewal_date": {
+          "value": "2024-04-21",
+          "quote": "The principal controversy is whether the appellants have been able to establish that the respondent/complainant was suffering from Osteoarthritis (OA) of the left knee prior to inception of the subject policy on 21.04.2024 and had knowingly suppressed the said material fact.",
+          "page_no": 1
+        },
+        "ported_from_date": {
+          "value": "2019-04-25",
+          "quote": "initially he had been obtaining the health insurance policies from National Insurance Company Ltd. since 25.04.2019 to 24.04.2024 (Annexures A-5 to A-9) on payment of the due premium amounts without any default.",
+          "page_no": 1
+        },
+        "alleged_undisclosed_condition": {
+          "value": "Osteoarthritis (OA) of the left knee",
+          "quote": "Osteoarthritis (OA) of the knee is a chronic, degenerative and progressive condition, which develops over several years and cannot arise suddenly after inception of the policy.",
+          "page_no": 1
+        }
+      },
+      "question_en": "For how many continuous months has this policyholder been covered?",
+      "question_hi": null,
+      "action_en": "Point out that the waiting period cannot exceed the cap; ask the insurer to reconsider.",
+      "action_hi": null
+    }
+  ],
+  "attribution": "powered by IKanoon"
+}

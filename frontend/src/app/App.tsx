@@ -11,11 +11,13 @@ import { Splash } from "./Splash";
 
 // One chunk per route. The landing page is the only one most visitors need before anything else.
 const Landing = lazy(() => import("@/pages/Landing"));
+const Schemes = lazy(() => import("@/pages/Schemes"));
 const About = lazy(() => import("@/pages/About"));
 const HowItWorks = lazy(() => import("@/pages/HowItWorks"));
 const CheckClaim = lazy(() => import("@/pages/CheckClaim"));
 const ActionPlan = lazy(() => import("@/pages/ActionPlan"));
 const Cases = lazy(() => import("@/pages/Cases"));
+const Evidence = lazy(() => import("@/pages/Evidence"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const Help = lazy(() => import("@/pages/Help"));
 const Results = lazy(() => import("@/pages/Results"));
@@ -50,11 +52,13 @@ export function App() {
         >
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/schemes" element={<Schemes />} />
             <Route path="/about" element={<About />} />
             <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/check-claim" element={<CheckClaim />} />
             <Route path="/action-plan" element={<ActionPlan />} />
             <Route path="/cases" element={<Cases />} />
+            <Route path="/evidence" element={<Evidence />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/help" element={<Help />} />
             <Route path="/results/:id" element={<Results />} />

@@ -1,5 +1,5 @@
 /*
- * Design tokens: "late-afternoon sky with sunlight through soft clouds" (phase 3a).
+ * Design tokens: "indigo dusk": porcelain ground, indigo-night ink, one indigo action, saffron highlights, sky-violet glass (Nov 2026).
  *
  * Ivory and pale peach carry ~90% of every page. Ink carries all text. One primary action colour (ink fill, ivory
  * text; apricot only on hover/press and as a key highlight). Sky blue and lavender live only in atmospheric
@@ -17,32 +17,36 @@
 
 @theme static {
   /* ---- surfaces ---- */
-  --color-ivory: #fbf6ee; /* ground: the page */
-  --color-peach: #f7e6d6; /* surface-2: alternate band, quiet panel */
-  --color-peach-deep: #f0d8c2; /* hover on peach, pressed secondary */
-  --color-paper: #fffcf7; /* a sheet lifted off the ground (inputs, the few cards) */
+  --color-ivory: #f8f6f2; /* ground: porcelain, the page */
+  --color-peach: #eeeaf4; /* surface-2: lilac mist, alternate band, quiet panel */
+  --color-peach-deep: #e2dcee; /* hover on the mist surface, pressed secondary */
+  --color-paper: #fdfcfa; /* a sheet lifted off the ground (inputs, the few cards) */
 
   /* ---- atmosphere: backgrounds only, never controls or text ---- */
-  --color-sky-blue: #bfd3e6;
-  --color-sky-pale: #dce6f0;
-  --color-lavender: #d9d2e6;
-  --color-dusty-rose: #d9a9a6; /* emphasis marks, timeline markers, art; never body-sized text */
-  --color-apricot: #e9a87f; /* primary action hover/press and key highlights ONLY */
-  --color-apricot-soft: #f2c6a0; /* selection, soft glow */
-  --color-gold: #d9be8a; /* champagne: hairlines and underlines ONLY */
+  --color-sky-blue: #c9d4f2;
+  --color-sky-pale: #e3e8f8;
+  --color-lavender: #e6d9f5;
+  --color-dusty-rose: #c6a3db; /* violet: emphasis marks, timeline markers, art; never body-sized text */
+  --color-apricot: #e8873a; /* saffron: primary action hover/press and key highlights ONLY */
+  --color-apricot-soft: #f5c08e; /* soft saffron: selection, soft glow */
+  --color-gold: #e0b36a; /* marigold: hairlines and underlines ONLY */
 
   /* ---- text ---- */
-  --color-ink: #2a2630; /* all text; the primary action fill; the ink band */
-  --color-ink-soft: #5b5560; /* secondary text */
-  --color-on-ink: #fbf6ee; /* text on the ink band and on primary buttons */
-  --color-on-ink-soft: #d8cfc6; /* secondary text on the ink band */
-  --color-ink-raised: #3a3541; /* a surface raised from the ink band, primary hover alternative */
+  --color-ink: #1b1a33; /* indigo night: all text; the ink band */
+  --color-ink-soft: #4e4b66; /* secondary text */
+  --color-on-ink: #f8f6f2; /* text on the ink band and on primary buttons */
+  --color-on-ink-soft: #cfcbe3; /* secondary text on the ink band */
+  --color-ink-raised: #2c2a52; /* a surface raised from the ink band */
+
+  /* ---- the one action colour: indigo fill, porcelain label; saffron (apricot token) on hover/press ---- */
+  --color-action: #34318a;
+  --color-action-deep: #26246b; /* pressed edge, glass tint core */
 
   /* ---- lines and focus ---- */
-  --color-line: #e2d8cc; /* hairlines that separate groups (decorative) */
-  --color-line-strong: #857a6d; /* control borders and meaningful non-text (>= 3:1) */
-  --color-focus-ring: #2a2630; /* 3px ring, offset 2px */
-  --color-focus-ring-on-ink: #fbf6ee;
+  --color-line: #e1ddea; /* hairlines that separate groups (decorative) */
+  --color-line-strong: #77738f; /* control borders and meaningful non-text (>= 3:1) */
+  --color-focus-ring: #1b1a33; /* 3px ring, offset 2px */
+  --color-focus-ring-on-ink: #f8f6f2;
 
   /* ---- states and verdicts: muted, always with shape + word + sentence ---- */
   --color-terracotta: #b5553f; /* error, CHALLENGEABLE: borders, icons (non-text) */
@@ -89,13 +93,13 @@
   --radius-tab: 0.375rem; /* the claim-flow step tabs, which meet the sheet's top edge */
 
   /* ---- depth: soft, warm, low. No halos. ---- */
-  --shadow-sheet: 0 1px 2px rgba(42, 38, 48, 0.06), 0 14px 32px -18px rgba(42, 38, 48, 0.22);
-  --shadow-under: 0 6px 14px -8px rgba(42, 38, 48, 0.28);
-  --shadow-lift: 0 2px 4px rgba(42, 38, 48, 0.06), 0 24px 44px -24px rgba(42, 38, 48, 0.32);
-  --shadow-stage: 0 30px 60px -30px rgba(42, 38, 48, 0.45), 0 10px 20px -14px rgba(42, 38, 48, 0.25);
+  --shadow-sheet: 0 1px 2px rgba(27, 26, 51, 0.06), 0 14px 32px -18px rgba(27, 26, 51, 0.22);
+  --shadow-under: 0 6px 14px -8px rgba(27, 26, 51, 0.28);
+  --shadow-lift: 0 2px 4px rgba(27, 26, 51, 0.06), 0 24px 44px -24px rgba(27, 26, 51, 0.32);
+  --shadow-stage: 0 30px 60px -30px rgba(27, 26, 51, 0.45), 0 10px 20px -14px rgba(27, 26, 51, 0.25);
   --shadow-button: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
   /* float: a sticky rail or plate that must read as above the sheet without a halo */
-  --shadow-float: 0 1px 2px rgba(42, 38, 48, 0.05), 0 12px 32px -8px rgba(42, 38, 48, 0.14);
+  --shadow-float: 0 1px 2px rgba(27, 26, 51, 0.05), 0 12px 32px -8px rgba(27, 26, 51, 0.14);
 
   /* ---- motion ---- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -181,7 +185,8 @@
   --section-y: clamp(4rem, 8vw, 8rem);
   --section-y-tight: clamp(2.5rem, 5vw, 5rem);
   --grid-gap: clamp(1rem, 2.5vw, 2.5rem);
-  --nav-h: 4.25rem;
+  --nav-h: 4.25rem; /* the header's total height, floating or not (the stepper and scroll padding read it) */
+  --nav-bar-h: 4.25rem; /* the bar inside it; shorter while it floats as a capsule */
   /* stacking: one ladder, so a new overlay cannot guess its way above the modal */
   --z-rail: 39; /* the sticky result summary: it slides under the stepper it sits below */
   --z-step: 40; /* the sticky claim-flow stepper: under the navbar, above the sheet */

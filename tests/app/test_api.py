@@ -677,7 +677,10 @@ def test_health_check_is_unchanged_plus_supported_and_a_plan(client):
     body = client.post(f"/session/{sid}/check").json()
     assert body["supported"] is True and body["findings"][0]["verdict"] == "CHALLENGEABLE"
     plan = body["plan"]
-    assert [s["id"] for s in plan["steps"]][:4] == ["findings", "ask", "letter", "ombudsman"]
+    assert [s["id"] for s in plan["steps"]][:5] == ["case", "findings", "ask", "letter", "ombudsman"]
+    case_text = " ".join(i["text"]["en"] for i in plan["steps"][0]["items"])
+    assert "Type of insurance: Health." in case_text
+    assert "Non-disclosure of information" in case_text             # the reason the user recorded
     assert plan["verified"] is True and "Your plan" in plan["text"]["en"]
     assert client.post(f"/session/{sid}/explain").json()["plan"]["verified"] is True
 

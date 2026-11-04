@@ -78,7 +78,7 @@ export function Choice({
           <label
             key={o.value}
             lang={o.lang}
-            className="radio group relative inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-ctl border border-line-strong bg-paper px-4 py-2 font-medium text-ink transition-colors duration-150 hover:bg-peach has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-on-ink has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus-ring motion-reduce:transition-none"
+            className="radio group relative inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-ctl border border-line-strong bg-paper px-4 py-2 font-medium text-ink transition-colors duration-150 hover:bg-peach has-[:checked]:border-action has-[:checked]:bg-action has-[:checked]:text-on-ink has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus-ring motion-reduce:transition-none"
           >
             <input type="radio" className="peer sr-only" name={`${name}-${id}`} value={o.value} checked={value === o.value} onChange={() => onChange(o.value)} />
             <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="hidden shrink-0 group-has-[:checked]:block">

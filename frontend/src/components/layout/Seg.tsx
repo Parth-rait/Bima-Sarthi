@@ -27,7 +27,7 @@ export function Seg({ label, options, className, tone = "light" }: { label: stri
             i > 0 && (onInk ? "border-l border-on-ink-soft" : "border-l border-line-strong"),
             onInk
               ? o.pressed ? "bg-on-ink font-bold text-ink" : "bg-transparent font-medium text-on-ink hover:bg-ink-raised"
-              : o.pressed ? "bg-ink font-bold text-on-ink" : "bg-transparent font-medium text-ink hover:bg-peach",
+              : o.pressed ? "bg-action font-bold text-on-ink" : "bg-transparent font-medium text-ink hover:bg-peach",
           )}
         >
           {o.text}

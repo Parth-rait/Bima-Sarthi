@@ -19,7 +19,7 @@ export function ProgressIndicator({ value, label, valueText, className }: { valu
         className="h-2.5 w-full overflow-hidden rounded-full border border-line-strong bg-peach"
       >
         <div
-          className={cn("h-full bg-ink", determinate ? "transition-[width] duration-300 motion-reduce:transition-none" : "w-1/3 animate-[progress-slide_1.4s_ease-in-out_infinite] motion-reduce:w-full motion-reduce:animate-none motion-reduce:opacity-40")}
+          className={cn("h-full bg-action", determinate ? "transition-[width] duration-300 motion-reduce:transition-none" : "w-1/3 animate-[progress-slide_1.4s_ease-in-out_infinite] motion-reduce:w-full motion-reduce:animate-none motion-reduce:opacity-40")}
           style={determinate ? { width: `${pct}%` } : undefined}
         />
       </div>

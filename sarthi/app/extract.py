@@ -16,6 +16,7 @@ from rapidfuzz import fuzz
 from sarthi.app.session import Session
 from sarthi.core.derive import INPUT_FACTS
 from sarthi.core.expr import names
+from sarthi.core.inputs import REJECTION_GROUNDS
 from sarthi.core.models import FactValue, RuleCard
 from sarthi.core.parse_values import parse_date_in, parse_inr
 from sarthi.data.case_facts import (DATE_FIELDS, DATETIME_FIELDS, EXTRACTED_KEYS, CaseFactsOut,
@@ -33,7 +34,7 @@ Rules:
 - Extract only what the document states. If a field is not on this page, leave it null. Never guess or infer.
 - Each quote must be copied verbatim from the page (exact words, no paraphrase, no ellipsis).
 - Dates exactly as written. Amounts exactly as written (for example "Rs. 2,45,000").
-- rejection_ground is the insurer's stated reason for rejecting or reducing the claim.
+- rejection_ground is the insurer's stated reason for rejecting or reducing the claim, as exactly one of: {", ".join(REJECTION_GROUNDS)}.
 - page_no is 1 for this page.
 - deductions is a list of objects {{item, amount, reason, nonpayable_listed}}; disclosed_conditions is a list of strings.
 {schema_hint(CaseFactsOut)}"""
@@ -162,18 +163,22 @@ def _page_candidates(session: Session, page: Path, page_no: int,
                      backends: set[str] | None = None) -> list[tuple[str, FactValue]]:
     text_layer = session.page_text(page)
     from_photo = text_layer is None
-    image = _image_part(page)
+    if from_photo:
+        content = [{"type": "text", "text": "Extract the facts from this page."}, _image_part(page)]
+    else:
+        # The PDF text layer is quoted verbatim, so read it directly: fewer tokens, no vision dependency.
+        content = [{"type": "text", "text": "Extract the facts from this page. The page text is below.\n\n"
+                                           + text_layer}]
     res = chat(role="reader", cache=False, schema=CaseFactsOut, messages=[
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": [{"type": "text", "text": "Extract the facts from this page."},
-                                     image]}])
+        {"role": "user", "content": content}])
     if backends is not None and getattr(res, "backend", None):
         backends.add(res.backend)
     if res.parsed is None:
         return []
     if from_photo:
         t = chat(role="reader", cache=False, messages=[
-            {"role": "user", "content": [{"type": "text", "text": TRANSCRIBE_PROMPT}, image]}])
+            {"role": "user", "content": [{"type": "text", "text": TRANSCRIBE_PROMPT}, _image_part(page)]}])
         haystack = normalise_ws(t.text or "")
     else:
         haystack = normalise_ws(text_layer)

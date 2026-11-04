@@ -1,4 +1,5 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
 import { ApiError, api, type GalleryCase, type GalleryList } from "@/api";
 import { Boundary } from "@/components/ds/Boundary";
 import { Button } from "@/components/ds/Button";
@@ -11,7 +12,9 @@ import { StatusBadge, Tag } from "@/components/ds/StatusBadge";
 import { VerdictCard, sortFindings } from "@/components/Verdict";
 import { ART, type ArtKey } from "@/content/art";
 import { SCENARIOS } from "@/content/scenarios";
-import { ATTRIBUTION } from "@/i18n";
+import { WinnerBadge } from "@/components/charts/RealCases";
+import { ATTRIBUTION, GROUND_LABEL } from "@/i18n";
+import { isoToDisplay } from "@/lib/dates";
 import { useMediaQuery, usePrefersReducedMotion } from "@/hooks/useMedia";
 import { useSession } from "@/state/store";
 
@@ -71,13 +74,18 @@ function CaseDetail({ c, onClose }: { c: GalleryCase; onClose: () => void }) {
   return (
     <section ref={ref} tabIndex={-1} aria-labelledby="case-h" className="border border-line bg-paper p-5 shadow-sheet md:p-8">
       <h3 id="case-h" className="m-0 font-display text-h3 font-medium text-ink">
-        {c.citation.case_number || c.case_id}
+        {c.citation.case_number || c.citation.forum || t("cases_verified")}
       </h3>
-      <p className="mb-0 mt-1 text-ink-soft">{[c.citation.forum, c.citation.decided_on, c.insurer].filter(Boolean).join(", ")}</p>
-      <p className="mb-0 mt-3">
-        <strong>{t("outcome")}: </strong>
-        {c.outcome || ""}
+      <p className="mb-0 mt-1 text-ink-soft">
+        {[c.citation.case_number ? c.citation.forum : null, isoToDisplay(c.citation.decided_on), c.insurer].filter(Boolean).join(", ")}
       </p>
+      <p className="mb-0 mt-3 flex flex-wrap items-center gap-2">
+        <WinnerBadge prevailed={c.policyholder_prevailed} />
+        <span className="text-ink-soft">
+          {t("outcome")}: {c.outcome || ""}
+        </span>
+      </p>
+      <p className="mb-0 mt-2 text-control text-ink-soft">{t("cases_won_note")}</p>
       <div className="wf mt-4">
         <div className="findings">
           {sortFindings(c.findings).map((f, i) => (
@@ -93,10 +101,14 @@ function CaseDetail({ c, onClose }: { c: GalleryCase; onClose: () => void }) {
         ) : null}{" "}
         {c.attribution || t("powered")}
       </p>
-      <div className="mt-4">
-        <Button variant="secondary" onClick={onClose}>
-          {t("cases_close")}
-        </Button>
+      <div className="mt-5 border-t border-line pt-4">
+        <p className="m-0 max-w-[60ch]">{t("cases_like_this_p")}</p>
+        <div className="mt-3 flex flex-wrap gap-3">
+          <Button to="/check-claim">{t("cases_like_this")}</Button>
+          <Button variant="secondary" onClick={onClose}>
+            {t("cases_close")}
+          </Button>
+        </div>
       </div>
     </section>
   );
@@ -107,7 +119,10 @@ function CaseDetail({ c, onClose }: { c: GalleryCase; onClose: () => void }) {
  * a verified case is shown only as the public citation and the rule findings the engine produced for it.
  */
 export default function Cases() {
-  const { t } = useSession();
+  const { state, t } = useSession();
+  const [params, setParams] = useSearchParams();
+  const groundParam = params.get("ground");
+  const groundName = groundParam ? (GROUND_LABEL[state.lang] as Record<string, string>)[groundParam] : undefined;
   const [list, setList] = useState<GalleryList | null>(null);
   const [open, setOpen] = useState<GalleryCase | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -141,8 +156,13 @@ export default function Cases() {
     [t],
   );
 
-  const cases = list?.cases ?? [];
-  const label = (c: GalleryList["cases"][number]) => c.citation.case_number || c.case_id;
+  const allCases = list?.cases ?? [];
+  // Only a known ground filters (an unknown value in the URL shows everything).
+  const filtered = groundName ? allCases.filter((c) => c.rejection_ground === groundParam) : allCases;
+  const cases = filtered.length ? filtered : allCases;
+  const filtering = !!groundName && filtered.length > 0;
+  // Never the internal id: a judgment without a case number is named by its forum.
+  const label = (c: GalleryList["cases"][number]) => c.citation.case_number || c.citation.forum || t("cases_verified");
   const slides = [
     ...cases.map((c, i) => ({
       title: `${t("cases_verified")}: ${label(c)}`,
@@ -191,14 +211,29 @@ export default function Cases() {
             <p className="m-0">{t("cases_empty_p")}</p>
           </EmptyState>
         ) : null}
+        {filtering ? (
+          <p className="mb-0 mt-4 flex flex-wrap items-center gap-3 rounded-ctl bg-peach px-4 py-3">
+            <span>
+              {t("cases_filter_h")} <strong className="text-ink">{groundName}</strong> ({cases.length})
+            </span>
+            <Button variant="quiet" size="sm" onClick={() => setParams({}, { replace: true })}>
+              {t("cases_filter_clear")}
+            </Button>
+          </p>
+        ) : null}
+        {cases.length ? <p className="mb-0 mt-4 max-w-[68ch] text-control text-ink-soft">{t("cases_vs_check")}</p> : null}
         {cases.length ? (
           <ul className="m-0 mt-6 list-none divide-y divide-line border-y border-line p-0">
             {cases.map((c) => (
               <li key={c.case_id} className="flex flex-wrap items-center justify-between gap-4 py-5">
                 <div>
                   <h3 className="m-0 font-display text-h3 font-medium text-ink">{label(c)}</h3>
-                  <p className="mb-0 mt-1 text-ink-soft">{[c.citation.forum, c.citation.decided_on].filter(Boolean).join(", ")}</p>
-                  <p className="mb-0 mt-2 flex flex-wrap gap-2">
+                  <p className="mb-0 mt-1 text-ink-soft">
+                    {[c.citation.case_number ? c.citation.forum : null, isoToDisplay(c.citation.decided_on)].filter(Boolean).join(", ")}
+                  </p>
+                  <p className="mb-0 mt-2 flex flex-wrap items-center gap-2">
+                    <WinnerBadge prevailed={c.policyholder_prevailed} />
+                    <span className="ml-2 text-[0.8125rem] font-semibold text-ink-soft">{t("cases_engine")}</span>
                     {c.verdicts.map((v, i) => (
                       <StatusBadge key={`${v}-${i}`} verdict={v} />
                     ))}

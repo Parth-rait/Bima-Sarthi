@@ -1,3 +1,4 @@
+import { Spark } from "@/components/ds/Spark";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Fact } from "../api";
 import { ErrorBox } from "../components/ErrorBox";
@@ -23,6 +24,13 @@ import { isDeductionList, labelOf, valText } from "../lib/facts";
 import { rowOrder } from "../lib/motion";
 import { effectiveProduct } from "../state/session";
 import { useSession } from "../state/store";
+import { WorkStage, prefetchStage, type StageStep } from "../components/stage/WorkStage";
+
+/** The two requests behind "Run the check": the confirmed facts are saved, then the rules check runs. */
+const CHECK_STEPS: StageStep[] = [
+  { id: "facts", label: "stage_saving", mode: "saving" },
+  { id: "check", label: "stage_checking", mode: "checking" },
+];
 
 export function ConfirmScreen() {
   const { state, actions, t } = useSession();
@@ -42,6 +50,9 @@ export function ConfirmScreen() {
   const need = useMemo(() => unresolvedKeys(facts, form), [facts, form]);
   const upd = (patch: Partial<ConfirmForm>) => setForm((f) => ({ ...f, ...patch }));
   const flagged = new Set([...(err?.flagged ?? []), ...unresolved]);
+
+  // the check is one press away: fetch the 3D stage now
+  useEffect(() => prefetchStage(), []);
 
   useEffect(() => {
     if (!err) return;
@@ -208,13 +219,16 @@ export function ConfirmScreen() {
         {busy && state.slow ? ` ${t("slow")}` : ""}
       </p>
       <div className="actions">
-        <button type="button" id="run-check" onClick={run} disabled={busy}>
-          {t("run")}
-        </button>
+        <Spark>
+          <button type="button" id="run-check" onClick={run} disabled={busy}>
+            {t("run")}
+          </button>
+        </Spark>
         <button type="button" className="secondary" onClick={() => actions.goto("upload")} disabled={busy}>
           {t("back")}
         </button>
       </div>
+      {state.busy === "facts" || state.busy === "check" ? <WorkStage steps={CHECK_STEPS} current={state.busy} slow={state.slow} /> : null}
     </section>
   );
 }

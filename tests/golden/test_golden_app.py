@@ -82,10 +82,12 @@ def test_health_happy_path_upload_confirm_check_plan(client):
     assert body["supported"] is True
     plan = body["plan"]
     assert plan["verified"] is True and plan["title"]["en"] == "Your plan"
-    assert [s["id"] for s in plan["steps"]] == ["findings", "ask", "letter", "ombudsman", "commission"]
-    first = plan["steps"][0]["items"][0]                         # (1) the finding with its card quote
+    assert [s["id"] for s in plan["steps"]] == ["case", "findings", "ask", "letter", "ombudsman", "commission"]
+    case = " ".join(i["text"]["en"] for i in plan["steps"][0]["items"])
+    assert "Type of insurance: Health." in case and "Non-disclosure of information" in case
+    first = plan["steps"][1]["items"][0]                         # (1) the finding with its card quote
     assert first["rule_id"] == "MORATORIUM_60M" and first["page_no"] == 7 and first["quote"]
-    ask = " ".join(i["text"]["en"] for i in plan["steps"][1]["items"])
+    ask = " ".join(i["text"]["en"] for i in plan["steps"][2]["items"])
     assert "act" in ask.split()                                  # (2) the card's action text (stub: "act")
     d = by_key(plan)                                             # (3)-(4) dates and their sources
     assert any(i["link"] == "letter" for i in items(plan))

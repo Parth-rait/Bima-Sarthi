@@ -15,7 +15,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict
 
 from sarthi.core.inputs import REJECTION_GROUNDS
-from sarthi.core.models import CaseIssue
+from sarthi.core.models import ISSUE_FAMILIES, CaseIssue
 from sarthi.core.store import Store
 from sarthi.data.case_facts import _MARKER, _pages, make_windows
 from sarthi.data.parse_docs import normalise_ws
@@ -117,6 +117,7 @@ class OutIssue(BaseModel):
     holding: Literal["for_policyholder", "for_insurer", "not_decided"]
     quote: str | None = None
     page_no: int | None = None
+    family: str | None = None  # optional model draft of the legal issue family; validated on use
 
 
 class IssuesOut(BaseModel):
@@ -209,16 +210,20 @@ def draft_issues(case_id: str, store: Store, force: bool = False) -> list[CaseIs
         out = res.parsed
         if out.appellant != "unknown":
             appellants.append(out.appellant)
-        cands = [(OVERALL, out.prevailed, out.prevailed_quote, out.prevailed_page_no)]
+        cands = [(OVERALL, out.prevailed, out.prevailed_quote, out.prevailed_page_no, None)]
         for it in out.issues:
             if it.issue not in valid:
                 log.warning("case %s: dropped issue %r (not a rule id or ground)", case_id, it.issue)
                 continue
-            cands.append((it.issue, it.holding, it.quote, it.page_no))
-        for key, holding, quote, pg in cands:
+            fam = it.family if it.family in ISSUE_FAMILIES else None
+            if it.family and fam is None:
+                log.warning("case %s: dropped family %r on %s (not an allowed issue family)",
+                            case_id, it.family, it.issue)
+            cands.append((it.issue, it.holding, it.quote, it.page_no, fam))
+        for key, holding, quote, pg, fam in cands:
             found, page_no = _locate(quote, text, wpages, page_text, pg)
             _merge(best, key, dict(holding=holding, quote=quote or None, page_no=page_no,
-                                   found=found, res_review=res.needs_review))
+                                   found=found, res_review=res.needs_review, family=fam))
     rows = []
     for key, c in best.items():
         if key in skip:
@@ -236,6 +241,9 @@ def draft_issues(case_id: str, store: Store, force: bool = False) -> list[CaseIs
                          page_no=c["page_no"] if c["quote"] else None,
                          status="drafted" if ok else "needs_review", reviewer_note=note))
     store.upsert("case_issue", rows, key=["case_id", "issue"])
+    for key, c in best.items():  # a model family is only ever a draft; a reviewed one is kept
+        if key != OVERALL and key not in skip and c.get("family"):
+            set_family(store, case_id, key, c["family"], reviewed=False)
     return [CaseIssue(**r) for r in rows]
 
 
@@ -321,6 +329,66 @@ def load_reviewed_issues(store: Store) -> dict[str, dict[str, dict]]:
             "SELECT case_id, issue, holding, holding_quote, page_no FROM case_issue "
             "WHERE status IN ('reviewed','corrected') AND issue <> ? ORDER BY 1, 2", [OVERALL]).fetchall():
         out.setdefault(cid, {})[issue] = dict(holding=holding, quote=quote, page_no=page)
+    return out
+
+
+# ---------- issue family (the real legal issue; separate from the rule-label holding) ----------
+
+def set_family(store: Store, case_id: str, issue: str, family: str, note: str = "",
+               reviewed: bool = True) -> None:
+    """Record the legal issue family of one case_issue row. `reviewed=True` (a human, via the CLI
+    or the reproducible relabel file) sets family_status 'reviewed'; `reviewed=False` records a
+    model draft as 'drafted' and never overwrites a reviewed family. Status, holding and quote
+    of the row are never touched, so a rejected rule-label stays rejected (never scored) while
+    carrying the human-reviewed family. Idempotent."""
+    if family not in ISSUE_FAMILIES:
+        raise ValueError(f"unknown issue family {family!r}; allowed: {', '.join(ISSUE_FAMILIES)}")
+    cur = store.con.execute(
+        "SELECT reviewer_note, issue_family, family_status FROM case_issue "
+        "WHERE case_id=? AND issue=?", [case_id, issue]).fetchone()
+    if cur is None:
+        raise KeyError(f"no issue row for {case_id} {issue}")
+    old_note, old_family, old_status = cur
+    if not reviewed:
+        if old_status == "reviewed":
+            return  # a draft never replaces a human decision
+        store.con.execute("UPDATE case_issue SET issue_family=?, family_status='drafted' "
+                          "WHERE case_id=? AND issue=?", [family, case_id, issue])
+        return
+    tag = f"family {family}" + (f": {note}" if note else "")
+    full = f"{old_note}; {tag}" if old_note and tag not in old_note else (old_note or tag)
+    store.con.execute(
+        "UPDATE case_issue SET issue_family=?, family_status='reviewed', reviewer_note=? "
+        "WHERE case_id=? AND issue=?", [family, full, case_id, issue])
+
+
+def apply_family_relabels(store: Store, path: Path) -> int:
+    """Apply a version-controlled relabel file ({relabel: [{case_id, issue, family, note}]}) as
+    human-reviewed families. All-or-nothing: every row and family is validated before any write.
+    Returns the number of rows set. Idempotent."""
+    import yaml
+    doc = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    items = doc.get("relabel") or []
+    for it in items:
+        if it.get("family") not in ISSUE_FAMILIES:
+            raise ValueError(f"{it.get('case_id')} {it.get('issue')}: unknown family {it.get('family')!r}")
+        if store.con.execute("SELECT 1 FROM case_issue WHERE case_id=? AND issue=?",
+                             [it["case_id"], it["issue"]]).fetchone() is None:
+            raise KeyError(f"no issue row for {it['case_id']} {it['issue']}")
+    for it in items:
+        set_family(store, it["case_id"], it["issue"], it["family"], note=it.get("note", ""))
+    return len(items)
+
+
+def load_reviewed_families(store: Store) -> dict[str, dict[str, str]]:
+    """case_id -> issue (the row key) -> family, human-reviewed families only (drafted ones are
+    never returned). Includes rows whose rule-label holding was rejected: the family names the
+    real issue, the rejected label is still never scored (`load_reviewed_issues`)."""
+    out: dict[str, dict[str, str]] = {}
+    for cid, issue, fam in store.con.execute(
+            "SELECT case_id, issue, issue_family FROM case_issue WHERE family_status='reviewed' "
+            "AND issue_family IS NOT NULL AND issue <> ? ORDER BY 1, 2", [OVERALL]).fetchall():
+        out.setdefault(cid, {})[issue] = fam
     return out
 
 

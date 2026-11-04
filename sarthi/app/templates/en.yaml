@@ -19,24 +19,24 @@ labels:
   general_title: "We don't have a checked rules engine for this type of insurance yet. This does not mean the decision is correct. Here is a general way to take your case forward."
   missing_prefix: "missing "
 CHALLENGEABLE:
-  self: "On the facts in your documents, this decision may be challengeable under {rule_id}."
-  helper: "On the facts in their documents, the decision on their claim may be challengeable under {rule_id}."
+  self: "On the facts in your documents, there is a documented possible inconsistency between this decision and the rule quoted below. It may be worth raising with the insurer. This does not predict any outcome."
+  helper: "On the facts in their documents, there is a documented possible inconsistency between the decision on their claim and the rule quoted below. It may be worth raising with the insurer. This does not predict any outcome."
 CONSISTENT:
-  self: "Under {rule_id}, the rule gives no ground to challenge the decision on this point. This check covers only this rule."
-  helper: "Under {rule_id}, the rule gives no ground to challenge the decision on this point in their claim. This check covers only this rule."
+  self: "The rule quoted below gives no ground to challenge the decision on this point. This check covers only this rule."
+  helper: "The rule quoted below gives no ground to challenge the decision on this point in their claim. This check covers only this rule."
 NEED_INFO:
   rule_not_in_force:
-    self: "We could not apply {rule_id} to your claim because the rule was not in force on the relevant date."
-    helper: "We could not apply {rule_id} to their claim because the rule was not in force on the relevant date."
+    self: "We could not apply the rule quoted below to your claim because it was not in force on the relevant date."
+    helper: "We could not apply the rule quoted below to their claim because it was not in force on the relevant date."
   missing_inputs:
-    self: "We need a little more information from you before we can check {rule_id}: {missing}."
-    helper: "We need a little more information about their claim before we can check {rule_id}: {missing}."
+    self: "We need a little more information from you before we can check the rule quoted below: {missing}."
+    helper: "We need a little more information about their claim before we can check the rule quoted below: {missing}."
   condition_not_automated:
-    self: "{rule_id} cannot be checked automatically. Please read the rule below against your documents, or ask a grievance officer or an advisor."
-    helper: "{rule_id} cannot be checked automatically. Please read the rule below against their documents, or ask a grievance officer or an advisor."
+    self: "The rule quoted below cannot be checked automatically. Please read it against your documents, or ask a grievance officer or an advisor."
+    helper: "The rule quoted below cannot be checked automatically. Please read it against their documents, or ask a grievance officer or an advisor."
   missing_date:
-    self: "We cannot check {rule_id} yet because a date is missing: {missing}."
-    helper: "We cannot check {rule_id} for their claim yet because a date is missing: {missing}."
+    self: "We cannot check the rule quoted below yet because a date is missing: {missing}."
+    helper: "We cannot check the rule quoted below for their claim yet because a date is missing: {missing}."
   default:
-    self: "We cannot say yet whether {rule_id} applies to your claim."
-    helper: "We cannot say yet whether {rule_id} applies to their claim."
+    self: "We cannot say yet whether the rule quoted below applies to your claim, because we do not yet have the information that rule depends on. The rule is quoted below so you can see what it needs."
+    helper: "We cannot say yet whether the rule quoted below applies to their claim, because we do not yet have the information that rule depends on. The rule is quoted below so you can see what it needs."

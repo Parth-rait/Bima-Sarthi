@@ -71,3 +71,23 @@ def test_gallery_routes_read_json_only(tmp_path, monkeypatch, store):
 def test_gallery_empty_dir_is_empty_list(tmp_path, monkeypatch):
     monkeypatch.setenv("SARTHI_GALLERY_DIR", str(tmp_path / "none"))
     assert TestClient(main.app).get("/gallery").json()["cases"] == []
+
+
+def test_gallery_carries_who_prevailed_not_only_the_raw_outcome(store, tmp_path):
+    # An insurer's appeal "dismissed" is a policyholder win: the gallery must expose the
+    # direction-corrected winner, or the result screen shows a win as a loss.
+    store.con.execute('UPDATE "case" SET outcome = ?, policyholder_prevailed = ? WHERE case_id = ?',
+                      ["dismissed", True, "c1"])
+    out = tmp_path / "gal"
+    build_gallery(store, out_dir=out, cards=[moratorium()])
+    d = json.loads((out / "c1.json").read_text())
+    assert d["outcome"] == "dismissed" and d["policyholder_prevailed"] is True
+    from sarthi.app.gallery import list_cases
+    assert list_cases(out)[0]["policyholder_prevailed"] is True
+
+
+def test_gallery_winner_unknown_is_null(store, tmp_path):
+    out = tmp_path / "gal"
+    build_gallery(store, out_dir=out, cards=[moratorium()])
+    from sarthi.app.gallery import list_cases
+    assert list_cases(out)[0]["policyholder_prevailed"] is None

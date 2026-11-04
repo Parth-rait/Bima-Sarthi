@@ -53,13 +53,13 @@ function Explore() {
       <ul
         id={panelId}
         hidden={!open}
-        className="absolute left-0 top-full z-50 mt-2 w-80 list-none rounded-card border border-line bg-paper p-2 text-ink shadow-lift"
+        className="absolute left-0 top-full z-[var(--z-nav)] mt-2 w-80 list-none rounded-card border border-line bg-paper p-2 text-ink shadow-lift"
       >
         {EXPLORE_LINKS.map((l) => (
           <li key={l.label}>
             <Link to={l.to} className="block rounded-ctl px-3 py-2 no-underline hover:bg-peach">
               <span className="block font-semibold text-ink">{t(l.label)}</span>
-              <span className="block text-[0.9375rem] text-ink-soft">{t(l.hint)}</span>
+              <span className="block text-control text-ink-soft">{t(l.hint)}</span>
             </Link>
           </li>
         ))}
@@ -100,7 +100,7 @@ export function Navbar() {
       data-layout="navbar"
       data-over-hero={overHero ? "true" : undefined}
       className={cn(
-        "no-print sticky top-0 z-50 text-ink transition-[background-color,border-color] duration-200 motion-reduce:transition-none",
+        "no-print sticky top-0 z-[var(--z-nav)] text-ink transition-[background-color,border-color] duration-200 motion-reduce:transition-none",
         overHero ? "border-b border-transparent bg-transparent" : "border-b border-line bg-ivory/95 backdrop-blur-sm",
       )}
     >
@@ -136,7 +136,7 @@ export function Navbar() {
           </button>
         </div>
       </Wrap>
-      {state.lang === "hi" ? <p className="m-0 border-t border-line bg-ivory px-4 py-2 text-center text-[0.9375rem] text-ink-soft">{HINDI_DRAFT_NOTE}</p> : null}
+      {state.lang === "hi" ? <p className="m-0 border-t border-line bg-ivory px-4 py-2 text-center text-control text-ink-soft">{HINDI_DRAFT_NOTE}</p> : null}
       <MobileMenu id={menuId} open={menu} onClose={() => setMenu(false)} />
     </header>
   );

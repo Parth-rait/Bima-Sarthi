@@ -79,6 +79,9 @@
   --text-body--line-height: 1.6;
   --text-meta: 0.875rem;
   --text-meta--line-height: 1.45;
+  /* 15px: text inside controls, chips and dense table rows. Was hardcoded in ~15 files. */
+  --text-control: 0.9375rem;
+  --text-control--line-height: 1.45;
 
   /* ---- shape ---- */
   --radius-ctl: 0.625rem; /* buttons, inputs */
@@ -131,12 +134,20 @@
   --wrap-wide: 90rem; /* 1440px: navbar, heroes, editorial bands */
   --wrap-default: 80rem; /* 1280px: most content */
   --wrap-narrow: 60rem; /* 960px: forms and prose pages */
+  --sheet-w: var(--wrap-default); /* the claim-flow sheet spans the default well */
   --measure-prose: 68ch; /* running text */
   /* vertical rhythm */
   --section-y: clamp(4rem, 8vw, 8rem);
   --section-y-tight: clamp(2.5rem, 5vw, 5rem);
   --grid-gap: clamp(1rem, 2.5vw, 2.5rem);
   --nav-h: 4.25rem;
+  /* stacking: one ladder, so a new overlay cannot guess its way above the modal */
+  --z-nav: 50;
+  --z-toast: 60;
+  --z-menu: 65;
+  --z-modal: 70;
+  --z-splash: 100;
+  --z-skip: 110;
 }
 
 @media (min-width: 40rem) {

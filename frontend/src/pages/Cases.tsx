@@ -29,11 +29,11 @@ function Scenarios() {
   const list = (
     <ul className="m-0 list-none space-y-6 p-0 lg:hidden">
       {SCENARIOS.map((s) => (
-        <li key={s.id} className="border border-line bg-cream p-5">
+        <li key={s.id} className="border border-line bg-paper p-5">
           <h3 className="m-0 font-display text-h3 font-medium text-ink">{s.title}</h3>
           <p className="mb-0 mt-2">{s.body}</p>
           <p className="mb-0 mt-3">
-            <Tag tone="brass">{t("cases_illustrative")}</Tag>
+            <Tag tone="warm">{t("cases_illustrative")}</Tag>
           </p>
         </li>
       ))}
@@ -69,7 +69,7 @@ function CaseDetail({ c, onClose }: { c: GalleryCase; onClose: () => void }) {
     ref.current?.focus();
   }, [c.case_id]);
   return (
-    <section ref={ref} tabIndex={-1} aria-labelledby="case-h" className="border border-line bg-cream p-5 shadow-sheet md:p-8">
+    <section ref={ref} tabIndex={-1} aria-labelledby="case-h" className="border border-line bg-paper p-5 shadow-sheet md:p-8">
       <h3 id="case-h" className="m-0 font-display text-h3 font-medium text-ink">
         {c.citation.case_number || c.case_id}
       </h3>
@@ -85,7 +85,7 @@ function CaseDetail({ c, onClose }: { c: GalleryCase; onClose: () => void }) {
           ))}
         </div>
       </div>
-      <p className="mb-0 mt-4 text-[0.9375rem] text-ink-soft">
+      <p className="mb-0 mt-4 text-control text-ink-soft">
         {isHttps(c.citation.source_url) ? (
           <a href={c.citation.source_url} rel="noopener noreferrer" className="text-ink">
             {t("srcurl")}
@@ -159,12 +159,12 @@ export default function Cases() {
       <PageHeader title={t("cases_h")} lead={t("g_p")} />
 
       <Section tone="night" labelledBy="car-h">
-        <h2 id="car-h" className="m-0 font-display text-h2 font-medium text-on-night">
+        <h2 id="car-h" className="m-0 font-display text-h2 font-medium text-on-ink">
           {t("cases_browse")}
         </h2>
-        <p className="mt-3 max-w-[60ch] text-on-night-soft">{t("cases_browse_p")}</p>
+        <p className="mt-3 max-w-[60ch] text-on-ink-soft">{t("cases_browse_p")}</p>
         <div className="relative overflow-hidden pb-24 pt-10">
-          <Boundary fallback={<p className="text-on-night-soft">{t("cases_carousel_fail")}</p>}>
+          <Boundary fallback={<p className="text-on-ink-soft">{t("cases_carousel_fail")}</p>}>
             <Suspense fallback={<Loader label={t("loading")} />}>
               <Carousel slides={slides} label={t("cases_h")} />
             </Suspense>
@@ -215,7 +215,7 @@ export default function Cases() {
         <div ref={detailAnchor} className="mt-8">
           {open ? <CaseDetail c={open} onClose={() => setOpen(null)} /> : null}
         </div>
-        <p className="mb-0 mt-6 text-[0.9375rem] text-ink-soft">{list?.attribution || ATTRIBUTION}</p>
+        <p className="mb-0 mt-6 text-control text-ink-soft">{list?.attribution || ATTRIBUTION}</p>
       </Section>
 
       <Section tone="champagne" labelledBy="ill-h">

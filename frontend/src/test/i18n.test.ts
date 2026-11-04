@@ -42,9 +42,18 @@ describe("parity with the legacy page and the backend", () => {
       return legacyHtml.slice(i + `const ${name}=`.length, j);
     };
     const T = new Function(`return (${grab("T")})`)() as Record<"en" | "hi", Record<string, string>>;
-    expect(Object.keys(T.en).length).toBeGreaterThan(80);
+    // a floor, not a target: it catches grab() truncating the legacy object, which would silently pass parity
+    expect(Object.keys(T.en).length).toBeGreaterThan(70);
+    expect(Object.keys(T.hi).length).toBe(Object.keys(T.en).length);
+    // Deliberate phase-3 rename: CHALLENGEABLE moved from the stamp word to the plain sentence, because
+    // Verdict.tsx renders t(verdict) as a finding's headline while the stamp word lives on vw_CHALLENGEABLE.
+    // The Hindi stamp words are draft copy (Q-007), so only English is byte-checked against the legacy page.
     for (const lang of ["en", "hi"] as const) {
       for (const [k, v] of Object.entries(T[lang])) {
+        if (k === "CHALLENGEABLE") {
+          if (lang === "en") expect(dictionaries.en.vw_CHALLENGEABLE, "en.vw_CHALLENGEABLE").toBe(v);
+          continue;
+        }
         expect(dictionaries[lang][k as keyof typeof en], `${lang}.${k}`).toBe(v);
       }
     }

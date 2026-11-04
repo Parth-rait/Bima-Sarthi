@@ -17,10 +17,10 @@ export function Stepper({ steps, current, label }: { steps: Array<{ id: string; 
               aria-current={state === "current" ? "step" : undefined}
               data-state={state}
               className={cn(
-                "flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-t-[3px] border border-b-0 px-2 py-2 text-center text-[0.9375rem] font-semibold",
-                state === "current" && "border-line bg-cream text-ink",
-                state === "done" && "border-line-strong bg-champagne text-ink",
-                state === "todo" && "border-line-strong bg-chalk text-ink-soft",
+                "flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-t-[3px] border border-b-0 px-2 py-2 text-center text-control font-semibold",
+                state === "current" && "border-ink bg-paper text-ink",
+                state === "done" && "border-line-strong bg-peach text-ink",
+                state === "todo" && "border-line bg-ivory text-ink-soft",
               )}
             >
               {state === "done" ? (

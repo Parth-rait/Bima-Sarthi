@@ -32,13 +32,13 @@ export function Field({
         {label}
       </label>
       {hint ? (
-        <p className="hint mb-1.5 mt-0 text-[0.9375rem] text-ink-soft" id={hintId}>
+        <p className="hint mb-1.5 mt-0 text-control text-ink-soft" id={hintId}>
           {hint}
         </p>
       ) : null}
       {children({ id, "aria-describedby": describedBy, "aria-invalid": error ? true : undefined, className: controlCls })}
       {error ? (
-        <p className="field-error mb-0 mt-1.5 text-[0.9375rem] font-semibold text-terracotta-ink" id={errId}>
+        <p className="field-error mb-0 mt-1.5 text-control font-semibold text-terracotta-ink" id={errId}>
           {error}
         </p>
       ) : null}
@@ -89,7 +89,7 @@ export function Choice({
         ))}
       </div>
       {error ? (
-        <p className="field-error mb-0 mt-1.5 text-[0.9375rem] font-semibold text-terracotta-ink" id={`${id}-err`}>
+        <p className="field-error mb-0 mt-1.5 text-control font-semibold text-terracotta-ink" id={`${id}-err`}>
           {error}
         </p>
       ) : null}
@@ -118,7 +118,7 @@ export function Stamp({ verdict, className }: { verdict: Verdict; className?: st
   const word = t(`vw_${verdict}` as Key);
   return (
     <span
-      className={cn("stamp inline-flex items-center gap-2 rounded-ctl border-2 border-current px-3 py-1 text-[0.9375rem] font-bold uppercase leading-tight tracking-[0.07em]", STAMP[verdict], className)}
+      className={cn("stamp inline-flex items-center gap-2 rounded-ctl border-2 border-current px-3 py-1 text-control font-bold uppercase leading-tight tracking-[0.07em]", STAMP[verdict], className)}
       data-verdict={verdict}
     >
       <VerdictShape verdict={verdict} />

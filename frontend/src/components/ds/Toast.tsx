@@ -21,10 +21,10 @@ function Item({ item, closeLabel, onClose }: { item: ToastItem; closeLabel: stri
     return () => clearTimeout(id);
   }, [item.id, onClose]);
   return (
-    <li className="pointer-events-auto flex items-start gap-3 rounded-ctl border border-line bg-cream px-4 py-3 text-ink-body shadow-lift">
+    <li className="pointer-events-auto flex items-start gap-3 rounded-ctl border border-line bg-paper px-4 py-3 text-ink shadow-lift">
       <span aria-hidden="true" className="mt-1 inline-block size-2.5 shrink-0 rotate-45 bg-gold" />
       <span className="grow">{item.text}</span>
-      <button type="button" onClick={() => onClose(item.id)} aria-label={closeLabel} className="-my-2 -mr-2 grid size-11 shrink-0 cursor-pointer place-items-center bg-transparent text-ink hover:bg-champagne">
+      <button type="button" onClick={() => onClose(item.id)} aria-label={closeLabel} className="-my-2 -mr-2 grid size-11 shrink-0 cursor-pointer place-items-center bg-transparent text-ink hover:bg-peach">
         <IconX size={18} />
       </button>
     </li>
@@ -40,7 +40,7 @@ export function ToastProvider({ children, closeLabel }: { children: ReactNode; c
   return (
     <Ctx.Provider value={api}>
       {children}
-      <ul role="status" aria-live="polite" className="no-print pointer-events-none fixed inset-x-4 bottom-4 z-[60] m-0 flex max-w-sm list-none flex-col gap-2 p-0 sm:left-auto sm:right-4">
+      <ul role="status" aria-live="polite" className="no-print pointer-events-none fixed inset-x-4 bottom-4 z-[var(--z-toast)] m-0 flex max-w-sm list-none flex-col gap-2 p-0 sm:left-auto sm:right-4">
         {items.map((it) => (
           <Item key={it.id} item={it} closeLabel={closeLabel} onClose={close} />
         ))}

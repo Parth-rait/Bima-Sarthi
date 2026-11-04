@@ -48,7 +48,7 @@ export default function Help() {
                 className={cn(inputStyles, "pl-10")}
               />
             </div>
-            <p role="status" aria-live="polite" className="mb-0 mt-2 min-h-6 text-[0.9375rem] text-ink-soft">
+            <p role="status" aria-live="polite" className="mb-0 mt-2 min-h-6 text-control text-ink-soft">
               {q ? `${count} ${count === 1 ? t("help_result") : t("help_results")}` : ""}
             </p>
           </form>

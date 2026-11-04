@@ -18,7 +18,7 @@ export function PageHeader({ title, lead, art, children }: { title: string; lead
             </h1>
             {lead ? <p className="mt-5 max-w-[68ch] text-lead text-ink">{lead}</p> : null}
             {state.lang === "hi" ? (
-              <p role="note" className="mt-4 max-w-[68ch] rounded-ctl bg-ivory/70 px-3 py-2 text-[0.9375rem] text-ink-soft">
+              <p role="note" className="mt-4 max-w-[68ch] rounded-ctl bg-ivory/70 px-3 py-2 text-control text-ink-soft">
                 {t("editorial_note")}
               </p>
             ) : null}

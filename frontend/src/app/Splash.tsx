@@ -41,7 +41,7 @@ export function Splash() {
     <div
       role="status"
       aria-live="polite"
-      className={`fixed inset-0 z-[100] grid place-items-center bg-ivory text-ink transition-opacity duration-200 motion-reduce:transition-none ${leaving ? "opacity-0" : "opacity-100"}`}
+      className={`fixed inset-0 z-[var(--z-splash)] grid place-items-center bg-ivory text-ink transition-opacity duration-200 motion-reduce:transition-none ${leaving ? "opacity-0" : "opacity-100"}`}
     >
       <div className="flex flex-col items-center gap-4">
         <img src={markUrl} alt="" width={56} height={56} />

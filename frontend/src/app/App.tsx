@@ -33,7 +33,7 @@ export function App() {
           e.preventDefault();
           mainRef.current?.focus();
         }}
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[110] focus:rounded-ctl focus:border-2 focus:border-ink focus:bg-cream focus:px-4 focus:py-3 focus:font-semibold focus:text-ink"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[var(--z-skip)] focus:rounded-ctl focus:border-2 focus:border-ink focus:bg-paper focus:px-4 focus:py-3 focus:font-semibold focus:text-ink"
       >
         {t("skip")}
       </a>

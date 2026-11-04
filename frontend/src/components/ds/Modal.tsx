@@ -29,7 +29,7 @@ export function Modal({
   useFocusTrap(ref, open, onClose);
   if (!open) return null;
   return createPortal(
-    <div className="fixed inset-0 z-[70] grid place-items-center bg-ink/70 p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="fixed inset-0 z-[var(--z-modal)] grid place-items-center bg-ink/70 p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
         ref={ref}
         role="dialog"
@@ -37,9 +37,9 @@ export function Modal({
         aria-labelledby={tid}
         aria-describedby={description ? did : undefined}
         tabIndex={-1}
-        className="relative w-full max-w-md rounded-ctl border border-line bg-cream p-6 text-ink-body shadow-stage"
+        className="relative w-full max-w-md rounded-ctl border border-line bg-paper p-6 text-ink shadow-stage"
       >
-        <button type="button" onClick={onClose} aria-label={closeLabel} className="absolute right-2 top-2 grid size-11 cursor-pointer place-items-center rounded-ctl bg-transparent text-ink hover:bg-champagne">
+        <button type="button" onClick={onClose} aria-label={closeLabel} className="absolute right-2 top-2 grid size-11 cursor-pointer place-items-center rounded-ctl bg-transparent text-ink hover:bg-peach">
           <IconX size={22} />
         </button>
         <h2 id={tid} className="pr-10 font-display text-[1.5rem] font-medium leading-tight text-ink">

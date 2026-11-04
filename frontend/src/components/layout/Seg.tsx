@@ -23,7 +23,7 @@ export function Seg({ label, options, className, tone = "light" }: { label: stri
           aria-pressed={o.pressed}
           onClick={o.onClick}
           className={cn(
-            "min-h-11 cursor-pointer whitespace-nowrap px-3 text-[0.9375rem] transition-colors duration-150 motion-reduce:transition-none",
+            "min-h-11 cursor-pointer whitespace-nowrap px-3 text-control transition-colors duration-150 motion-reduce:transition-none",
             i > 0 && (onInk ? "border-l border-on-ink-soft" : "border-l border-line-strong"),
             onInk
               ? o.pressed ? "bg-on-ink font-bold text-ink" : "bg-transparent font-medium text-on-ink hover:bg-ink-raised"

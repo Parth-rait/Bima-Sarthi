@@ -110,11 +110,11 @@ export default function Privacy() {
       <Section tone="night" labelledBy="priv-cta-h">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div>
-            <h2 id="priv-cta-h" className="m-0 font-display text-h2 font-medium text-on-night">
+            <h2 id="priv-cta-h" className="m-0 font-display text-h2 font-medium text-on-ink">
               Questions about your data?
             </h2>
-            <p className="mb-0 mt-2 max-w-[52ch] text-on-night-soft">
-              The <Link to="/help#faq" className="text-brass-light">Help centre</Link> has more answers. This page describes the app as built today; if it changes, this page changes with it.
+            <p className="mb-0 mt-2 max-w-[52ch] text-on-ink-soft">
+              The <Link to="/help#faq" className="text-apricot">Help centre</Link> has more answers. This page describes the app as built today; if it changes, this page changes with it.
             </p>
           </div>
           <Button to="/check-claim" variant="onNight" size="lg">

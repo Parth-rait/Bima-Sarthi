@@ -21,7 +21,7 @@ export function TextField({
         {label}
       </label>
       {hint ? (
-        <p id={hintId} className="mb-1 mt-0 text-[0.9375rem] text-ink-soft">
+        <p id={hintId} className="mb-1 mt-0 text-control text-ink-soft">
           {hint}
         </p>
       ) : null}
@@ -33,7 +33,7 @@ export function TextField({
         {...input}
       />
       {error ? (
-        <p id={errId} className="mb-0 mt-1 text-[0.9375rem] font-semibold text-terracotta-ink">
+        <p id={errId} className="mb-0 mt-1 text-control font-semibold text-terracotta-ink">
           {error}
         </p>
       ) : null}

@@ -28,7 +28,7 @@ export function MobileMenu({ id, open, onClose }: { id: string; open: boolean; o
       aria-modal="true"
       aria-label={t("nav_mobile")}
       tabIndex={-1}
-      className="no-print fixed inset-0 z-[65] overflow-y-auto bg-ivory text-ink"
+      className="no-print fixed inset-0 z-[var(--z-menu)] overflow-y-auto bg-ivory text-ink"
     >
       <Wrap width="wide" className="flex min-h-[var(--nav-h)] items-center justify-between">
         <Link to="/" onClick={onClose} className="font-display text-[1.375rem] text-ink no-underline">
@@ -50,7 +50,7 @@ export function MobileMenu({ id, open, onClose }: { id: string; open: boolean; o
               </li>
             ))}
           </ul>
-          <p className="mb-1 mt-6 text-[0.9375rem] font-semibold text-ink-soft">{t("nav_explore")}</p>
+          <p className="mb-1 mt-6 text-control font-semibold text-ink-soft">{t("nav_explore")}</p>
           <ul className="m-0 list-none p-0">
             {EXPLORE_LINKS.map((l) => (
               <li key={l.label}>

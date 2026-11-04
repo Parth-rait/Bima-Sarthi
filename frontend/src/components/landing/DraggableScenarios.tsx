@@ -17,10 +17,10 @@ export default function DraggableScenarios({ scenarios }: { scenarios: Scenario[
     <DraggableCardContainer className="relative h-[34rem] overflow-hidden rounded-card">
       {scenarios.map((s, i) => (
         <DraggableCardBody key={s.id} className={`absolute min-h-0 w-[20rem] rounded-card border border-line bg-paper p-5 text-ink ${POS[i % POS.length]}`}>
-          <Tag tone="brass">{t("cases_illustrative")}</Tag>
+          <Tag tone="warm">{t("cases_illustrative")}</Tag>
           <img src={ART[s.art]} alt={s.artAlt} width={280} height={160} className="pointer-events-none relative z-10 mt-3 h-36 w-full select-none object-cover" draggable={false} />
           <h3 className="mb-0 mt-4 font-display text-[1.25rem] font-medium leading-tight text-ink">{s.title}</h3>
-          <p className="mb-0 mt-2 select-none text-[0.9375rem] leading-snug">{s.body}</p>
+          <p className="mb-0 mt-2 select-none text-control leading-snug">{s.body}</p>
         </DraggableCardBody>
       ))}
     </DraggableCardContainer>

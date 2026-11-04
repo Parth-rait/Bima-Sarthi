@@ -107,7 +107,7 @@ export default function About() {
 
       <Section tone="night" labelledBy="about-cta-h">
         <Container className="reveal flex flex-wrap items-center justify-between gap-6 px-0 md:px-0">
-          <h2 id="about-cta-h" className="m-0 max-w-[22ch] font-display text-h2 font-medium text-on-night">
+          <h2 id="about-cta-h" className="m-0 max-w-[22ch] font-display text-h2 font-medium text-on-ink">
             Ready when you have the letter.
           </h2>
           <Button to="/check-claim" variant="onNight" size="lg">

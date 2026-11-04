@@ -22,7 +22,7 @@ function IntroText() {
         How it works
       </h1>
       <p className="mx-auto mt-5 max-w-[56ch] text-lead text-on-ink">{LEAD}</p>
-      {state.lang === "hi" ? <p role="note" className="mx-auto mt-4 max-w-[56ch] text-[0.9375rem] text-on-ink">{t("editorial_note")}</p> : null}
+      {state.lang === "hi" ? <p role="note" className="mx-auto mt-4 max-w-[56ch] text-control text-on-ink">{t("editorial_note")}</p> : null}
     </div>
   );
 }

@@ -41,7 +41,7 @@ function Tick({ task }: { task: PlanTask }) {
   return (
     <li>
       <label className="flex min-h-11 cursor-pointer items-start gap-3 py-1.5">
-        <input type="checkbox" checked={on} onChange={() => actions.toggleChecked(task.id)} className="mt-0.5 size-6 shrink-0 accent-wine" />
+        <input type="checkbox" checked={on} onChange={() => actions.toggleChecked(task.id)} className="mt-0.5 size-6 shrink-0 accent-ink" />
         <span className={cn(on && "text-ink-soft line-through decoration-1")}>{task.text}</span>
       </label>
     </li>
@@ -113,7 +113,7 @@ export default function ActionPlan() {
     <>
       <PageHeader title={t("ap_h")} lead={t("ap_lead")} />
       <Container className="max-w-3xl space-y-12 py-10 md:py-14">
-        <p className="m-0 border border-line-strong bg-cream px-4 py-3 font-semibold text-ink" role="note">
+        <p className="m-0 border border-line-strong bg-paper px-4 py-3 font-semibold text-ink" role="note">
           {RESULT_NOTICE}
           {lang === "hi" ? <span lang="hi"> {t("notice_result_hi")}</span> : null}
         </p>
@@ -176,7 +176,7 @@ export default function ActionPlan() {
                   <ul className="m-0 list-none p-0">{steps.map((d) => <Tick key={d.id} task={d} />)}</ul>
                 </fieldset>
               ) : null}
-              <p className="m-0 text-[0.9375rem] text-ink-soft">{t("ap_session_note")}</p>
+              <p className="m-0 text-control text-ink-soft">{t("ap_session_note")}</p>
             </>
           ) : (
             <p className="m-0">{t("ap_check_none")}</p>

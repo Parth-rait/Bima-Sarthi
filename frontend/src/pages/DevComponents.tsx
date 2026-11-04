@@ -30,7 +30,7 @@ function Panel({ id, title, children, check, tone = "ivory" }: { id: string; tit
         <div className="mt-6">{children}</div>
         <div className="mt-6 max-w-[70ch] border-t border-gold pt-3">
           <p className="m-0 font-semibold text-ink">What to check in the browser</p>
-          <ul className="mb-0 mt-2 list-disc pl-5 text-[0.9375rem]">
+          <ul className="mb-0 mt-2 list-disc pl-5 text-control">
             {check.map((c) => (
               <li key={c}>{c}</li>
             ))}
@@ -71,7 +71,7 @@ export default function DevComponents() {
           <p className="mt-3 max-w-[68ch]">
             The nine Aceternity components, installed from the registry and shown with our own artwork and colours. This page holds no user data and is not linked from the site.
           </p>
-          <dl className="mt-4 grid max-w-xl grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-[0.9375rem]">
+          <dl className="mt-4 grid max-w-xl grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-control">
             <dt className="font-semibold">WebGL available</dt>
             <dd className="m-0">{String(hasWebGL())}</dd>
             <dt className="font-semibold">Reduced motion</dt>
@@ -188,7 +188,7 @@ export default function DevComponents() {
               <FileUpload onChange={(files) => setPicked(files.map((f) => f.name))} title="Add your documents" hint="Drop a photo or PDF here, or press to choose a file" dropLabel="Drop it here" />
             </Suspense>
           </Boundary>
-          <p className="mt-3 text-[0.9375rem]">onChange received: {picked.length ? picked.join(", ") : "nothing yet"}</p>
+          <p className="mt-3 text-control">onChange received: {picked.length ? picked.join(", ") : "nothing yet"}</p>
         </div>
       </Panel>
 
@@ -251,17 +251,17 @@ export default function DevComponents() {
               <SkyBackdrop shader={sky.useShader} onUnavailable={sky.markUnavailable} className="z-0" />
               <p className="absolute inset-x-6 bottom-6 m-0 rounded-card bg-ivory/80 px-4 py-3 text-ink">Ink text on an ivory scrim keeps 4.5:1 or more over the darkest cloud.</p>
             </div>
-            <figcaption className="mt-2 text-[0.9375rem] text-ink-soft">CloudShader (or its fallback, if WebGL is off)</figcaption>
+            <figcaption className="mt-2 text-control text-ink-soft">CloudShader (or its fallback, if WebGL is off)</figcaption>
           </figure>
           <figure className="m-0">
             <div className="relative isolate h-[22rem] overflow-hidden rounded-card">
               <SkyBackdrop shader={false} className="z-0" />
               <p className="absolute inset-x-6 bottom-6 m-0 rounded-card bg-ivory/80 px-4 py-3 text-ink">The static fallback: same palette, no WebGL.</p>
             </div>
-            <figcaption className="mt-2 text-[0.9375rem] text-ink-soft">Static sunset fallback</figcaption>
+            <figcaption className="mt-2 text-control text-ink-soft">Static sunset fallback</figcaption>
           </figure>
         </div>
-        {sky.canToggle ? <SkyToggle pressed={sky.useShader} onToggle={sky.toggle} className="mt-5" /> : <p className="mt-5 text-[0.9375rem]">The toggle is hidden: WebGL is unavailable or reduced motion is on.</p>}
+        {sky.canToggle ? <SkyToggle pressed={sky.useShader} onToggle={sky.toggle} className="mt-5" /> : <p className="mt-5 text-control">The toggle is hidden: WebGL is unavailable or reduced motion is on.</p>}
       </Panel>
     </>
   );

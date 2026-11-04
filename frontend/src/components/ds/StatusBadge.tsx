@@ -6,7 +6,7 @@ import type { Key } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 const stamp = cva(
-  "inline-flex items-center gap-2 rounded-ctl border-2 border-current px-3 py-1 text-[0.9375rem] font-bold uppercase leading-tight tracking-[0.07em]",
+  "inline-flex items-center gap-2 rounded-ctl border-2 border-current px-3 py-1 text-control font-bold uppercase leading-tight tracking-[0.07em]",
   {
     variants: {
       verdict: {

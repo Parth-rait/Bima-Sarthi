@@ -16,7 +16,7 @@ export function ProgressIndicator({ value, label, valueText, className }: { valu
         aria-valuemax={determinate ? 100 : undefined}
         aria-valuenow={pct}
         aria-valuetext={valueText}
-        className="h-2.5 w-full overflow-hidden rounded-full border border-line-strong bg-chalk"
+        className="h-2.5 w-full overflow-hidden rounded-full border border-line-strong bg-peach"
       >
         <div
           className={cn("h-full bg-ink", determinate ? "transition-[width] duration-300 motion-reduce:transition-none" : "w-1/3 animate-[progress-slide_1.4s_ease-in-out_infinite] motion-reduce:w-full motion-reduce:animate-none motion-reduce:opacity-40")}

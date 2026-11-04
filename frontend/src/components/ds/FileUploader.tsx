@@ -31,7 +31,7 @@ function Preview({ file }: { file: File }) {
     return () => URL.revokeObjectURL(u);
   }, [file, image]);
   return (
-    <span aria-hidden="true" className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-ctl border border-line bg-chalk text-ink-soft">
+    <span aria-hidden="true" className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-ctl border border-line bg-peach text-ink-soft">
       {url ? <img src={url} alt="" className="size-full object-cover" /> : <IconFile size={26} />}
     </span>
   );
@@ -151,7 +151,7 @@ export function FileUploader({
           </label>
           <span className="hidden text-ink-soft md:inline">{t("drop_here")}</span>
         </div>
-        <p id={describedBy} className="mb-0 mt-3 text-[0.9375rem] text-ink-soft">
+        <p id={describedBy} className="mb-0 mt-3 text-control text-ink-soft">
           {t("up_rules")}
         </p>
       </div>
@@ -215,7 +215,7 @@ export function FileUploader({
               }}
             />
             <div className="mt-4">
-              <p className="m-0 mb-1 text-[0.9375rem] text-ink-soft">
+              <p className="m-0 mb-1 text-control text-ink-soft">
                 {t("allowance")}: {formatSize(used)} / 25 MB
               </p>
               <ProgressIndicator value={pct} label={t("allowance")} valueText={`${formatSize(used)} / 25 MB`} />

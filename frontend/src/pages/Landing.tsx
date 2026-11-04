@@ -69,8 +69,8 @@ function Hero() {
                 {t("nav_how")}
               </Button>
             </div>
-            {state.lang === "hi" ? <p role="note" className="mt-6 max-w-[34rem] text-[0.9375rem] text-ink">{t("editorial_note")}</p> : null}
-            <p className="mt-8 max-w-[34rem] text-[0.9375rem] text-ink">No account needed. An independent project: not an insurer, not the regulator, not a lawyer.</p>
+            {state.lang === "hi" ? <p role="note" className="mt-6 max-w-[34rem] text-control text-ink">{t("editorial_note")}</p> : null}
+            <p className="mt-8 max-w-[34rem] text-control text-ink">No account needed. An independent project: not an insurer, not the regulator, not a lawyer.</p>
             {sky.canToggle ? <SkyToggle pressed={sky.useShader} onToggle={sky.toggle} className="mt-5" /> : null}
           </div>
 
@@ -136,7 +136,7 @@ function Problem() {
               <span className="block py-2 text-[clamp(3.25rem,7vw,6rem)] font-medium leading-none tracking-tight">31,490</span>
               complaints about health insurance in 2023-24.
             </blockquote>
-            <figcaption className="mt-4 max-w-[52ch] text-[0.9375rem] text-ink-soft">
+            <figcaption className="mt-4 max-w-[52ch] text-control text-ink-soft">
               Source: CIO Annual Report 2023-24 (secondary source). It counts complaints, not rejections, and says nothing about who was right.
             </figcaption>
           </figure>

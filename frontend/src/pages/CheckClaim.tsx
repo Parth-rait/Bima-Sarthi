@@ -43,7 +43,7 @@ export default function CheckClaim() {
 
   return (
     <>
-      <header className="border-b border-line bg-champagne">
+      <header className="border-b border-line bg-peach">
         <Container className="flex flex-wrap items-end justify-between gap-6 py-8 md:py-10">
           <div>
             <h1 tabIndex={-1} data-page-heading className="m-0 font-display text-h1 font-medium text-ink">
@@ -55,7 +55,7 @@ export default function CheckClaim() {
         </Container>
       </header>
 
-      <div className="wf bg-ground pb-16" ref={body}>
+      <div className="wf bg-ivory pb-16" ref={body}>
         <Container className="max-w-4xl pt-6">
           {svc.status === "down" ? (
             <ErrorState title={t("svc_title")} what={t("svc_what")} why={t("svc_why")} next={t("svc_next")} className="mb-6">

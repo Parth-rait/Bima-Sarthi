@@ -52,7 +52,7 @@ export function Footer() {
         </Grid12>
       </Wrap>
       <div className="border-t border-on-ink-soft/30">
-        <Wrap width="wide" className="space-y-1 py-6 text-[0.9375rem] text-on-ink-soft">
+        <Wrap width="wide" className="space-y-1 py-6 text-control text-on-ink-soft">
           <p className="m-0 font-semibold text-on-ink">
             {RESULT_NOTICE}
             {state.lang === "hi" ? <span lang="hi"> {t("notice_result_hi")}</span> : null}

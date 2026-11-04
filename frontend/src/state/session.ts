@@ -73,12 +73,12 @@ export interface SessionState {
 export function initialState(partial: Partial<SessionState> = {}): SessionState {
   const view = partial.view ?? "upload";
   const step = partial.step ?? stepForView(view);
-  return {
+  const defaults: SessionState = {
     lang: "en",
     helper: false,
     view,
     step,
-    reached: partial.reached ?? step,
+    reached: step,
     slots: { letter: emptySlot(), policy: emptySlot() },
     form: null,
     galleryReturn: "upload",
@@ -97,10 +97,8 @@ export function initialState(partial: Partial<SessionState> = {}): SessionState 
     expired: false,
     reportId: null,
     checkedItems: {},
-    ...partial,
-    view,
-    step,
   };
+  return { ...defaults, ...partial, view, step };
 }
 
 export type Action =
